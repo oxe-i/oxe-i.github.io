@@ -2,9 +2,11 @@
 const canvas = document.querySelector("#game-canvas");
 const context = canvas.getContext("2d", {alpha: false});
 
-const vMin = Math.min(window.innerWidth, window.innerHeight) / 100;
-canvas.width = Math.floor(vMin * 80);
-canvas.height = Math.floor(vMin * 60);
+const windowHeight = window.innerHeight;
+const windowWidth = window.innerWidth;
+const vMin = Math.min(windowWidth, windowHeight) / 100;
+canvas.width = windowWidth >= windowHeight ?  Math.floor(vMin * 80) : Math.floor(vMin * 60);
+canvas.height = windowWidth <= windowHeight ?  Math.floor(vMin * 80) : Math.floor(vMin * 60);
 
 // game control
 let raf = null;
