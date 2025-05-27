@@ -13,6 +13,11 @@ let raf = null;
 const startGame = document.querySelector("#start-game");
 const pauseGame = document.querySelector("#pause-game");
 
+const dirUp = document.querySelector("#up");
+const dirDown = document.querySelector("#down");
+const dirLeft = document.querySelector("#left");
+const dirRight = document.querySelector("#right");
+
 // constants
 const SEGMENT_SIZE = Math.floor(canvas.width * 0.035);
 const BORDER = SEGMENT_SIZE * 0.1;
@@ -20,7 +25,8 @@ const X_MIN = 0;
 const Y_MIN = 0;
 const X_MAX = canvas.width;
 const Y_MAX = canvas.height;
-const SPEED = SEGMENT_SIZE;
+const SPEED = SEGMENT_SIZE * 0.1;
+const NUM_ITERATIONS_BEFORE_DRAWING = (SEGMENT_SIZE + BORDER) / SPEED;
 
 // enum-like class to represent direction of movement
 class Direction {};
@@ -38,7 +44,6 @@ const block = createBlock();
 document.addEventListener("DOMContentLoaded", () => {
     drawCanvas();
 });
-
 
 document.addEventListener("keydown", (state) => {
     switch (state.key) {
@@ -71,6 +76,22 @@ startGame.addEventListener("click", () => {
 
 pauseGame.addEventListener("click", () => {
     window.cancelAnimationFrame(raf);
+});
+
+dirUp.addEventListener("click", () => {
+    directionQueue.push(Direction.UP);
+});
+
+dirDown.addEventListener("click", () => {
+    directionQueue.push(Direction.DOWN);
+});
+
+dirLeft.addEventListener("click", () => {
+    directionQueue.push(Direction.LEFT);
+});
+
+dirRight.addEventListener("click", () => {
+    directionQueue.push(Direction.RIGHT);
 });
 
 function createSegment(idx) {
@@ -138,8 +159,18 @@ function gameLoop() {
 
     const gameLoopHelper = () => {
         counter++;
+
         snake.forEach(segment => segment.move());
-        if (counter % 11 == 0) {
+
+        if (isEndGame()) {
+            drawCanvas();
+            drawSnake();
+            drawBlock();
+            window.cancelAnimationFrame(raf);
+            return;
+        }
+
+        if (counter == NUM_ITERATIONS_BEFORE_DRAWING) {
             drawCanvas();
             for (let i = snake.length - 1; i > 0; --i) {
                 snake[i].direction = snake[i - 1].direction;
@@ -150,12 +181,9 @@ function gameLoop() {
             }
             drawSnake();
             drawBlock();
-            if (isEndGame()) {
-                window.cancelAnimationFrame(raf);
-                return;
-            }
             counter = 0;
         }
+
         raf = window.requestAnimationFrame(gameLoopHelper);
     };
     
