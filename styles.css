@@ -1,0 +1,60 @@
+body {
+    background: #211d2f;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: "Ubuntu", sans-serif;
+
+    #title {
+        text-align: center;
+        margin-bottom: 1%;
+        font-weight: 400;
+        font-size: 40px; 
+        color: #f0f3f9;
+    }
+
+    #game {
+        background-color: rgb(214, 223, 138);
+        width: var(--canvas-width);
+        height: var(--canvas-height);
+        border: 2px solid black;
+        border-radius: 10px;
+        display: flex;
+
+        #game-canvas {
+            flex-grow: 1;
+            background-color: rgb(214, 223, 138);
+            width: var(--canvas-width);
+            height: var(--canvas-height);
+        }
+    }
+
+    #buttons {
+        width: var(--canvas-width);
+        height: 10%;
+        display: grid;
+        grid-template-columns: 1fr 20% 1fr 20% 1fr;
+        justify-content: center;
+        align-items: center;
+        margin: 2%;
+
+        .button {
+            color: #f0f3f9;
+            font-size: 1vw;
+            font-weight: 400; 
+            background-color: rgb(80 66 173/1);
+            border: 1px solid black;
+            border-radius: 10px;
+        }
+
+        #start-game {
+            grid-column: 2/3;
+        }
+
+        #pause-game {
+            grid-column: 4/5;
+        }
+    }
+}
+
