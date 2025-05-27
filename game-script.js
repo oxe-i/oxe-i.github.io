@@ -40,7 +40,7 @@ Direction.RIGHT = [SPEED, 0];
 
 // snake variables
 const snake = Array.from({ length: 5 }, (_, idx) => createSegment(idx));
-const directionQueue = [];
+let directionQueue = [];
 let block = createBlock();
 
 // listeners
@@ -79,6 +79,7 @@ startGame.addEventListener("click", () => {
             snake[idx] = createSegment(idx);
         });
         block = createBlock();
+        directionQueue = [];
         endGame = false;
     }
     raf = window.requestAnimationFrame(gameLoop);
