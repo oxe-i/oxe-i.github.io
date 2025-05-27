@@ -47,9 +47,9 @@ body {
             display: flex;
 
             img {
-                margin-left: 1vmin; 
-                width: 3vw;
-                height: 3vh;
+                margin-left: 3vmin; 
+                width: auto;
+                height: auto;
             }
         }
     }

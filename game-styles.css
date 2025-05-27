@@ -79,37 +79,38 @@ body {
         grid-row: 2/3;
         grid-column: 3/4;
         display: flex;
-        justify-content: center;
-        align-items: center;
         position: relative;
+        left: 15vmin;
 
         .button {
             position: absolute;
-            width: auto;
+            width: 15vmin;
+            height: 3vmin;
+            font-size: 3vmin;
             height: auto;
         }
 
         #up {
-            left: 50%;
-            top: 50;
+            left: 20%;
+            top: 50%;
             transform: translateY(-100%);
         }
 
         #down {
-            left: 50%;
-            top: 50;
+            left: 20%;
+            top: 50%;
             transform: translateY(100%);
         }
 
         #left {
-            left: 50%;
-            top: 50;
+            left: 20%;
+            top: 50%;
             transform: translateX(-100%);
         }
 
         #right {
-            left: 50%;
-            top: 50;
+            left: 20%;
+            top: 50%;
             transform: translateX(100%);
         }
     }
