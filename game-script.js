@@ -19,7 +19,7 @@ const dirLeft = document.querySelector("#left");
 const dirRight = document.querySelector("#right");
 
 // constants
-const SEGMENT_SIZE = Math.floor(canvas.width * 0.035);
+const SEGMENT_SIZE = 20;
 const BORDER = SEGMENT_SIZE * 0.1;
 const X_MIN = 0;
 const Y_MIN = 0;
