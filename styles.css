@@ -1,21 +1,24 @@
 body {
     background: #211d2f;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 10vmin var(--canvas-height) 1fr;
+    grid-template-columns: 1fr var(--canvas-width) 1fr;
     justify-content: center;
     align-items: center;
     font-family: "Ubuntu", sans-serif;
 
     #title {
-        height: 5vmin;
+        grid-row: 1/2;
+        grid-column: 2/3;
         text-align: center;
-        margin: 3vmin;
         font-weight: 400;
         font-size: 5vmin; 
         color: #f0f3f9;
     }
 
     #game {
+        grid-row: 2/3;
+        grid-column: 2/3;
         background-color: rgb(214, 223, 138);
         width: var(--canvas-width);
         height: var(--canvas-height);
@@ -32,7 +35,20 @@ body {
         }
     }
 
-    #buttons {
+    .button {
+        color: #f0f3f9;            
+        padding: 1vmin;
+        font-size: 2vmin;
+        font-weight: 400; 
+        background-color: rgb(80 66 173/1);
+        border-radius: 2vmin;
+        border: 1vmin solid #211d2f;
+        text-align: center;
+    }
+
+    #game-flow-buttons {
+        grid-row: 3/4;
+        grid-column: 2/3;
         --buttom-width: calc(0.2 * var(--canvas-width));
         width: var(--canvas-width);
         height: 100%;
@@ -43,16 +59,8 @@ body {
         align-items: center;
 
         .button {
-            color: #f0f3f9;
             width: auto;
             height: auto;
-            padding: 1vmin;
-            font-size: 2vmin;
-            font-weight: 400; 
-            background-color: rgb(80 66 173/1);
-            border-radius: 2vmin;
-            border: 1vmin solid #211d2f;
-            text-align: center;
         }
 
         #start-game { 
@@ -63,6 +71,45 @@ body {
         #pause-game { 
             grid-column: 4/5; 
             grid-row: 2/3;
+        }
+    }
+
+    #directional-buttons {
+        grid-row: 2/3;
+        grid-column: 3/4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+
+        .button {
+            position: absolute;
+            width: auto;
+            height: auto;
+        }
+
+        #up {
+            left: 50%;
+            top: 50;
+            transform: translateY(-100%);
+        }
+
+        #down {
+            left: 50%;
+            top: 50;
+            transform: translateY(100%);
+        }
+
+        #left {
+            left: 50%;
+            top: 50;
+            transform: translateX(-100%);
+        }
+
+        #right {
+            left: 50%;
+            top: 50;
+            transform: translateX(100%);
         }
     }
 }

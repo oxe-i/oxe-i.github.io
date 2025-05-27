@@ -2,8 +2,9 @@
 const canvas = document.querySelector("#game-canvas");
 const context = canvas.getContext("2d", {alpha: false});
 
-canvas.width = window.innerWidth * 0.5;
-canvas.height = window.innerHeight * 0.7;
+const vMin = Math.min(window.innerWidth, window.innerHeight);
+canvas.width = Math.floor(vMin * 0.8);
+canvas.height = Math.floor(vMin * 0.6);
 
 // raf
 let raf = null;
@@ -13,13 +14,13 @@ const startGame = document.querySelector("#start-game");
 const pauseGame = document.querySelector("#pause-game");
 
 // constants
-const SEGMENT_SIZE = canvas.width * 0.025;
-const MARGIN = SEGMENT_SIZE;
+const SEGMENT_SIZE = Math.floor(canvas.width * 0.035);
+const BORDER = SEGMENT_SIZE * 0.1;
 const X_MIN = 0;
 const Y_MIN = 0;
 const X_MAX = canvas.width;
 const Y_MAX = canvas.height;
-const SPEED = SEGMENT_SIZE * 0.1;
+const SPEED = SEGMENT_SIZE;
 
 // enum-like class to represent direction of movement
 class Direction {};
@@ -37,6 +38,7 @@ const block = createBlock();
 document.addEventListener("DOMContentLoaded", () => {
     drawCanvas();
 });
+
 
 document.addEventListener("keydown", (state) => {
     switch (state.key) {
@@ -60,7 +62,6 @@ document.addEventListener("keydown", (state) => {
         case "A":
             directionQueue.push(Direction.LEFT);
             break;
-
     }
 });
 
@@ -74,8 +75,8 @@ pauseGame.addEventListener("click", () => {
 
 function createSegment(idx) {
     const segment = {
-        x: (X_MAX / 2) + (idx * (SEGMENT_SIZE + SPEED)),
-        y: Y_MAX / 2,
+        x: (X_MAX * 0.5) + (idx * (SEGMENT_SIZE + BORDER)),
+        y: Y_MAX * 0.5,
         direction: Direction.LEFT,
         counter: 0,
         draw() {
