@@ -2,9 +2,9 @@
 const canvas = document.querySelector("#game-canvas");
 const context = canvas.getContext("2d", {alpha: false});
 
-const vMin = Math.min(window.innerWidth, window.innerHeight);
-canvas.width = Math.floor(vMin * 0.8);
-canvas.height = Math.floor(vMin * 0.6);
+const vMin = Math.min(window.innerWidth, window.innerHeight) / 100;
+canvas.width = Math.floor(vMin * 80);
+canvas.height = Math.floor(vMin * 60);
 
 // game control
 let raf = null;
@@ -20,7 +20,7 @@ const dirLeft = document.querySelector("#left");
 const dirRight = document.querySelector("#right");
 
 // constants
-const SEGMENT_SIZE = 20;
+const SEGMENT_SIZE = 2 * vMin;
 const BORDER = SEGMENT_SIZE * 0.1;
 const X_MIN = 0;
 const Y_MIN = 0;
