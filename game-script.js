@@ -6,8 +6,9 @@ const vMin = Math.min(window.innerWidth, window.innerHeight);
 canvas.width = Math.floor(vMin * 0.8);
 canvas.height = Math.floor(vMin * 0.6);
 
-// raf
+// game control
 let raf = null;
+let endGame = false;
 
 // buttons
 const startGame = document.querySelector("#start-game");
@@ -38,7 +39,7 @@ Direction.RIGHT = [SPEED, 0];
 // snake variables
 const snake = Array.from({ length: 5 }, (_, idx) => createSegment(idx));
 const directionQueue = [];
-const block = createBlock();
+let block = createBlock();
 
 // listeners
 document.addEventListener("DOMContentLoaded", () => {
@@ -71,6 +72,13 @@ document.addEventListener("keydown", (state) => {
 });
 
 startGame.addEventListener("click", () => {
+    if (endGame) {
+        snake.forEach((_, idx) => {
+            snake[idx] = createSegment(idx);
+        });
+        block = createBlock();
+        endGame = false;
+    }
     raf = window.requestAnimationFrame(gameLoop);
 });
 
@@ -167,6 +175,7 @@ function gameLoop() {
             drawSnake();
             drawBlock();
             window.cancelAnimationFrame(raf);
+            endGame = true;
             return;
         }
 
