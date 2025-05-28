@@ -43,6 +43,13 @@ class Direction {};
 // current block variable
 let block = null;
 
+function getCanvasSize() {
+    if (windowHeight >= 800 && windowWidth >= 800) { return 600; }
+    if (windowHeight >= 600 && windowWidth >= 600) { return 450; }
+    if (windowHeight >= 450 && windowWidth >= 450) { return 300; }
+    return 150;
+}
+
 // initialization functions
 function initializeVariables() {
     // window variables
@@ -63,9 +70,16 @@ function initializeVariables() {
     Direction.LEFT = [-speed, 0];
     Direction.RIGHT = [speed, 0];
 
+    // check position of directional buttons
+    if (windowHeight > windowWidth * 1.2) {
+        const directionalButtons = document.querySelector("#directional-buttons");
+        directionalButtons.style.gridRow = "3/4";
+        directionalButtons.style.gridColumn = "2/3";
+    }
+
     // canvas variables
-    const scaled = 600;
-    
+    const scaled = getCanvasSize();
+
     canvas.width = scaled;
     canvas.height = scaled;
 
@@ -139,8 +153,8 @@ function createBlock() {
     const horizontalMin = 0;
     const verticalMax = canvas.height - segmentSize;
     const verticalMin = 0;
-    const randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + horizontalMin;
-    const randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + verticalMin;
+    const randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
+    const randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + drawingSize;
     return {
         x: randomizedX - (randomizedX % drawingSize),
         y: randomizedY - (randomizedY % drawingSize)

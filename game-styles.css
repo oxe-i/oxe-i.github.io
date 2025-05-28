@@ -1,7 +1,7 @@
 #page {
     background: #211d2f;
     display: grid;
-    grid-template-rows: 15vmin var(--canvas-height) 1fr;
+    grid-template-rows: 10vmin var(--canvas-height) 1fr;
     grid-template-columns: 1fr var(--canvas-width) 1fr;
     justify-content: center;
     align-items: center;
@@ -62,11 +62,7 @@
             height: auto;
         }
 
-        #start-game { 
-            grid-row: 2/3;
-        }
-    
-        #pause-game { 
+        #start-game, #pause-game { 
             grid-row: 2/3;
         }
     }
