@@ -52,7 +52,7 @@ function getCanvasSize() {
     const yOffset = isWidthGreater ? 25 * vMin : 80 * vMin;
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight - yOffset;
-    return [usableWidth - (usableWidth % 64), usableHeight - (usableHeight % 64)];
+    return [usableWidth - (usableWidth % 128), usableHeight - (usableHeight % 128)];
 }
 
 function getSegmentSize() {
