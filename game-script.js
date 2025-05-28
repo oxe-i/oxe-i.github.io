@@ -1,18 +1,25 @@
+// window variables
+let windowHeight = null;
+let windowWidth = null;
+let vMin = null;
+
 // canvas variables
 const canvas = document.querySelector("#game-canvas");
 const context = canvas.getContext("2d", {alpha: false});
 
-const windowHeight = window.innerHeight;
-const windowWidth = window.innerWidth;
-const vMin = Math.min(windowWidth, windowHeight) / 100;
-canvas.width = windowWidth >= windowHeight ?  Math.floor(vMin * 80) : Math.floor(vMin * 60);
-canvas.height = windowWidth <= windowHeight ?  Math.floor(vMin * 80) : Math.floor(vMin * 60);
+// class to get game state
+class GameState {};
+GameState.NOT_STARTED = 0;
+GameState.RUNNING = 1;
+GameState.PAUSED = 2;
+GameState.ENDED = 3;
 
-// game control
+// game control variables
 let raf = null;
-let endGame = false;
+let gameState = GameState.NOT_STARTED;
+let numIterationsBeforeDrawing = null;
 
-// buttons
+// buttons variables
 const startGame = document.querySelector("#start-game");
 const pauseGame = document.querySelector("#pause-game");
 
@@ -21,32 +28,129 @@ const dirDown = document.querySelector("#down");
 const dirLeft = document.querySelector("#left");
 const dirRight = document.querySelector("#right");
 
-// constants
-const SEGMENT_SIZE = 2 * vMin;
-const BORDER = SEGMENT_SIZE * 0.1;
-const X_MIN = 0;
-const Y_MIN = 0;
-const X_MAX = canvas.width;
-const Y_MAX = canvas.height;
-const SPEED = SEGMENT_SIZE * 0.1;
-const NUM_ITERATIONS_BEFORE_DRAWING = (SEGMENT_SIZE + BORDER) / SPEED;
+// snake variables
+let snake = null;
+let segmentSize = null;
+let drawingSize = null;
+let border = null;
+let speed = null;
 
+// direction variables
+let directionQueue = [];
 // enum-like class to represent direction of movement
 class Direction {};
-Direction.UP = [0, -SPEED];
-Direction.DOWN = [0, SPEED];
-Direction.LEFT = [-SPEED, 0];
-Direction.RIGHT = [SPEED, 0];
 
-// snake variables
-const snake = Array.from({ length: 5 }, (_, idx) => createSegment(idx));
-let directionQueue = [];
-let block = createBlock();
+// current block variable
+let block = null;
+
+// initialization functions
+function initializeVariables() {
+    // window variables
+    windowHeight = window.innerHeight;
+    windowWidth = window.innerWidth;
+    vMin = Math.floor(Math.min(windowWidth, windowHeight) / 100);
+    
+    // snake variables
+    segmentSize = 2 * vMin;
+    border = 1;
+    drawingSize = segmentSize + border;
+    speed = 1;
+    numIterationsBeforeDrawing = drawingSize / speed;
+
+    // direction variables
+    Direction.UP = [0, -speed];
+    Direction.DOWN = [0, speed];
+    Direction.LEFT = [-speed, 0];
+    Direction.RIGHT = [speed, 0];
+
+    // canvas variables
+    const scaled = vMin * 70;
+    
+    canvas.width = scaled;
+    canvas.height = scaled;
+
+    // CSS properties
+    document.documentElement.style.setProperty("--canvas-height", `${canvas.height}px`);
+    document.documentElement.style.setProperty("--canvas-width", `${canvas.width}px`);
+}
+
+function initialSetup() {
+    initializeVariables();
+    drawCanvas();
+    snake = createSnake();
+    block = createBlock();
+}
+
+// resizing functions
+function updateSnakeOnResize(prevWidth, prevHeight) {
+    const coordinates = snake.map(segment => [segment.x, segment.y]);
+    return snake.map((segment, idx) => {        
+        const scaleX = coordinates[idx][0] / prevWidth;
+        const scaleY = coordinates[idx][1] / prevHeight;
+
+        segment.x = scaleX * windowWidth;
+        segment.y = scaleY * windowHeight;
+
+        return segment;
+    });
+}
+
+function resizeWindow() {
+    const prevWindowWidth = windowWidth;
+    const prevWindowHeight = windowHeight;
+    initializeVariables();
+    snake = updateSnakeOnResize(prevWindowWidth, prevWindowHeight);
+    drawCanvas();
+    drawSnake();
+    drawBlock();
+}
+
+// creation functions
+function createSegment(idx) {
+    const startingX = (canvas.width / 2);
+    const startingY = (canvas.height / 2);
+    const segment = {
+        x: startingX - (startingX % drawingSize) + (idx * drawingSize),
+        y: startingY - (startingY % drawingSize),
+        direction: Direction.LEFT,
+        counter: 0,
+        draw() {
+            context.fillStyle = "rgb(0, 0, 0)";
+            context.fillRect(segment.x, segment.y, segmentSize, segmentSize);
+        },
+        move() {
+            const [xspeed, yspeed] = segment.direction;
+            segment.x += xspeed;
+            segment.y += yspeed;
+        },
+        changeDirection(newDirection) {
+            segment.direction = newDirection;
+        }
+    };
+    return segment;
+}
+
+function createSnake() {
+    return Array.from({ length: 5 }, (_, idx) => createSegment(idx));
+}
+
+function createBlock() {
+    const horizontalMax = canvas.width - segmentSize;
+    const horizontalMin = 0;
+    const verticalMax = canvas.height - segmentSize;
+    const verticalMin = 0;
+    const randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + horizontalMin;
+    const randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + verticalMin;
+    return {
+        x: randomizedX - (randomizedX % drawingSize),
+        y: randomizedY - (randomizedY % drawingSize)
+    };
+}
 
 // listeners
-document.addEventListener("DOMContentLoaded", () => {
-    drawCanvas();
-});
+document.addEventListener("DOMContentLoaded", initialSetup);
+
+window.addEventListener("resize", resizeWindow);
 
 document.addEventListener("keydown", (state) => {
     switch (state.key) {
@@ -74,18 +178,25 @@ document.addEventListener("keydown", (state) => {
 });
 
 startGame.addEventListener("click", () => {
-    if (endGame) {
-        snake.forEach((_, idx) => {
-            snake[idx] = createSegment(idx);
-        });
-        block = createBlock();
-        directionQueue = [];
-        endGame = false;
+    switch (gameState) {
+        case GameState.NOT_STARTED:
+        case GameState.PAUSED:
+            gameState = GameState.RUNNING;
+            break;
+        case GameState.RUNNING:
+            return;
+        default:
+            snake = createSnake();
+            block = createBlock();
+            directionQueue = [];
+            gameState = GameState.RUNNING;
     }
-    raf = window.requestAnimationFrame(gameLoop);
+
+    raf = window.requestAnimationFrame(gameLoop);    
 });
 
 pauseGame.addEventListener("click", () => {
+    gameState = GameState.PAUSED;            
     window.cancelAnimationFrame(raf);
 });
 
@@ -105,59 +216,66 @@ dirRight.addEventListener("click", () => {
     directionQueue.push(Direction.RIGHT);
 });
 
-function createSegment(idx) {
-    const segment = {
-        x: (X_MAX * 0.5) + (idx * (SEGMENT_SIZE + BORDER)),
-        y: Y_MAX * 0.5,
-        direction: Direction.LEFT,
-        counter: 0,
-        draw() {
-            context.fillStyle = "rgb(0, 0, 0)";
-            context.fillRect(segment.x, segment.y, SEGMENT_SIZE, SEGMENT_SIZE);
-        },
-        move() {
-            const [xSpeed, ySpeed] = segment.direction;
-            segment.x += xSpeed;
-            segment.y += ySpeed;
-        },
-        changeDirection(newDirection) {
-            segment.direction = newDirection;
-        }
-    };
-    return segment;
+function hasTouchedBlock() {
+    const headBounds = [
+        [snake[0].x, snake[0].x + segmentSize], 
+        [snake[0].y, snake[0].y + segmentSize]
+    ];
+    const blockBounds = [
+        [block.x, block.x + segmentSize],
+        [block.y, block.y + segmentSize]
+    ];
+
+    return headBounds.every(([min, max], idx) => {
+        return (min <= blockBounds[idx][0] && max >= blockBounds[idx][0]) ||
+               (min >= blockBounds[idx][0] && min <= blockBounds[idx][1]);
+    });
+}
+
+function addBlock() {
+    snake.unshift(createSegment(0));
+    snake[0].direction = snake[1].direction;
+
+    switch (snake[0].direction) {
+        case Direction.UP:
+            snake[0].x = snake[1].x;
+            snake[0].y = snake[1].y - drawingSize;
+            return;
+        case Direction.DOWN:
+            snake[0].x = snake[1].x;
+            snake[0].y = snake[1].y + drawingSize;
+            return;
+        case Direction.LEFT:
+            snake[0].y = snake[1].y;
+            snake[0].x = snake[1].x - drawingSize;
+            return;
+        case Direction.RIGHT:
+            snake[0].y = snake[1].y;
+            snake[0].x = snake[1].x + drawingSize;
+            return;
+    }
 }
 
 function isEndGame() {
     return snake.some(segment => {
-        return segment.x >= X_MAX || segment.x <= X_MIN || 
-               segment.y >= Y_MAX || segment.y <= X_MIN;
+        return segment.x >= canvas.width || segment.x <= 0 || 
+               segment.y >= canvas.height || segment.y <= 0;
     });
 }
 
-function createBlock() {
-    const horizontalMax = X_MAX - SEGMENT_SIZE;
-    const horizontalMin = X_MIN;
-    const verticalMax = Y_MAX - SEGMENT_SIZE;
-    const verticalMin = Y_MIN;
-    return {
-        x: Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + horizontalMin,
-        y: Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + verticalMin
-    };
+// drawing functions
+function drawCanvas() {
+    context.fillStyle = "rgb(214, 223, 138)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-// drawing functions
 function drawSnake() {
     snake.forEach(segment => segment.draw());
 }
 
 function drawBlock() {
     context.fillStyle = "rgb(0, 0, 0)";
-    context.fillRect(block.x, block.y, SEGMENT_SIZE, SEGMENT_SIZE);
-}
-
-function drawCanvas() {
-    context.fillStyle = "rgb(214, 223, 138)";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(block.x, block.y, segmentSize, segmentSize);
 }
 
 // main game loop
@@ -178,11 +296,11 @@ function gameLoop() {
             drawSnake();
             drawBlock();
             window.cancelAnimationFrame(raf);
-            endGame = true;
+            gameState = GameState.ENDED;
             return;
         }
 
-        if (counter == NUM_ITERATIONS_BEFORE_DRAWING) {
+        if (counter == numIterationsBeforeDrawing) {
             drawCanvas();
             for (let i = snake.length - 1; i > 0; --i) {
                 snake[i].direction = snake[i - 1].direction;
@@ -190,6 +308,10 @@ function gameLoop() {
             const newDirection = directionQueue.shift();
             if (newDirection) {
                 snake[0].changeDirection(newDirection);
+            }
+            if (hasTouchedBlock()) {
+                addBlock();
+                block = createBlock();
             }
             drawSnake();
             drawBlock();

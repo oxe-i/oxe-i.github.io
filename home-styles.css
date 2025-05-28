@@ -1,3 +1,8 @@
+:root {
+    --canvas-height: 80vmin; 
+    --canvas-width: 60vmin;
+}
+
 body, #title, #table-of-links, li {
     justify-content: center;
     align-items: center;
