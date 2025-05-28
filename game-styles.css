@@ -46,7 +46,6 @@
             flex-grow: 1;
             background-color: rgb(214, 223, 138);
             border-radius: 1vmin;
-            image-rendering: crisp-edges;
         }
     }
 
