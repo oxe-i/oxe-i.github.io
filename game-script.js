@@ -153,18 +153,6 @@ function resizeWindow() {
 
 function changeOrientation(event) {
     resizeWindow();
-    if (event.type == "landscape-secondary" || event.type == "landscape-primary") {
-        const gameFlowButtons = document.querySelector("#game-flow-buttons");
-        gameFlowButtons.style.gridRow = "2/3";
-        gameFlowButtons.style.gridColumn = "3/4";
-        gameFlowButtons.style.width = "minmax(15vmin, 20vmin)";
-        gameFlowButtons.style.gridTemplateRows = "1fr minmax(3fr, 5fr) 1fr minmax(3fr, 5fr) 1fr";
-        gameFlowButtons.style.gridTemplateColumns = "1fr minmax(15vmin, 20vmin) 1fr";
-        startGame.style.gridRow = "2/3";
-        startGame.style.gridColumn = "2/3";
-        pauseGame.style.gridRow = "4/5";
-        pauseGame.style.gridColumn = "2/3";
-    } 
 }
 
 // creation functions
