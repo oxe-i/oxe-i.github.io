@@ -147,18 +147,24 @@ function updateSnakeOnResize(prevWidth, prevHeight) {
 }
 
 function resizeWindow() {
-    // TODO
-    const prevWindowWidth = windowWidth;
-    const prevWindowHeight = windowHeight;
-    initializeVariables();
-    snake = updateSnakeOnResize(prevWindowWidth, prevWindowHeight);
-    drawCanvas();
-    switch (gameState) {
-        case GameState.PAUSED:
-        case GameState.RUNNING:
-            drawSnake();
-            drawBlock();    
-    }
+    if (raf) window.cancelAnimationFrame(raf);
+    initialSetup();
+}
+
+function changeOrientation(event) {
+    resizeWindow();
+    if (event.type == "landscape-secondary" || event.type == "landscape-primary") {
+        const gameFlowButtons = document.querySelector("#game-flow-buttons");
+        gameFlowButtons.style.gridRow = "2/3";
+        gameFlowButtons.style.gridColumn = "3/4";
+        gameFlowButtons.style.width = "minmax(15vmin, 20vmin)";
+        gameFlowButtons.style.gridTemplateRows = "1fr minmax(3fr, 5fr) 1fr minmax(3fr, 5fr) 1fr";
+        gameFlowButtons.style.gridTemplateColumns = "1fr minmax(15vmin, 20vmin) 1fr";
+        startGame.style.gridRow = "2/3";
+        startGame.style.gridColumn = "2/3";
+        pauseGame.style.gridRow = "4/5";
+        pauseGame.style.gridColumn = "2/3";
+    } 
 }
 
 // creation functions
@@ -210,24 +216,20 @@ function createBlock() {
 }
 
 // listeners
+function debounce(fn, delay) {
+    return function() {
+        clearTimeout(fn.timeout);
+        fn.timeout = setTimeout(() => {
+            fn.apply(this, arguments);
+        }, delay);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", initialSetup);
 
-screen.orientation.addEventListener("change", (event) => {
-    if (raf) window.cancelAnimationFrame(raf);
-    initialSetup();
-    if (event.type == "landscape-secondary" || event.type == "landscape-primary") {
-        const gameFlowButtons = document.querySelector("#game-flow-buttons");
-        gameFlowButtons.style.gridRow = "2/3";
-        gameFlowButtons.style.gridColumn = "3/4";
-        gameFlowButtons.style.width = "minmax(15vmin, 20vmin)";
-        gameFlowButtons.style.gridTemplateRows = "1fr minmax(3fr, 5fr) 1fr minmax(3fr, 5fr) 1fr";
-        gameFlowButtons.style.gridTemplateColumns = "1fr minmax(15vmin, 20vmin) 1fr";
-        startGame.style.gridRow = "2/3";
-        startGame.style.gridColumn = "2/3";
-        pauseGame.style.gridRow = "4/5";
-        pauseGame.style.gridColumn = "2/3";
-    } 
-});
+window.addEventListener("resize", debounce(resizeWindow, 50));
+
+screen.orientation.addEventListener("change", debounce(changeOrientation, 50));
 
 document.addEventListener("keydown", (state) => {
     switch (state.key) {

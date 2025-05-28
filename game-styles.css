@@ -21,7 +21,7 @@
         font-weight: 400;
         font-size: minmax(3vmin, 5vmin); 
         color: #f0f3f9;
-        margin: minmax(3vmin, 5vmin);
+        margin: minmax(2vmin, 3vmin);
         width: auto;
         height: auto;
     }
@@ -79,12 +79,10 @@
         grid-row: 2/3;
         grid-column: 3/4;
         display: flex;
-        position: absolute;
+        position: relative;
         min-width: 40vmin;
         min-height: 40vmin;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        
 
         .button {
             position: absolute;
