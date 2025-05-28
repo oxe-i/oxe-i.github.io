@@ -189,15 +189,20 @@ function createSnake() {
 }
 
 function createBlock() {
-    const horizontalMax = canvas.width - segmentSize;
+    const horizontalMax = canvas.width - (2 * drawingSize);
     const horizontalMin = 0;
-    const verticalMax = canvas.height - segmentSize;
+    const verticalMax = canvas.height - (2 * drawingSize);
     const verticalMin = 0;
     const randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
     const randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + drawingSize;
+    const normalizedX = randomizedX - (randomizedX % drawingSize);
+    const normalizedY = randomizedY - (randomizedY % drawingSize);
+
+    if (overlapsWithSnake(normalizedX, normalizedY)) { return createBlock(); }
+
     return {
-        x: randomizedX - (randomizedX % drawingSize),
-        y: randomizedY - (randomizedY % drawingSize)
+        x: normalizedX,
+        y: normalizedY
     };
 }
 
@@ -269,20 +274,24 @@ dirRight.addEventListener("click", () => {
     directionQueue.push(Direction.RIGHT);
 });
 
-function hasTouchedBlock() {
+function overlapsWithSnake(x, y) {
     const headBounds = [
         [snake[0].x, snake[0].x + segmentSize], 
         [snake[0].y, snake[0].y + segmentSize]
     ];
     const blockBounds = [
-        [block.x, block.x + segmentSize],
-        [block.y, block.y + segmentSize]
+        [x, x + segmentSize],
+        [y, y + segmentSize]
     ];
 
     return headBounds.every(([min, max], idx) => {
         return (min <= blockBounds[idx][0] && max >= blockBounds[idx][0]) ||
                (min >= blockBounds[idx][0] && min <= blockBounds[idx][1]);
     });
+}
+
+function hasTouchedBlock() {
+    return overlapsWithSnake(block.x, block.y);
 }
 
 function addBlock() {
