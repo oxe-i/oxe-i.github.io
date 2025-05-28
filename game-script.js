@@ -30,10 +30,11 @@ const dirLeft = document.querySelector("#left");
 const dirRight = document.querySelector("#right");
 
 // snake variables
+const border = 1;
+
 let snake = null;
 let segmentSize = null;
 let drawingSize = null;
-let border = null;
 let speed = null;
 
 // direction variables
@@ -49,12 +50,14 @@ function getCanvasSize() {
     const yOffset = 25 * vMin;
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight - yOffset;
-    return [usableWidth - (usableWidth % 32), usableHeight - (usableHeight % 32)];
+    return [usableWidth - (usableWidth % 128), usableHeight - (usableHeight % 128)];
 }
 
 function getSegmentSize() {
     const minCanvasSize = Math.min(canvas.width, canvas.height);
-    return (minCanvasSize / 32) - 1;
+    const maxCanvasSize = Math.max(canvas.width, canvas.height);
+    const avgCanvasSize = (minCanvasSize + maxCanvasSize) / 2;
+    return (avgCanvasSize / 64) - border;
 }
 
 function getSpeed() {
@@ -99,7 +102,6 @@ function initializeVariables() {
 
     // snake variables
     segmentSize = getSegmentSize();
-    border = 1;
     drawingSize = segmentSize + border;
     speed = getSpeed();
     numIterationsBeforeDrawing = drawingSize / speed;
