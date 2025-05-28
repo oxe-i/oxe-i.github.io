@@ -50,8 +50,22 @@ function getCanvasSize() {
     return 150;
 }
 
+function isTouchDevice() {
+    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
+
 // initialization functions
 function initializeVariables() {
+    if (isTouchDevice()) {
+        switch (screen.orientation.type) {
+            case "portrait-primary":
+            case "portrait-secondary":
+                alert("Please, rotate your device to landscape.");
+                break;
+            default:
+                break;
+        }
+    }
     // window variables
     windowHeight = window.innerHeight;
     windowWidth = window.innerWidth;
