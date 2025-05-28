@@ -80,6 +80,7 @@ function initializeVariables() {
     // CSS properties
     document.documentElement.style.setProperty("--canvas-height", `${canvas.height}px`);
     document.documentElement.style.setProperty("--canvas-width", `${canvas.width}px`);
+    document.documentElement.style.setProperty("--button-width", `${canvas.width * 0.2}px`);
 }
 
 function initialSetup() {

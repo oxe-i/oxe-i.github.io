@@ -1,4 +1,8 @@
-
+:root {
+    --canvas-width: 600px;
+    --canvas-height: 600px;
+    --buttom-width: calc(var(--canvas-width) * 0.2);
+}
 
 #page {
     background: #211d2f;
@@ -52,7 +56,6 @@
     }
 
     #game-flow-buttons {
-        --buttom-width: calc(var(var(--canvas-width)) * 0.2);
         grid-row: 3/4;
         grid-column: 2/3;
         width: var(--canvas-width);
@@ -63,7 +66,11 @@
         justify-content: center;
         align-items: center;
 
+        .button { min-width: var(--buttom-width); }
+
         #start-game, #pause-game { grid-row: 2/3; }
+        #start-game { grid-column: 2/3; }
+        #pause-game { grid-column: 4/5; }
     }
 
     #directional-buttons {
@@ -86,30 +93,22 @@
         #up { 
             transform: translate(0%, -100%); 
 
-            img {
-                transform: rotate(-90deg);
-            }
+            img { transform: rotate(-90deg); }
         }
 
         #down { 
             transform: translate(0%, 100%); 
 
-            img {
-                transform: rotate(90deg);
-            }
+            img { transform: rotate(90deg); }
         }
 
         #left { 
             transform: translate(-100%, 0%); 
 
-            img {
-                transform: rotate(180deg);
-            }
+            img { transform: rotate(180deg); }
         }
 
-        #right { 
-            transform: translate(100%, 0%); 
-        }
+        #right { transform: translate(100%, 0%); }
     }
 }
 
