@@ -44,10 +44,20 @@ class Direction {};
 let block = null;
 
 function getCanvasSize() {
-    if (windowHeight >= 750 && windowWidth >= 750) { return 600; }
-    if (windowHeight >= 600 && windowWidth >= 600) { return 450; }
-    if (windowHeight >= 450 && windowWidth >= 450) { return 300; }
-    return 150;
+    const xOffset = 60 * vMin;
+    const yOffset = 25 * vMin;
+    const usableWidth = windowWidth - xOffset;
+    const usableHeight = windowHeight - yOffset;
+    return [usableWidth - (usableWidth % 32), usableHeight - (usableHeight % 32)];
+}
+
+function getSegmentSize() {
+    const minCanvasSize = Math.min(canvas.width, canvas.height);
+    return minCanvasSize / 32;
+}
+
+function getSpeed() {
+    return drawingSize / 16;
 }
 
 function isTouchDevice() {
@@ -69,13 +79,23 @@ function initializeVariables() {
     // window variables
     windowHeight = window.innerHeight;
     windowWidth = window.innerWidth;
-    vMin = Math.floor(Math.min(windowWidth, windowHeight) / 100);
-    
+    vMin = Math.floor(Math.min(windowWidth, windowHeight) / 100);    
+
+    // canvas variables
+    const [scaledX, scaledY] = getCanvasSize();
+
+    canvas.width = scaledX;
+    canvas.height = scaledY;
+
+    // CSS properties
+    document.documentElement.style.setProperty("--canvas-height", `${canvas.height}px`);
+    document.documentElement.style.setProperty("--canvas-width", `${canvas.width}px`);
+
     // snake variables
-    segmentSize = 15;
+    segmentSize = getSegmentSize();
     border = 1;
     drawingSize = segmentSize + border;
-    speed = 1;
+    speed = getSpeed();
     numIterationsBeforeDrawing = drawingSize / speed;
 
     // direction variables
@@ -83,18 +103,6 @@ function initializeVariables() {
     Direction.DOWN = [0, speed];
     Direction.LEFT = [-speed, 0];
     Direction.RIGHT = [speed, 0];
-    
-
-    // canvas variables
-    const scaled = getCanvasSize();
-
-    canvas.width = scaled;
-    canvas.height = scaled;
-
-    // CSS properties
-    document.documentElement.style.setProperty("--canvas-height", `${canvas.height}px`);
-    document.documentElement.style.setProperty("--canvas-width", `${canvas.width}px`);
-    document.documentElement.style.setProperty("--button-width", `${canvas.width * 0.2}px`);
 }
 
 function initialSetup() {

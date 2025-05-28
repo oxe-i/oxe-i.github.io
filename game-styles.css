@@ -1,14 +1,13 @@
 :root {
     --canvas-width: 600px;
     --canvas-height: 600px;
-    --buttom-width: calc(var(--canvas-width) * 0.2);
 }
 
 #page {
     background: #211d2f;
     display: grid;
     grid-template-rows: 10vmin var(--canvas-height) 1fr;
-    grid-template-columns: 1fr var(--canvas-width) 1fr;
+    grid-template-columns: 1fr var(--canvas-width) 2fr;
     justify-content: center;
     align-items: center;
     font-family: "Ubuntu", sans-serif;
@@ -52,7 +51,6 @@
         text-align: center;
         width: auto;
         height: auto;
-        padding: 1vmin;
     }
 
     #game-flow-buttons {
@@ -61,12 +59,12 @@
         width: var(--canvas-width);
         height: 100%;
         display: grid;
-        grid-template-rows: 1fr 2fr 1fr;
-        grid-template-columns: 1fr var(--button-width) 1fr var(--button-width) 1fr;
+        grid-template-rows: 1fr 5fr 1fr;
+        grid-template-columns: 1fr 20vmin 1fr 20vmin 1fr;
         justify-content: center;
         align-items: center;
 
-        .button { min-width: var(--buttom-width); }
+        .button { min-width: 20vmin; }
 
         #start-game, #pause-game { grid-row: 2/3; }
         #start-game { grid-column: 2/3; }
@@ -78,10 +76,11 @@
         grid-column: 3/4;
         display: flex;
         position: relative;
+        min-width: 40vmin;
 
         .button {
             position: absolute;
-            left: 20%;
+            left: 40%;
             top: 50%;
             min-width: 10vmin;
             font-size: 2vmin;
