@@ -51,7 +51,7 @@ function initializeVariables() {
     vMin = Math.floor(Math.min(windowWidth, windowHeight) / 100);
     
     // snake variables
-    segmentSize = 2 * vMin;
+    segmentSize = 15;
     border = 1;
     drawingSize = segmentSize + border;
     speed = 1;
@@ -64,7 +64,7 @@ function initializeVariables() {
     Direction.RIGHT = [speed, 0];
 
     // canvas variables
-    const scaled = vMin * 70;
+    const scaled = 600;
     
     canvas.width = scaled;
     canvas.height = scaled;
