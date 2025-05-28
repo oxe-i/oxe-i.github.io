@@ -279,6 +279,7 @@ function overlapsWithSnake(x, y) {
         [snake[0].x, snake[0].x + segmentSize], 
         [snake[0].y, snake[0].y + segmentSize]
     ];
+
     const blockBounds = [
         [x, x + segmentSize],
         [y, y + segmentSize]
@@ -319,10 +320,14 @@ function addBlock() {
 }
 
 function isEndGame() {
-    return snake.some(segment => {
+    const touchesGrid = snake.some(segment => {
         return segment.x >= canvas.width || segment.x <= 0 || 
                segment.y >= canvas.height || segment.y <= 0;
     });
+
+    const touchesTail = snake.slice(1).some(segment => overlapsWithSnake(segment.x, segment.y));
+    
+    return touchesGrid || touchesTail;
 }
 
 // drawing functions
@@ -353,18 +358,19 @@ function gameLoop() {
 
         snake.forEach(segment => segment.move());
 
-        if (isEndGame()) {
-            drawCanvas();
-            drawSnake();
-            drawBlock();
-            window.cancelAnimationFrame(raf);
-            gameState = GameState.ENDED;
-            iterationCounter = 0;
-            return;
-        }
-
         if (iterationCounter == numIterationsBeforeDrawing) {
             drawCanvas();
+
+            if (isEndGame()) {
+                drawCanvas();
+                drawSnake();
+                drawBlock();
+                window.cancelAnimationFrame(raf);
+                gameState = GameState.ENDED;
+                iterationCounter = 0;
+                return;
+            }
+
             for (let i = snake.length - 1; i > 0; --i) {
                 snake[i].direction = snake[i - 1].direction;
             }
