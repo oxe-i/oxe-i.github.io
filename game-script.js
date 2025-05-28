@@ -209,6 +209,10 @@ function createBlock() {
 // listeners
 document.addEventListener("DOMContentLoaded", initialSetup);
 
+screen.orientation.addEventListener("change", (event) => {
+   initialSetup();
+});
+
 document.addEventListener("keydown", (state) => {
     switch (state.key) {
         case "ArrowUp":
