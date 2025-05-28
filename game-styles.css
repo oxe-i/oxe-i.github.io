@@ -3,17 +3,23 @@
     --canvas-height: 600px;
 }
 
+
+
 #page {
     background: #211d2f;
     display: grid;
-    grid-template-rows: minmax(10vmin, 15vmin) var(--canvas-height) minmax(1fr, 2fr);
-    grid-template-columns: 1fr var(--canvas-width) 2fr;
+    grid-template-rows: 10vmin 15vmin 1fr;
+    grid-template-columns: 1fr var(--canvas-width) 3fr;
     justify-content: center;
-    align-items: center;
     font-family: "Ubuntu", sans-serif;
     position: relative;
+    width: 100vw;
+    height: 100vh;
 
     #title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         grid-row: 1/2;
         grid-column: 2/3;
         text-align: center;
@@ -21,13 +27,13 @@
         font-weight: 400;
         font-size: minmax(3vmin, 5vmin); 
         color: #f0f3f9;
-        margin: minmax(2vmin, 3vmin);
         width: auto;
         height: auto;
     }
 
     #game {
-        grid-row: 2/3;
+        margin: 0;
+        grid-row: 2/end;
         grid-column: 2/3;
         background-color: rgb(214, 223, 138);
         width: var(--canvas-width);
@@ -58,36 +64,33 @@
     }
 
     #game-flow-buttons {
-        grid-row: 3/4;
-        grid-column: 2/3;
-        width: var(--canvas-width);
-        height: 100%;
+        grid-row: 2/3;
+        grid-column: 3/4;
+        width: auto;
+        height: minmax(3vmin, 5vmin);
         display: grid;
-        grid-template-rows: 1fr minmax(3fr, 5fr) 1fr;
         grid-template-columns: 1fr minmax(15vmin, 20vmin) 1fr minmax(15vmin, 20vmin) 1fr;
         justify-content: center;
         align-items: center;
 
         .button { min-width: minmax(15vmin, 20vmin); }
 
-        #start-game, #pause-game { grid-row: 2/3; }
         #start-game { grid-column: 2/3; }
         #pause-game { grid-column: 4/5; }
     }
 
     #directional-buttons {
-        grid-row: 2/3;
+        grid-row: 3/4;
         grid-column: 3/4;
         display: flex;
         position: relative;
         min-width: 40vmin;
-        min-height: 40vmin;
-        
+        min-height: 40vmin;        
 
         .button {
             position: absolute;
             left: calc(50% - 5vmin);
-            top: calc(50% - 5vmin);
+            top: calc(50% - 15vmin);
             min-width: 10vmin;
             min-height: 10vmin;
             font-size: 2vmin;

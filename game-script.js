@@ -48,8 +48,8 @@ let block = null;
 
 function getCanvasSize() {
     const isWidthGreater = windowWidth > windowHeight;
-    const xOffset = isWidthGreater ? 80 * vMin : 25 * vMin;
-    const yOffset = isWidthGreater ? 25 * vMin : 80 * vMin;
+    const xOffset = isWidthGreater ? 80 * vMin : 15 * vMin;
+    const yOffset = isWidthGreater ? 15 * vMin : 80 * vMin;
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight - yOffset;
     return [usableWidth - (usableWidth % 128), usableHeight - (usableHeight % 128)];
