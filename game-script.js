@@ -46,6 +46,7 @@ class Direction {};
 // current block variable
 let block = null;
 
+// initialization helpers
 function getCanvasSize() {
     const isWidthGreater = windowWidth > windowHeight;
     const xOffset = 60 * vMin;
@@ -62,7 +63,18 @@ function getSegmentSize() {
 }
 
 function getSpeed() {
-    return drawingSize / numIterationsBeforeDrawing;
+    return drawingSize;
+}
+
+function handleTouchDevice() {
+    switch (screen.orientation.type) {
+        case "portrait-primary":
+        case "portrait-secondary":
+            alert("Please, rotate your device to landscape.");
+            break;
+        default:
+            break;
+    }
 }
 
 function isTouchDevice() {
@@ -76,16 +88,8 @@ function initializeVariables() {
     raf = null;
     gameState = GameState.NOT_STARTED;
 
-    if (isTouchDevice()) {
-        switch (screen.orientation.type) {
-            case "portrait-primary":
-            case "portrait-secondary":
-                alert("Please, rotate your device to landscape.");
-                break;
-            default:
-                break;
-        }
-    }
+    if (isTouchDevice()) { handleTouchDevice(); }
+    
     // window variables
     windowHeight = window.innerHeight;
     windowWidth = window.innerWidth;
@@ -127,7 +131,8 @@ function restart() {
     initialSetup();
 }
 
-// resizing functions
+// resizing functions 
+// TODO
 function updateSnakeOnResize(prevWidth, prevHeight) {
     // TODO
     const coordinates = snake.map(segment => [segment.x, segment.y]);
@@ -283,6 +288,7 @@ dirRight.addEventListener("click", () => {
     directionQueue.push(Direction.RIGHT);
 });
 
+// handle block and collisions
 function overlapsWithSnake(x, y) {
     const headBounds = [
         [snake[0].x, snake[0].x + segmentSize], 
@@ -356,6 +362,11 @@ function drawBlock() {
     context.fillRect(block.x + 1, block.y + 1, segmentSize, segmentSize);
 }
 
+// updating functions
+function moveSnake() {
+    snake.forEach(segment => segment.move());
+}
+
 // main game loop
 function gameLoop() {
     drawCanvas();
@@ -365,9 +376,8 @@ function gameLoop() {
     const gameLoopHelper = () => {
         iterationCounter++;
 
-        snake.forEach(segment => segment.move());
-
         if (iterationCounter == numIterationsBeforeDrawing) {
+            moveSnake();
             drawCanvas();
 
             if (isEndGame()) {
