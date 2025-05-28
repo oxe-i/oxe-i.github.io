@@ -53,7 +53,7 @@ function getCanvasSize() {
 
 function getSegmentSize() {
     const minCanvasSize = Math.min(canvas.width, canvas.height);
-    return minCanvasSize / 32;
+    return (minCanvasSize / 32) - 1;
 }
 
 function getSpeed() {
@@ -119,8 +119,12 @@ function updateSnakeOnResize(prevWidth, prevHeight) {
         const scaleX = coordinates[idx][0] / prevWidth;
         const scaleY = coordinates[idx][1] / prevHeight;
 
-        segment.x = scaleX * windowWidth;
-        segment.y = scaleY * windowHeight;
+        const scaledWidth = scaleX * windowWidth;
+        const scaledHeight = scaleY * windowHeight;
+
+        segment.x = scaledWidth - (scaledWidth % drawingSize);
+        segment.y = scaledHeight - (scaledHeight % drawingSize);
+
 
         return segment;
     });
@@ -132,8 +136,12 @@ function resizeWindow() {
     initializeVariables();
     snake = updateSnakeOnResize(prevWindowWidth, prevWindowHeight);
     drawCanvas();
-    drawSnake();
-    drawBlock();
+    switch (gameState) {
+        case GameState.PAUSED:
+        case GameState.RUNNING:
+            drawSnake();
+            drawBlock();    
+    }
 }
 
 // creation functions
@@ -146,8 +154,10 @@ function createSegment(idx) {
         direction: Direction.LEFT,
         counter: 0,
         draw() {
+            context.fillStyle = "rgb(214, 223, 138)";
+            context.fillRect(segment.x, segment.y, drawingSize, drawingSize);
             context.fillStyle = "rgb(0, 0, 0)";
-            context.fillRect(segment.x, segment.y, segmentSize, segmentSize);
+            context.fillRect(segment.x + border, segment.y + border, segmentSize, segmentSize);
         },
         move() {
             const [xspeed, yspeed] = segment.direction;
@@ -182,6 +192,12 @@ function createBlock() {
 document.addEventListener("DOMContentLoaded", initialSetup);
 
 window.addEventListener("resize", resizeWindow);
+
+screen.orientation.addEventListener("change", (event) => {
+    if (event.type === "landscape-primary" || event.type === "landscape-secondary") {
+
+    }
+});
 
 document.addEventListener("keydown", (state) => {
     switch (state.key) {
@@ -305,8 +321,10 @@ function drawSnake() {
 }
 
 function drawBlock() {
+    context.fillStyle = "rgb(214, 223, 138)";
+    context.fillRect(block.x, block.y, drawingSize, drawingSize);
     context.fillStyle = "rgb(0, 0, 0)";
-    context.fillRect(block.x, block.y, segmentSize, segmentSize);
+    context.fillRect(block.x + 1, block.y + 1, segmentSize, segmentSize);
 }
 
 // main game loop

@@ -17,9 +17,11 @@
         grid-row: 1/2;
         grid-column: 2/3;
         text-align: center;
+        text-transform: capitalize;
         font-weight: 400;
         font-size: 5vmin; 
         color: #f0f3f9;
+        margin: 5vmin;
     }
 
     #game {
