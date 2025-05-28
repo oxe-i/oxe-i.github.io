@@ -1,3 +1,5 @@
+
+
 #page {
     background: #211d2f;
     display: grid;
@@ -6,6 +8,7 @@
     justify-content: center;
     align-items: center;
     font-family: "Ubuntu", sans-serif;
+    position: relative;
 
     #title {
         grid-row: 1/2;
@@ -43,6 +46,9 @@
         border-radius: 2vmin;
         border: 1vmin solid #211d2f;
         text-align: center;
+        width: auto;
+        height: auto;
+        padding: 1vmin;
     }
 
     #game-flow-buttons {
@@ -57,14 +63,7 @@
         justify-content: center;
         align-items: center;
 
-        .button {
-            width: auto;
-            height: auto;
-        }
-
-        #start-game, #pause-game { 
-            grid-row: 2/3;
-        }
+        #start-game, #pause-game { grid-row: 2/3; }
     }
 
     #directional-buttons {
@@ -72,38 +71,44 @@
         grid-column: 3/4;
         display: flex;
         position: relative;
-        left: 15vmin;
 
         .button {
             position: absolute;
-            width: 15vmin;
-            height: 3vmin;
-            font-size: 3vmin;
-            height: auto;
-        }
-
-        #up {
             left: 20%;
             top: 50%;
-            transform: translateY(-100%);
+            min-width: 10vmin;
+            font-size: 2vmin;
+            background: #211d2f;
+
+            img { width: 5vmin; }
         }
 
-        #down {
-            left: 20%;
-            top: 50%;
-            transform: translateY(100%);
+        #up { 
+            transform: translate(0%, -100%); 
+
+            img {
+                transform: rotate(-90deg);
+            }
         }
 
-        #left {
-            left: 20%;
-            top: 50%;
-            transform: translateX(-100%);
+        #down { 
+            transform: translate(0%, 100%); 
+
+            img {
+                transform: rotate(90deg);
+            }
         }
 
-        #right {
-            left: 20%;
-            top: 50%;
-            transform: translateX(100%);
+        #left { 
+            transform: translate(-100%, 0%); 
+
+            img {
+                transform: rotate(180deg);
+            }
+        }
+
+        #right { 
+            transform: translate(100%, 0%); 
         }
     }
 }

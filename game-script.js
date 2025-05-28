@@ -44,7 +44,7 @@ class Direction {};
 let block = null;
 
 function getCanvasSize() {
-    if (windowHeight >= 800 && windowWidth >= 800) { return 600; }
+    if (windowHeight >= 750 && windowWidth >= 750) { return 600; }
     if (windowHeight >= 600 && windowWidth >= 600) { return 450; }
     if (windowHeight >= 450 && windowWidth >= 450) { return 300; }
     return 150;
@@ -69,13 +69,7 @@ function initializeVariables() {
     Direction.DOWN = [0, speed];
     Direction.LEFT = [-speed, 0];
     Direction.RIGHT = [speed, 0];
-
-    // check position of directional buttons
-    if (windowHeight > windowWidth * 1.2) {
-        const directionalButtons = document.querySelector("#directional-buttons");
-        directionalButtons.style.gridRow = "3/4";
-        directionalButtons.style.gridColumn = "2/3";
-    }
+    
 
     // canvas variables
     const scaled = getCanvasSize();
