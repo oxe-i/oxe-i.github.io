@@ -6,7 +6,7 @@
 #page {
     background: #211d2f;
     display: grid;
-    grid-template-rows: 10vmin var(--canvas-height) 1fr;
+    grid-template-rows: minmax(10vmin, 15vmin) var(--canvas-height) minmax(1fr, 2fr);
     grid-template-columns: 1fr var(--canvas-width) 2fr;
     justify-content: center;
     align-items: center;
@@ -19,9 +19,11 @@
         text-align: center;
         text-transform: capitalize;
         font-weight: 400;
-        font-size: 5vmin; 
+        font-size: minmax(3vmin, 5vmin); 
         color: #f0f3f9;
-        margin: 5vmin;
+        margin: minmax(3vmin, 5vmin);
+        width: auto;
+        height: auto;
     }
 
     #game {
@@ -61,12 +63,12 @@
         width: var(--canvas-width);
         height: 100%;
         display: grid;
-        grid-template-rows: 1fr 5fr 1fr;
-        grid-template-columns: 1fr 20vmin 1fr 20vmin 1fr;
+        grid-template-rows: 1fr minmax(3fr, 5fr) 1fr;
+        grid-template-columns: 1fr minmax(15vmin, 20vmin) 1fr minmax(15vmin, 20vmin) 1fr;
         justify-content: center;
         align-items: center;
 
-        .button { min-width: 20vmin; }
+        .button { min-width: minmax(15vmin, 20vmin); }
 
         #start-game, #pause-game { grid-row: 2/3; }
         #start-game { grid-column: 2/3; }
@@ -77,16 +79,22 @@
         grid-row: 2/3;
         grid-column: 3/4;
         display: flex;
-        position: relative;
+        position: absolute;
         min-width: 40vmin;
+        min-height: 40vmin;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
 
         .button {
             position: absolute;
-            left: 40%;
-            top: 50%;
+            left: calc(50% - 5vmin);
+            top: calc(50% - 5vmin);
             min-width: 10vmin;
+            min-height: 10vmin;
             font-size: 2vmin;
             background: #211d2f;
+            transform: translateX(50%);
 
             img { width: 5vmin; }
         }

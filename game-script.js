@@ -15,9 +15,10 @@ GameState.PAUSED = 2;
 GameState.ENDED = 3;
 
 // game control variables
+const numIterationsBeforeDrawing = 16;
+
 let raf = null;
 let gameState = GameState.NOT_STARTED;
-let numIterationsBeforeDrawing = null;
 let iterationCounter = 0;
 
 // buttons variables
@@ -46,8 +47,9 @@ class Direction {};
 let block = null;
 
 function getCanvasSize() {
-    const xOffset = 80 * vMin;
-    const yOffset = 25 * vMin;
+    const isWidthGreater = windowWidth > windowHeight;
+    const xOffset = isWidthGreater ? 80 * vMin : 25 * vMin;
+    const yOffset = isWidthGreater ? 25 * vMin : 80 * vMin;
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight - yOffset;
     return [usableWidth - (usableWidth % 64), usableHeight - (usableHeight % 64)];
@@ -61,7 +63,7 @@ function getSegmentSize() {
 }
 
 function getSpeed() {
-    return drawingSize / 16;
+    return drawingSize / numIterationsBeforeDrawing;
 }
 
 function isTouchDevice() {
@@ -104,7 +106,6 @@ function initializeVariables() {
     segmentSize = getSegmentSize();
     drawingSize = segmentSize + border;
     speed = getSpeed();
-    numIterationsBeforeDrawing = drawingSize / speed;
 
     // direction variables
     Direction.UP = [0, -speed];
@@ -212,7 +213,20 @@ function createBlock() {
 document.addEventListener("DOMContentLoaded", initialSetup);
 
 screen.orientation.addEventListener("change", (event) => {
-   initialSetup();
+    if (raf) window.cancelAnimationFrame(raf);
+    initialSetup();
+    if (event.type == "landscape-secondary" || event.type == "landscape-primary") {
+        const gameFlowButtons = document.querySelector("#game-flow-buttons");
+        gameFlowButtons.style.gridRow = "2/3";
+        gameFlowButtons.style.gridColumn = "3/4";
+        gameFlowButtons.style.width = "minmax(15vmin, 20vmin)";
+        gameFlowButtons.style.gridTemplateRows = "1fr minmax(3fr, 5fr) 1fr minmax(3fr, 5fr) 1fr";
+        gameFlowButtons.style.gridTemplateColumns = "1fr minmax(15vmin, 20vmin) 1fr";
+        startGame.style.gridRow = "2/3";
+        startGame.style.gridColumn = "2/3";
+        pauseGame.style.gridRow = "4/5";
+        pauseGame.style.gridColumn = "2/3";
+    } 
 });
 
 document.addEventListener("keydown", (state) => {
