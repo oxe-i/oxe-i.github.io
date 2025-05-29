@@ -26,6 +26,9 @@ let raf = null;
 let gameState = GameState.NOT_STARTED;
 let iterationCounter = 0;
 let difficulty = Difficulty.MEDIUM;
+let crtScore = 0;
+
+const scoreElem = document.querySelector("#score");
 
 // buttons variables
 const startPause = document.querySelector("#start-pause");
@@ -129,6 +132,8 @@ function initializeVariables() {
     raf = null;
     gameState = GameState.NOT_STARTED;
     difficulty = Difficulty.MEDIUM;
+    crtScore = 0;
+    scoreElem.textContent = `${crtScore}`;
 
     if (isTouchDevice()) { handleTouchDevice(); }
     
@@ -392,6 +397,36 @@ hardButton.addEventListener("click", () => {
     mediumButton.style.background = " #211d2f";
 });
 
+function addIterationScore() {
+    switch (difficulty) {
+        case Difficulty.EASY:
+            crtScore += 50;
+            break;
+        case Difficulty.MEDIUM:
+            crtScore += 100;
+            break;
+        case Difficulty.HARD:
+            crtScore += 200;
+            break;
+    }
+    scoreElem.textContent = `${crtScore}`;
+}
+
+function addBlockScore() {
+    switch (difficulty) {
+        case Difficulty.EASY:
+            crtScore += 2000;
+            break;
+        case Difficulty.MEDIUM:
+            crtScore += 4000;
+            break;
+        case Difficulty.HARD:
+            crtScore += 8000;
+            break;
+    }
+    scoreElem.textContent = `${crtScore}`;
+}
+
 // handle block and collisions
 function overlapsWithSnake(x, y) {
     const headBounds = [
@@ -506,18 +541,21 @@ function updateSnakeDirection() {
 function updateSnake() {  
     updateSnakeDirection(); 
     moveSnake();
-    if (hasTouchedBlock()) { handleBlockCollision(); }
+    if (hasTouchedBlock()) { 
+        addBlockScore();
+        handleBlockCollision(); 
+    }
 }
 
 // main game loop
 function gameLoop() {
-    
     if (++iterationCounter >= numIterationsBeforeDrawing) {
         updateImage();
         if (isEndGame()) {
             handleEndGame();
             return;
         }
+        addIterationScore();
         updateSnake();
         iterationCounter = 0;
     }
