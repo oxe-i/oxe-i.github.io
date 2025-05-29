@@ -84,12 +84,14 @@ function getSegmentSize() {
     const minCanvasSize = Math.min(canvas.width, canvas.height);
     const maxCanvasSize = Math.max(canvas.width, canvas.height);
     const avgCanvasSize = (minCanvasSize + maxCanvasSize) / 2;
+    /*
     const minDivisors = getDivisors(minCanvasSize);
     const maxDivisors = getDivisors(maxCanvasSize);
     const possibleMinValues = minDivisors.filter(divisor => minDivisors.includes(minCanvasSize / divisor));
     const possibleMaxValues = maxDivisors.filter(divisor => maxDivisors.includes(maxCanvasSize / divisor));
     const possibleValue = possibleMaxValues.find(divisor => possibleMinValues.includes(divisor) && divisor >= 2*vMin && divisor <= 4*vMin);
-    if (possibleValue) { return possibleValue - border; }
+    if (possibleValue) { return possibleValue - border; } */
+
     return (avgCanvasSize / 64) - border;
 }
 
@@ -98,10 +100,13 @@ function getSpeed() {
 }
 
 function getNumIterations() {
+    const minCanvasSize = Math.min(canvas.width, canvas.height);
+    const maxCanvasSize = Math.max(canvas.width, canvas.height);
+    const avgCanvasSize = (minCanvasSize + maxCanvasSize) / 2;
     switch (difficulty) {
-        case Difficulty.EASY: return 24;
-        case Difficulty.MEDIUM: return 16;
-        case Difficulty.HARD: return 8;
+        case Difficulty.EASY: return avgCanvasSize / 16;
+        case Difficulty.MEDIUM: return avgCanvasSize / 32;
+        case Difficulty.HARD: return avgCanvasSize / 64;
     }
 }
 
@@ -221,7 +226,7 @@ function createSegment(idx) {
         },
         changeDirection(newDirection) {
             let willChange = false;
-            
+
             switch (segment.direction) {
                 case Direction.LEFT:
                     willChange = newDirection != Direction.RIGHT;
@@ -487,14 +492,15 @@ function updateSnakeDirection() {
     }
 }
 
-function updateSnake() {
-    moveSnake();   
+function updateSnake() {  
     if (hasTouchedBlock()) { handleBlockCollision(); }
     updateSnakeDirection();
+    moveSnake(); 
 }
 
 // main game loop
 function gameLoop() {
+    
     if (++iterationCounter >= numIterationsBeforeDrawing) {
         updateImage();
         if (isEndGame()) {
