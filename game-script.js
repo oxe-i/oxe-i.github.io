@@ -49,7 +49,7 @@ let block = null;
 // initialization helpers
 function getCanvasSize() {
     const isWidthGreater = windowWidth > windowHeight;
-    const xOffset = 40 * vMin;
+    const xOffset = 80 * vMin;
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight;
     return [usableWidth - (usableWidth % 128), usableHeight - (usableHeight % 128)];
@@ -254,6 +254,9 @@ startPause.addEventListener("click", () => {
             startPause.querySelector("img").src = "pause.svg";
             startPause.querySelector("img").alt = "pause button";
             gameState = GameState.RUNNING;
+            drawCanvas();
+            drawSnake();
+            drawBlock();
             raf = window.requestAnimationFrame(gameLoop); 
             return;
         case GameState.PAUSED:
@@ -382,46 +385,39 @@ function moveSnake() {
 }
 
 // main game loop
-function gameLoop() {
-    drawCanvas();
-    drawSnake();
-    drawBlock();
+function gameLoop(timestamp) {
+    iterationCounter++;
 
-    const gameLoopHelper = () => {
-        iterationCounter++;
+    if (iterationCounter == numIterationsBeforeDrawing) {
+        moveSnake();
+        drawCanvas();
+        drawBlock();
 
-        if (iterationCounter == numIterationsBeforeDrawing) {
-            moveSnake();
-            drawCanvas();
-
-            if (isEndGame()) {
-                drawCanvas();
-                drawSnake();
-                drawBlock();
-                window.cancelAnimationFrame(raf);
-                gameState = GameState.ENDED;
-                iterationCounter = 0;
-                return;
-            }
-
-            for (let i = snake.length - 1; i > 0; --i) {
-                snake[i].direction = snake[i - 1].direction;
-            }
-            const newDirection = directionQueue.shift();
-            if (newDirection) {
-                snake[0].changeDirection(newDirection);
-            }
-            if (hasTouchedBlock()) {
-                addBlock();
-                block = createBlock();
-            }
+        if (isEndGame()) {
             drawSnake();
-            drawBlock();
+            window.cancelAnimationFrame(raf);
+            gameState = GameState.ENDED;
             iterationCounter = 0;
+            return;
         }
 
-        raf = window.requestAnimationFrame(gameLoopHelper);
-    };
-    
-    raf = window.requestAnimationFrame(gameLoopHelper);
+        for (let i = snake.length - 1; i > 0; --i) {
+            snake[i].direction = snake[i - 1].direction;
+        }
+
+        const newDirection = directionQueue.shift();
+        if (newDirection) {
+            snake[0].changeDirection(newDirection);
+        }
+
+        if (hasTouchedBlock()) {
+            addBlock();
+            block = createBlock();
+        }
+        
+        drawSnake();
+        iterationCounter = 0;
+    }
+
+    raf = window.requestAnimationFrame(gameLoop);
 }

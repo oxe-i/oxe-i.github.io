@@ -37,12 +37,13 @@
     border-radius: 1vmin;
     border: 0.5vmin solid black;
     position: absolute;
-    left: 0%;
+    left: 40vmin;
     top: 0%;
 }
 
 #game-canvas {
-    flex-grow: 1;
+    height: var(--canvas-height);
+    width: var(--canvas-width);
     background: rgb(214, 223, 138);
     border-radius: 1vmin;
 }
@@ -50,9 +51,9 @@
 #directional-buttons {
     display: flex;
     position: absolute;
-    left: 100%;
+    left: -40vmin;
     top: 50%;
-    transform: translateY(-75%);
+    transform: translateY(-50%);
     width: 40vmin;
     height: 40vmin;       
     
@@ -79,7 +80,6 @@
     width: 10vmin;
     height: 10vmin;
     background: #211d2f;
-    transform: translateX(50%);
 }
 
 #directional-buttons .button img { width: var(--directional-button-img-width); }
@@ -93,7 +93,8 @@
     align-items: center;
     position: absolute;
     left: 100%;
-    top: calc(50% + 10vmin);
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 #game-flow-buttons .button { width: minmax(10vmin, 15vmin); }
