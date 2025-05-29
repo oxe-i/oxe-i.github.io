@@ -38,6 +38,7 @@
     border: 0.5vmin solid black;
     position: absolute;
     left: 0%;
+    top: 0%;
 }
 
 #game-canvas {
@@ -51,52 +52,51 @@
     position: absolute;
     left: 100%;
     top: 50%;
-    transform: translateY(-100%);
+    transform: translateY(-75%);
     width: 40vmin;
     height: 40vmin;       
     
-    #up { transform: translate(0%, -100%); }
+    #up { transform: translate(0%, -125%); }
 
     #up img { transform: rotate(-90deg); }
 
-    #down { transform: translate(0%, 100%); }
+    #down { transform: translate(0%, 125%); }
 
     #down img { transform: rotate(90deg); }
 
-    #left { transform: translate(-100%, 0%); }
+    #left { transform: translate(-125%, 0%); }
 
     #left img { transform: rotate(180deg); }
 
-    #right { transform: translate(100%, 0%); }
+    #right { transform: translate(125%, 0%); }
 }
 
 #directional-buttons .button {
-    --directional-button-width: 5vmin;
+    --directional-button-img-width: 5vmin;
     position: absolute;
-    left: calc(50% - var(--directional-button-width));
-    top: calc(50% - var(--directional-button-width));
-    min-width: 10vmin;
-    min-height: 10vmin;
-    font-size: 2vmin;
+    left: calc(50% - var(--directional-button-img-width));
+    top: calc(50% - var(--directional-button-img-width));
+    width: 10vmin;
+    height: 10vmin;
     background: #211d2f;
     transform: translateX(50%);
 }
 
-#directional-buttons .button img { width: var(--directional-button-width); }
+#directional-buttons .button img { width: var(--directional-button-img-width); }
 
 #game-flow-buttons {
     width: 40vmin;
     height: minmax(3vmin, 5vmin);
     display: grid;
-    grid-template-columns: 1fr minmax(10vmin, 15vmin) 1fr minmax(10vmin, 15vmin) 1fr;
+    grid-template-columns: 1fr minmax(10vmin, 15vmin) 2fr minmax(10vmin, 15vmin) 1fr;
     justify-content: center;
     align-items: center;
     position: absolute;
     left: 100%;
-    top: 50%;
+    top: calc(50% + 10vmin);
 }
 
-#game-flow-buttons .button { min-width: minmax(10vmin, 15vmin); }
+#game-flow-buttons .button { width: minmax(10vmin, 15vmin); }
 
 #start-pause { grid-column: 2/3; }
 #start-pause img { width: 100%; }
