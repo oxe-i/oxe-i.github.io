@@ -4,7 +4,7 @@
     --stats-height: 18vmin;
     --stats-width: 40vmin;
     --before-canvas-width: 40vmin;
-    --after-canvas-width: 60vmin;
+    --after-canvas-width: 50vmin;
 }
 
 #page {
@@ -29,7 +29,7 @@
     top: 5vmin;
     bottom: 5vmin;
     left: 40vmin;
-    right: 60vmin;
+    right: 50vmin;
 }
 
 #game-canvas {
@@ -116,8 +116,6 @@
     background: #302b42;
     margin-right: 2vmin;
 }
-
-
 
 .button {
     color: #f0f3f9;            
