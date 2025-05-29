@@ -80,7 +80,7 @@ function getCanvasSize() {
     const xOffset = 80 * vMin;
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight;
-    return [usableWidth - (usableWidth % 128), usableHeight - (usableHeight % 128)];
+    return [usableWidth - (usableWidth % 64), usableHeight - (usableHeight % 64)];
 }
 
 function getSegmentSize() {
@@ -92,7 +92,7 @@ function getSegmentSize() {
     const maxDivisors = getDivisors(maxCanvasSize);
     const possibleMinValues = minDivisors.filter(divisor => minDivisors.includes(minCanvasSize / divisor));
     const possibleMaxValues = maxDivisors.filter(divisor => maxDivisors.includes(maxCanvasSize / divisor));
-    const possibleValue = possibleMaxValues.find(divisor => possibleMinValues.includes(divisor) && divisor >= 2*vMin && divisor <= 5*vMin);
+    const possibleValue = possibleMaxValues.findLast(divisor => possibleMinValues.includes(divisor) && divisor >= 2*vMin && divisor <= 5*vMin);
 
     if (possibleValue) { return possibleValue - border; }
     return (avgCanvasSize / 64) - border;
