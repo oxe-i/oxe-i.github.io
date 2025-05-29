@@ -76,11 +76,10 @@ function getCommonDivisors(...nums) {
 
 // initialization helpers
 function getCanvasSize() {
-    const isWidthGreater = windowWidth > windowHeight;
-    const xOffset = 80 * vMin;
+    const xOffset = 100 * vMin;
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight;
-    return [usableWidth - (usableWidth % 64), usableHeight - (usableHeight % 64)];
+    return [usableWidth - (usableWidth % 32), usableHeight - (usableHeight % 32)];
 }
 
 function getSegmentSize() {

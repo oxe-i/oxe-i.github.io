@@ -9,29 +9,30 @@
     <body id="page">
         <div id="game">
             <canvas id="game-canvas"></canvas>
-            <div id="game-stats">
-                <div id="difficulty-buttons">
-                    <h1>difficulty:</h1>
-                    <button class="button" id="easy"><img src="easy.svg" alt="easy button" /></button>
-                    <button class="button" id="medium"><img src="medium.svg" alt="medium button" /></button>
-                    <button class="button" id="hard"><img src="hard.svg" alt="hard button" /></button>
-                </div>
-                <div id="score-board">
-                    score:
-                    <div id="score">0</div>
-                </div>
+            
+        </div>    
+        <div id="game-stats">
+            <div id="difficulty-buttons">
+                <h1>difficulty:</h1>
+                <button class="button" id="easy"><img src="easy.svg" alt="easy button" /></button>
+                <button class="button" id="medium"><img src="medium.svg" alt="medium button" /></button>
+                <button class="button" id="hard"><img src="hard.svg" alt="hard button" /></button>
             </div>
-            <div id="directional-buttons">
-                <button class="button" id="up"><img src="arrow.svg" alt="up button" /></button>
-                <button class="button" id="left"><img src="arrow.svg" alt="left button" /></button>
-                <button class="button" id="down"><img src="arrow.svg" alt="down button" /></button>
-                <button class="button" id="right"><img src="arrow.svg" alt="right button" /></button>
+            <div id="score-board">
+                <div id="score-title">score:</div>
+                <div id="score">0</div>
             </div>
-            <div id="game-flow-buttons">
-                <button class="button" id="start-pause"><img src="play.svg" alt="play button" /></button>
-                <button class="button" id="stop"><img src="stop.svg" alt="stop button" /></button>
-            </div>
-        </div>        
+        </div>
+        <div id="directional-buttons">
+            <button class="button" id="up"><img src="arrow.svg" alt="up button" /></button>
+            <button class="button" id="left"><img src="arrow.svg" alt="left button" /></button>
+            <button class="button" id="down"><img src="arrow.svg" alt="down button" /></button>
+            <button class="button" id="right"><img src="arrow.svg" alt="right button" /></button>
+        </div>
+        <div id="game-flow-buttons">
+            <button class="button" id="start-pause"><img src="play.svg" alt="play button" /></button>
+            <button class="button" id="stop"><img src="stop.svg" alt="stop button" /></button>
+        </div>    
         <script src="game-script.js"></script>
     </body>
 </html>

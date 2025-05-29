@@ -1,15 +1,16 @@
 :root {
     --canvas-width: 600px;
     --canvas-height: 600px;
+    --stats-height: 18vmin;
+    --stats-width: 40vmin;
+    --before-canvas-width: 40vmin;
+    --after-canvas-width: 60vmin;
 }
-
 
 #page {
     background: #211d2f;
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: center;
     font-family: "Ubuntu", sans-serif;
     position: relative;
     width: 100vw;
@@ -25,30 +26,28 @@
     border-radius: 1vmin;
     border: 0.5vmin solid black;
     position: absolute;
-    left: 40vmin;
     top: 0%;
+    left: 40vmin;
+    right: 60vmin;
 }
 
 #game-canvas {
     height: var(--canvas-height);
     width: var(--canvas-width);
     background: rgb(214, 223, 138);
-    border-radius: 1vmin;
+    border-radius: 1vmin;    
 }
 
 #game-stats {
-    --stats-height: 20vmin;
-    --stats-width: 40vmin;
     height: var(--stats-height);
     width: var(--stats-width);
     position: relative;
-    top: 0%;
-    left: 0%;
+    top: 5vmin;
+    left: calc(50vmin + var(--canvas-width));
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 0 2vmin;
     padding: 0;
 }
 
@@ -57,17 +56,16 @@
     display: grid;
     grid-template-rows: 1fr 4fr;
     grid-template-columns: repeat(3, 1fr);
-    justify-content: center;
-    align-items: center;
-    width: var(--stats-width);
+    width: 100%;
     margin: 0;
     padding: 0;
+    margin: 1vmin;
 }
 
 #difficulty-buttons h1 { 
     grid-row: 1/2; 
     grid-column: 1/end;
-    width: var(--stats-width);
+    width: 100%;
     text-align: center;
     margin: 0;
     padding: 0;
@@ -81,8 +79,6 @@
 }
 
 #easy, #medium, #hard { 
-    margin: 2vmin;
-    min-width: calc(var(--stats-width) / 4);
     width: auto;
     display: flex;
     justify-content: center;
@@ -100,18 +96,27 @@
     flex-grow: 1;
     display: flex;
     align-items: center;
-    background: #302b42;
-    width: var(--stats-width);
+    width: 100%;
     height: auto;
     text-align: justify;
     text-transform: uppercase;
 }
 
+#score-title {
+    width: auto;
+    margin-left: 2vmin;
+    margin-right: 2vmin;
+}
+
 #score {
     text-align: center;
-    flex-grow: 1;
+    flex-grow: 5;
     height: auto;
+    background: #302b42;
+    margin-right: 2vmin;
 }
+
+
 
 .button {
     color: #f0f3f9;            
@@ -129,7 +134,7 @@
 #directional-buttons {
     display: flex;
     position: absolute;
-    left: -40vmin;
+    left: 0%;
     top: 50%;
     transform: translateY(-50%);
     width: 40vmin;
@@ -167,6 +172,7 @@
 }
 
 #game-flow-buttons {
+    --before: calc(var(--canvas-width) + var(--before-canvas-width));
     width: 40vmin;
     height: minmax(3vmin, 5vmin);
     display: grid;
@@ -174,9 +180,8 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
+    left: calc(var(--before) + 10vmin);
+    top: calc(50% + 5vmin);
 }
 
 #game-flow-buttons .button { width: minmax(10vmin, 15vmin); }
