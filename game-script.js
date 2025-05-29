@@ -14,13 +14,18 @@ GameState.RUNNING = 1;
 GameState.PAUSED = 2;
 GameState.ENDED = 3;
 
-// game control variables
-const numIterationsBeforeDrawing = 24;
+// class to get difficulty
+class Difficulty {};
+Difficulty.EASY = 0;
+Difficulty.MEDIUM = 1;
+Difficulty.HARD = 2;
 
+// game control variables
+let numIterationsBeforeDrawing = 0;
 let raf = null;
 let gameState = GameState.NOT_STARTED;
 let iterationCounter = 0;
-let lastTime = 0;
+let difficulty = Difficulty.MEDIUM;
 
 // buttons variables
 const startPause = document.querySelector("#start-pause");
@@ -30,6 +35,10 @@ const dirUp = document.querySelector("#up");
 const dirDown = document.querySelector("#down");
 const dirLeft = document.querySelector("#left");
 const dirRight = document.querySelector("#right");
+
+const easyButton = document.querySelector("#easy");
+const mediumButton = document.querySelector("#medium");
+const hardButton = document.querySelector("#hard");
 
 // snake variables
 const border = 1;
@@ -88,6 +97,14 @@ function getSpeed() {
     return drawingSize;
 }
 
+function getNumIterations() {
+    switch (difficulty) {
+        case Difficulty.EASY: return 24;
+        case Difficulty.MEDIUM: return 16;
+        case Difficulty.HARD: return 8;
+    }
+}
+
 function handleTouchDevice() {
     switch (screen.orientation.type) {
         case "portrait-primary":
@@ -109,6 +126,7 @@ function initializeVariables() {
     iterationCounter = 0;
     raf = null;
     gameState = GameState.NOT_STARTED;
+    difficulty = Difficulty.MEDIUM;
 
     if (isTouchDevice()) { handleTouchDevice(); }
     
@@ -131,6 +149,7 @@ function initializeVariables() {
     segmentSize = getSegmentSize();
     drawingSize = segmentSize + border;
     speed = getSpeed();
+    numIterationsBeforeDrawing = getNumIterations();
 
     // direction variables
     Direction.UP = [0, -speed];
@@ -201,7 +220,24 @@ function createSegment(idx) {
             segment.y += yspeed;
         },
         changeDirection(newDirection) {
-            segment.direction = newDirection;
+            let willChange = false;
+            
+            switch (segment.direction) {
+                case Direction.LEFT:
+                    willChange = newDirection != Direction.RIGHT;
+                    break;
+                case Direction.RIGHT:
+                    willChange = newDirection != Direction.LEFT;
+                    break;
+                case Direction.DOWN:
+                    willChange = newDirection != Direction.UP;
+                    break;
+                case Direction.UP:
+                    willChange = newDirection != Direction.DOWN;
+                    break;
+            }
+            
+            if (willChange) { segment.direction = newDirection; }
         }
     };
     return segment;
@@ -325,6 +361,21 @@ dirRight.addEventListener("click", () => {
     directionQueue.push(Direction.RIGHT);
 });
 
+easyButton.addEventListener("click", () => {
+    difficulty = Difficulty.EASY;
+    numIterationsBeforeDrawing = getNumIterations();
+});
+
+mediumButton.addEventListener("click", () => {
+    difficulty = Difficulty.MEDIUM;
+    numIterationsBeforeDrawing = getNumIterations();
+});
+
+hardButton.addEventListener("click", () => {
+    difficulty = Difficulty.HARD;
+    numIterationsBeforeDrawing = getNumIterations();
+});
+
 // handle block and collisions
 function overlapsWithSnake(x, y) {
     const headBounds = [
@@ -444,7 +495,7 @@ function updateSnake() {
 
 // main game loop
 function gameLoop() {
-    if (++iterationCounter == numIterationsBeforeDrawing) {
+    if (++iterationCounter >= numIterationsBeforeDrawing) {
         updateImage();
         if (isEndGame()) {
             handleEndGame();
