@@ -313,6 +313,7 @@ startPause.addEventListener("click", () => {
         case GameState.NOT_STARTED:
             startPause.querySelector("img").src = "pause.svg";
             startPause.querySelector("img").alt = "pause button";
+            mediumButton.style.background = "rgb(233, 236, 7)";
             gameState = GameState.RUNNING;
             raf = window.requestAnimationFrame(gameLoop); 
             return;
@@ -325,6 +326,7 @@ startPause.addEventListener("click", () => {
         case GameState.ENDED:
             restart();
             gameState = GameState.RUNNING;
+            mediumButton.style.background = "rgb(233, 236, 7)";
             startPause.querySelector("img").src = "pause.svg";
             startPause.querySelector("img").alt = "pause button";
             raf = window.requestAnimationFrame(gameLoop); 
@@ -332,7 +334,7 @@ startPause.addEventListener("click", () => {
         case GameState.RUNNING:
             gameState = GameState.PAUSED;
             startPause.querySelector("img").src = "play.svg"; 
-            startPause.querySelector("img").alt = "play button";           
+            startPause.querySelector("img").alt = "play button";          
             window.cancelAnimationFrame(raf);
             raf = null;
             return;
@@ -345,6 +347,9 @@ stopButton.addEventListener("click", () => {
     gameState = GameState.NOT_STARTED;
     startPause.querySelector("img").src = "play.svg"; 
     startPause.querySelector("img").alt = "play button";
+    easyButton.style.background = " #211d2f";
+    mediumButton.style.background = " #211d2f";
+    hardButton.style.background = " #211d2f";
 });
 
 dirUp.addEventListener("click", () => {
@@ -366,16 +371,25 @@ dirRight.addEventListener("click", () => {
 easyButton.addEventListener("click", () => {
     difficulty = Difficulty.EASY;
     numIterationsBeforeDrawing = getNumIterations();
+    easyButton.style.background = "rgb(127, 228, 88)";
+    mediumButton.style.background = " #211d2f";
+    hardButton.style.background = " #211d2f";
 });
 
 mediumButton.addEventListener("click", () => {
     difficulty = Difficulty.MEDIUM;
     numIterationsBeforeDrawing = getNumIterations();
+    mediumButton.style.background = "rgb(233, 236, 7)";
+    hardButton.style.background = " #211d2f";
+    easyButton.style.background = " #211d2f";
 });
 
 hardButton.addEventListener("click", () => {
     difficulty = Difficulty.HARD;
     numIterationsBeforeDrawing = getNumIterations();
+    hardButton.style.background = "rgb(247, 29, 14)";
+    easyButton.style.background = " #211d2f";
+    mediumButton.style.background = " #211d2f";
 });
 
 // handle block and collisions
@@ -490,9 +504,9 @@ function updateSnakeDirection() {
 }
 
 function updateSnake() {  
+    updateSnakeDirection(); 
+    moveSnake();
     if (hasTouchedBlock()) { handleBlockCollision(); }
-    updateSnakeDirection();
-    moveSnake(); 
 }
 
 // main game loop
