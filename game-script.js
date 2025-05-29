@@ -131,7 +131,9 @@ function initializeVariables() {
     iterationCounter = 0;
     raf = null;
     gameState = GameState.NOT_STARTED;
-    difficulty = Difficulty.MEDIUM;
+
+    difficulty = Difficulty.MEDIUM;   
+
     crtScore = 0;
     scoreElem.textContent = `${crtScore}`;
 
@@ -319,6 +321,8 @@ startPause.addEventListener("click", () => {
             startPause.querySelector("img").src = "pause.svg";
             startPause.querySelector("img").alt = "pause button";
             mediumButton.style.background = "rgb(233, 236, 7)";
+            hardButton.style.background = " #211d2f";
+            easyButton.style.background = " #211d2f";
             gameState = GameState.RUNNING;
             raf = window.requestAnimationFrame(gameLoop); 
             return;
@@ -332,6 +336,8 @@ startPause.addEventListener("click", () => {
             restart();
             gameState = GameState.RUNNING;
             mediumButton.style.background = "rgb(233, 236, 7)";
+            hardButton.style.background = " #211d2f";
+            easyButton.style.background = " #211d2f";
             startPause.querySelector("img").src = "pause.svg";
             startPause.querySelector("img").alt = "pause button";
             raf = window.requestAnimationFrame(gameLoop); 
