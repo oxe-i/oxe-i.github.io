@@ -5,9 +5,8 @@
 
 #page {
     background: #211d2f;
-    display: grid;
-    grid-template-rows: 15vmin 1fr;
-    grid-template-columns: 1fr var(--canvas-width) 3fr;
+    display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     font-family: "Ubuntu", sans-serif;
@@ -21,7 +20,7 @@
     padding: 1vmin;
     font-size: 2vmin;
     font-weight: 400; 
-    background-color: rgb(80 66 173/1);
+    background: #211d2f;
     border-radius: 2vmin;
     border: 1vmin solid #211d2f;
     text-align: center;
@@ -31,79 +30,78 @@
 
 #game {
     margin: 0;
-    grid-row: 1/end;
-    grid-column: 2/3;
-    background-color: rgb(214, 223, 138);
+    background: rgb(214, 223, 138);
     width: var(--canvas-width);
     height: var(--canvas-height);
     display: flex;
     border-radius: 1vmin;
     border: 0.5vmin solid black;
+    position: absolute;
+    left: 0%;
 }
 
 #game-canvas {
     flex-grow: 1;
-    background-color: rgb(214, 223, 138);
+    background: rgb(214, 223, 138);
     border-radius: 1vmin;
 }
 
+#directional-buttons {
+    display: flex;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-100%);
+    width: 40vmin;
+    height: 40vmin;       
+    
+    #up { transform: translate(0%, -100%); }
+
+    #up img { transform: rotate(-90deg); }
+
+    #down { transform: translate(0%, 100%); }
+
+    #down img { transform: rotate(90deg); }
+
+    #left { transform: translate(-100%, 0%); }
+
+    #left img { transform: rotate(180deg); }
+
+    #right { transform: translate(100%, 0%); }
+}
+
+#directional-buttons .button {
+    --directional-button-width: 5vmin;
+    position: absolute;
+    left: calc(50% - var(--directional-button-width));
+    top: calc(50% - var(--directional-button-width));
+    min-width: 10vmin;
+    min-height: 10vmin;
+    font-size: 2vmin;
+    background: #211d2f;
+    transform: translateX(50%);
+}
+
+#directional-buttons .button img { width: var(--directional-button-width); }
+
 #game-flow-buttons {
-    grid-row: 1/2;
-    grid-column: 3/4;
-    width: auto;
+    width: 40vmin;
     height: minmax(3vmin, 5vmin);
     display: grid;
     grid-template-columns: 1fr minmax(10vmin, 15vmin) 1fr minmax(10vmin, 15vmin) 1fr;
     justify-content: center;
     align-items: center;
-
-    .button { min-width: minmax(10vmin, 15vmin); }
+    position: absolute;
+    left: 100%;
+    top: 50%;
 }
 
-#start-game { grid-column: 2/3; }
-#pause-game { grid-column: 4/5; }
+#game-flow-buttons .button { min-width: minmax(10vmin, 15vmin); }
 
-#directional-buttons {
-    grid-row: 2/3;
-    grid-column: 3/4;
-    display: flex;
-    position: relative;
-    min-width: 40vmin;
-    min-height: 40vmin;        
-
-    .button {
-        position: absolute;
-        left: calc(50% - 5vmin);
-        top: calc(50% - 15vmin);
-        min-width: 10vmin;
-        min-height: 10vmin;
-        font-size: 2vmin;
-        background: #211d2f;
-        transform: translateX(50%);
-
-        img { width: 5vmin; }
-    }
-
-    #up { 
-        transform: translate(0%, -100%); 
-    
-        img { transform: rotate(-90deg); }
-    }
-    
-    #down { 
-        transform: translate(0%, 100%); 
-    
-        img { transform: rotate(90deg); }
-    }
-    
-    #left { 
-        transform: translate(-100%, 0%); 
-    
-        img { transform: rotate(180deg); }
-    }
-    
-    #right { transform: translate(100%, 0%); }
-}
+#start-pause { grid-column: 2/3; }
+#start-pause img { width: 100%; }
+#stop { grid-column: 4/5; }
+#stop img { width: 100%; }
 
 
 

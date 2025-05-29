@@ -22,8 +22,8 @@ let gameState = GameState.NOT_STARTED;
 let iterationCounter = 0;
 
 // buttons variables
-const startGame = document.querySelector("#start-game");
-const pauseGame = document.querySelector("#pause-game");
+const startPause = document.querySelector("#start-pause");
+const stopButton = document.querySelector("#stop");
 
 const dirUp = document.querySelector("#up");
 const dirDown = document.querySelector("#down");
@@ -49,7 +49,7 @@ let block = null;
 // initialization helpers
 function getCanvasSize() {
     const isWidthGreater = windowWidth > windowHeight;
-    const xOffset = 60 * vMin;
+    const xOffset = 40 * vMin;
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight;
     return [usableWidth - (usableWidth % 128), usableHeight - (usableHeight % 128)];
@@ -248,28 +248,42 @@ document.addEventListener("keydown", (state) => {
     }
 });
 
-startGame.addEventListener("click", () => {
+startPause.addEventListener("click", () => {
     switch (gameState) {
         case GameState.NOT_STARTED:
+            startPause.querySelector("img").src = "pause.svg";
+            startPause.querySelector("img").alt = "pause button";
+            gameState = GameState.RUNNING;
+            raf = window.requestAnimationFrame(gameLoop); 
+            return;
         case GameState.PAUSED:
-            startGame.textContent = "RESTART";
-            break;
-        case GameState.RUNNING:
+            startPause.querySelector("img").src = "pause.svg";
+            startPause.querySelector("img").alt = "pause button";
+            gameState = GameState.RUNNING;
+            raf = window.requestAnimationFrame(gameLoop); 
+            return;
         case GameState.ENDED:
             window.cancelAnimationFrame(raf);
             restart();
+            gameState = GameState.RUNNING;
+            raf = window.requestAnimationFrame(gameLoop); 
+            return;
+        case GameState.RUNNING:
+            gameState = GameState.PAUSED;
+            startPause.querySelector("img").src = "play.svg"; 
+            startPause.querySelector("img").alt = "play button";           
+            window.cancelAnimationFrame(raf);
+            raf = null;
+            return;
     }
-
-    gameState = GameState.RUNNING;
-
-    raf = window.requestAnimationFrame(gameLoop);    
 });
 
-pauseGame.addEventListener("click", () => {
-    gameState = GameState.PAUSED;
-    startGame.textContent = "CONTINUE";            
-    window.cancelAnimationFrame(raf);
-    raf = null;
+stopButton.addEventListener("click", () => {
+    window.cancelAnimationFrame(raf); 
+    restart();
+    gameState = GameState.NOT_STARTED;
+    startPause.querySelector("img").src = "play.svg"; 
+    startPause.querySelector("img").alt = "play button";
 });
 
 dirUp.addEventListener("click", () => {
