@@ -15,11 +15,12 @@ GameState.PAUSED = 2;
 GameState.ENDED = 3;
 
 // game control variables
-const numIterationsBeforeDrawing = 16;
+const numIterationsBeforeDrawing = 24;
 
 let raf = null;
 let gameState = GameState.NOT_STARTED;
 let iterationCounter = 0;
+let lastTime = 0;
 
 // buttons variables
 const startPause = document.querySelector("#start-pause");
@@ -46,6 +47,21 @@ class Direction {};
 // current block variable
 let block = null;
 
+// math helper functions
+function getDivisors(num) {
+    if (num < 1) return [];
+    const divisors = [1];
+    for (let i = 2; i <= num; ++i) {
+        if (num % i == 0) { divisors.push(i); }
+    }
+    return divisors;
+}
+
+function getCommonDivisors(...nums) {
+    const divisors = [...nums].map(getDivisors);
+    return divisors[0].filter(num => divisors.slice(1).every(divisorList => divisorList.includes(num)));
+}
+
 // initialization helpers
 function getCanvasSize() {
     const isWidthGreater = windowWidth > windowHeight;
@@ -59,6 +75,12 @@ function getSegmentSize() {
     const minCanvasSize = Math.min(canvas.width, canvas.height);
     const maxCanvasSize = Math.max(canvas.width, canvas.height);
     const avgCanvasSize = (minCanvasSize + maxCanvasSize) / 2;
+    const minDivisors = getDivisors(minCanvasSize);
+    const maxDivisors = getDivisors(maxCanvasSize);
+    const possibleMinValues = minDivisors.filter(divisor => minDivisors.includes(minCanvasSize / divisor));
+    const possibleMaxValues = maxDivisors.filter(divisor => maxDivisors.includes(maxCanvasSize / divisor));
+    const possibleValue = possibleMaxValues.find(divisor => possibleMinValues.includes(divisor) && divisor >= 2*vMin && divisor <= 4*vMin);
+    if (possibleValue) { return possibleValue - border; }
     return (avgCanvasSize / 64) - border;
 }
 
@@ -254,9 +276,6 @@ startPause.addEventListener("click", () => {
             startPause.querySelector("img").src = "pause.svg";
             startPause.querySelector("img").alt = "pause button";
             gameState = GameState.RUNNING;
-            drawCanvas();
-            drawSnake();
-            drawBlock();
             raf = window.requestAnimationFrame(gameLoop); 
             return;
         case GameState.PAUSED:
@@ -266,9 +285,10 @@ startPause.addEventListener("click", () => {
             raf = window.requestAnimationFrame(gameLoop); 
             return;
         case GameState.ENDED:
-            window.cancelAnimationFrame(raf);
             restart();
             gameState = GameState.RUNNING;
+            startPause.querySelector("img").src = "pause.svg";
+            startPause.querySelector("img").alt = "pause button";
             raf = window.requestAnimationFrame(gameLoop); 
             return;
         case GameState.RUNNING:
@@ -351,15 +371,29 @@ function addBlock() {
     }
 }
 
+function handleBlockCollision() {
+    addBlock();
+    block = createBlock();
+}
+
+// handle end game
 function isEndGame() {
-    const touchesGrid = snake.some(segment => {
-        return segment.x >= canvas.width || segment.x <= 0 || 
-               segment.y >= canvas.height || segment.y <= 0;
-    });
+    const touchesGrid = (() => {
+        const head = snake[0];
+        return head.x == 0 || head.x == (canvas.width - drawingSize) || head.y == 0 || head.y == (canvas.height - drawingSize);
+    })();
 
     const touchesTail = snake.slice(1).some(segment => overlapsWithSnake(segment.x, segment.y));
     
     return touchesGrid || touchesTail;
+}
+
+function handleEndGame() {
+    window.cancelAnimationFrame(raf);
+    gameState = GameState.ENDED;
+    startPause.querySelector("img").src = "play.svg"; 
+    startPause.querySelector("img").alt = "play button";
+    iterationCounter = 0;
 }
 
 // drawing functions
@@ -379,45 +413,45 @@ function drawBlock() {
     context.fillRect(block.x + 1, block.y + 1, segmentSize, segmentSize);
 }
 
-// updating functions
+function updateImage() {
+    drawCanvas();
+    drawBlock();
+    drawSnake();
+}
+
+// handle snake updates
 function moveSnake() {
     snake.forEach(segment => segment.move());
 }
 
-// main game loop
-function gameLoop(timestamp) {
-    iterationCounter++;
-
-    if (iterationCounter == numIterationsBeforeDrawing) {
-        moveSnake();
-        drawCanvas();
-        drawBlock();
-
-        if (isEndGame()) {
-            drawSnake();
-            window.cancelAnimationFrame(raf);
-            gameState = GameState.ENDED;
-            iterationCounter = 0;
-            return;
-        }
-
-        for (let i = snake.length - 1; i > 0; --i) {
-            snake[i].direction = snake[i - 1].direction;
-        }
-
-        const newDirection = directionQueue.shift();
-        if (newDirection) {
-            snake[0].changeDirection(newDirection);
-        }
-
-        if (hasTouchedBlock()) {
-            addBlock();
-            block = createBlock();
-        }
-        
-        drawSnake();
-        iterationCounter = 0;
+function updateSnakeDirection() {
+    for (let i = snake.length - 1; i > 0; --i) {
+        snake[i].direction = snake[i - 1].direction;
     }
 
+    const newDirection = directionQueue.shift();
+
+    if (newDirection) {
+        snake[0].changeDirection(newDirection);
+    }
+}
+
+function updateSnake() {
+    moveSnake();   
+    if (hasTouchedBlock()) { handleBlockCollision(); }
+    updateSnakeDirection();
+}
+
+// main game loop
+function gameLoop() {
+    if (++iterationCounter == numIterationsBeforeDrawing) {
+        updateImage();
+        if (isEndGame()) {
+            handleEndGame();
+            return;
+        }
+        updateSnake();
+        iterationCounter = 0;
+    }
     raf = window.requestAnimationFrame(gameLoop);
 }
