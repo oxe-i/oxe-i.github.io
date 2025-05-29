@@ -26,7 +26,8 @@
     border-radius: 1vmin;
     border: 0.5vmin solid black;
     position: absolute;
-    top: 0%;
+    top: 5vmin;
+    bottom: 5vmin;
     left: 40vmin;
     right: 60vmin;
 }
