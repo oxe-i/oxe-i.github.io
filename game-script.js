@@ -257,16 +257,22 @@ function createSnake() {
 }
 
 function createBlock() {
-    const horizontalMax = canvas.width - (2 * drawingSize);
+    const horizontalMax = canvas.width - drawingSize;
     const horizontalMin = 0;
-    const verticalMax = canvas.height - (2 * drawingSize);
+    const verticalMax = canvas.height - drawingSize;
     const verticalMin = 0;
-    const randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
-    const randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + drawingSize;
-    const normalizedX = randomizedX - (randomizedX % drawingSize);
-    const normalizedY = randomizedY - (randomizedY % drawingSize);
 
-    if (overlapsWithSnake(normalizedX, normalizedY)) { return createBlock(); }
+    let randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
+    let randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + drawingSize;
+    let normalizedX = randomizedX - (randomizedX % drawingSize);
+    let normalizedY = randomizedY - (randomizedY % drawingSize);
+
+    while (overlapsWithSnake(normalizedX, normalizedY)) { 
+        randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
+        randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + drawingSize;
+        normalizedX = randomizedX - (randomizedX % drawingSize);
+        normalizedY = randomizedY - (randomizedY % drawingSize);
+    }
 
     return {
         x: normalizedX,
@@ -434,8 +440,8 @@ function addBlockScore() {
 }
 
 // handle block and collisions
-function overlapsWithSnake(x, y) {
-    return snake.some(segment => {
+function overlapsWithSegment(x, y) {
+    return function(segment) {
         const headBounds = [
             [segment.x, segment.x + segmentSize], 
             [segment.y, segment.y + segmentSize]
@@ -450,11 +456,15 @@ function overlapsWithSnake(x, y) {
             return (min <= blockBounds[idx][0] && max >= blockBounds[idx][0]) ||
                    (min >= blockBounds[idx][0] && min <= blockBounds[idx][1]);
         });
-    }); 
+    };
+}
+
+function overlapsWithSnake(x, y) {
+    return snake.some(overlapsWithSegment(x, y)); 
 }
 
 function hasTouchedBlock() {
-    return overlapsWithSnake(block.x, block.y);
+    return overlapsWithSegment(block.x, block.y)(snake[0]);
 }
 
 function addBlock() {
@@ -488,12 +498,13 @@ function handleBlockCollision() {
 
 // handle end game
 function isEndGame() {
+    const head = snake[0];
+
     const touchesGrid = (() => {
-        const head = snake[0];
         return head.x == 0 || head.x == (canvas.width - drawingSize) || head.y == 0 || head.y == (canvas.height - drawingSize);
     })();
 
-    const touchesTail = snake.slice(1).some(segment => overlapsWithSnake(segment.x, segment.y));
+    const touchesTail = snake.slice(1).some(segment => overlapsWithSegment(segment.x, segment.y)(head));
     
     return touchesGrid || touchesTail;
 }
