@@ -7,7 +7,7 @@
     --directional-button-size: 12vmin;
     --difficulty-button-size: 10vmin;
     --gameflow-button-size: 20vmin;
-    --min-screen-width-for-directional-buttons: 600px;
+    --max-screen-width-for-directional-buttons: 1024px;
 }
 
 .button {
@@ -37,7 +37,7 @@
     display: none;
 }
 
-@media screen and (max-width: var(--min-screen-width-for-directional-buttons)) {
+@media screen and (max-width: var(--max-screen-width-for-directional-buttons)) {
     #directional-buttons {
         min-width: var(--before-canvas-width);
         position: relative;
