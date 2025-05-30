@@ -20,12 +20,9 @@
 
 #game {
     margin: 0;
-    background: rgb(214, 223, 138);
     width: var(--canvas-width);
     height: var(--canvas-height);
-    display: grid;
-    border-radius: 1vmin;
-    border: 0.5vmin solid black;
+    display: flex;
     position: absolute;
     top: 5vmin;
     bottom: 5vmin;
@@ -34,9 +31,9 @@
 }
 
 #game-canvas {
-    height: var(--canvas-height);
-    width: var(--canvas-width);
+    flex-grow: 1;
     background: rgb(214, 223, 138);
+    border: 0.5vmin solid black;
     border-radius: 1vmin;    
     image-rendering: crisp-edges;
 }

@@ -82,12 +82,12 @@ function getCanvasSize() {
     const yOffset = 10 * vMin
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight - yOffset;
-    return [usableWidth - (usableWidth % 32), usableHeight - (usableHeight % 32)];
+    return [usableWidth - (usableWidth % 32) + border, usableHeight - (usableHeight % 32) + border];
 }
 
 function getSegmentSize() {
-    const minCanvasSize = Math.min(canvas.width, canvas.height);
-    const maxCanvasSize = Math.max(canvas.width, canvas.height);
+    const minCanvasSize = Math.min(canvas.width, canvas.height) - border;
+    const maxCanvasSize = Math.max(canvas.width, canvas.height) - border;
     const avgCanvasSize = (minCanvasSize + maxCanvasSize) / 2;
 
     const minDivisors = getDivisors(minCanvasSize);
@@ -506,7 +506,7 @@ function isEndGame() {
     const head = snake[0];
 
     const touchesGrid = (() => {
-        return head.x == 0 || head.x == (canvas.width - drawingSize) || head.y == 0 || head.y == (canvas.height - drawingSize);
+        return head.x == 0 || head.x == (canvas.width - drawingSize - border) || head.y == 0 || head.y == (canvas.height - drawingSize - border);
     })();
 
     const touchesTail = snake.slice(1).some(segment => overlapsWithSegment(segment.x, segment.y)(head));
