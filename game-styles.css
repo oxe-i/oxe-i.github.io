@@ -2,7 +2,7 @@
     --canvas-width: 90vmin;
     --canvas-height: 90vmin;
     --before-canvas-width: 40vmin;
-    --after-canvas-width: 40vmin;
+    --after-canvas-width: 50vmin;
     --game-canvas-margin: 5vmin;
     --button-size: 10vmin;
 }
@@ -134,8 +134,8 @@
 #game-flow-buttons {
     flex-grow: 3;
     display: grid;
-    grid-template-rows: 1fr var(--button-size) 1fr;
-    grid-template-columns: 1fr var(--button-size) 1fr var(--button-size) 1fr;
+    grid-template-rows: 1fr calc(2* var(--button-size)) 1fr;
+    grid-template-columns: 1fr calc(2* var(--button-size)) 1fr calc(2* var(--button-size)) 1fr;
     margin-bottom: 5vmin;
 }
 
