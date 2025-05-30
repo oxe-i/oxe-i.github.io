@@ -42,13 +42,13 @@
         background: #211d2f;
     }
     
-    #up { transform: translate(-50%, -150%) rotate(-90deg); }
+    #up { transform: translate(-50%, -200%) rotate(-90deg); }
 
-    #down { transform: translate(-50%, 50%) rotate(90deg); }
+    #down { transform: translate(-50%, 100%) rotate(90deg); }
 
-    #left { transform: translate(-150%, -50%) rotate(180deg); }
+    #left { transform: translate(-200%, -50%) rotate(180deg); }
 
-    #right { transform: translate(50%, -50%); }
+    #right { transform: translate(100%, -50%); }
 }
 
 #game {
@@ -79,6 +79,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin-top: 5vmin;
 }
 
 #game-stats h1 { 
@@ -135,6 +136,7 @@
     display: grid;
     grid-template-rows: 1fr var(--button-size) 1fr;
     grid-template-columns: 1fr var(--button-size) 1fr var(--button-size) 1fr;
+    margin-bottom: 5vmin;
 }
 
 #start-pause, #stop { grid-row: 2/3; }

@@ -391,6 +391,7 @@ dirRight.addEventListener("click", () => {
 });
 
 easyButton.addEventListener("click", () => {
+    if (gameState === GameState.NOT_STARTED) { return; }
     difficulty = Difficulty.EASY;
     timePerStep = getTimePerStep();
     easyButton.style.background = "rgb(127, 228, 88)";
@@ -399,6 +400,7 @@ easyButton.addEventListener("click", () => {
 });
 
 mediumButton.addEventListener("click", () => {
+    if (gameState === GameState.NOT_STARTED) { return; }
     difficulty = Difficulty.MEDIUM;
     timePerStep = getTimePerStep();
     mediumButton.style.background = "rgb(233, 236, 7)";
@@ -407,6 +409,7 @@ mediumButton.addEventListener("click", () => {
 });
 
 hardButton.addEventListener("click", () => {
+    if (gameState === GameState.NOT_STARTED) { return; }
     difficulty = Difficulty.HARD;
     timePerStep = getTimePerStep();
     hardButton.style.background = "rgb(247, 29, 14)";
