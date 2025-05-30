@@ -24,7 +24,7 @@ Difficulty.HARD = 2;
 let numIterationsBeforeDrawing = 0;
 let raf = null;
 let gameState = GameState.NOT_STARTED;
-let iterationCounter = 0;
+let timePerStep = 0;
 let difficulty = Difficulty.MEDIUM;
 let crtScore = 0;
 
@@ -102,11 +102,11 @@ function getSpeed() {
     return drawingSize;
 }
 
-function getNumIterations() {
+function getTimePerStep() {
     switch (difficulty) {
-        case Difficulty.EASY: return 20;
-        case Difficulty.MEDIUM: return 15;
-        case Difficulty.HARD: return 10;
+        case Difficulty.EASY: return 400;
+        case Difficulty.MEDIUM: return 300;
+        case Difficulty.HARD: return 200;
     }
 }
 
@@ -158,7 +158,7 @@ function initializeVariables() {
     segmentSize = getSegmentSize();
     drawingSize = segmentSize + border;
     speed = getSpeed();
-    numIterationsBeforeDrawing = getNumIterations();
+    timePerStep = getTimePerStep();
 
     // direction variables
     Direction.UP = [0, -speed];
@@ -387,7 +387,7 @@ dirRight.addEventListener("click", () => {
 
 easyButton.addEventListener("click", () => {
     difficulty = Difficulty.EASY;
-    numIterationsBeforeDrawing = getNumIterations();
+    timePerStep = getTimePerStep();
     easyButton.style.background = "rgb(127, 228, 88)";
     mediumButton.style.background = " #211d2f";
     hardButton.style.background = " #211d2f";
@@ -395,7 +395,7 @@ easyButton.addEventListener("click", () => {
 
 mediumButton.addEventListener("click", () => {
     difficulty = Difficulty.MEDIUM;
-    numIterationsBeforeDrawing = getNumIterations();
+    timePerStep = getTimePerStep();
     mediumButton.style.background = "rgb(233, 236, 7)";
     hardButton.style.background = " #211d2f";
     easyButton.style.background = " #211d2f";
@@ -403,7 +403,7 @@ mediumButton.addEventListener("click", () => {
 
 hardButton.addEventListener("click", () => {
     difficulty = Difficulty.HARD;
-    numIterationsBeforeDrawing = getNumIterations();
+    timePerStep = getTimePerStep();
     hardButton.style.background = "rgb(247, 29, 14)";
     easyButton.style.background = " #211d2f";
     mediumButton.style.background = " #211d2f";
@@ -567,7 +567,24 @@ function updateSnake() {
 }
 
 // main game loop
-function gameLoop() {
+let lastIterTime = 0;
+let remTime = 0;
+function gameLoop(timestamp) {
+    let deltaTime = remTime + (timestamp - lastIterTime);
+    while (deltaTime >= timePerStep) {
+        deltaTime -= timePerStep;
+        updateImage();
+        if (isEndGame()) {
+            handleEndGame();
+            return;
+        }
+        addIterationScore();
+        updateSnake();
+    }
+    remTime = deltaTime;
+    lastIterTime = timestamp;
+    raf = window.requestAnimationFrame(gameLoop);
+/*
     if (++iterationCounter >= numIterationsBeforeDrawing) {
         updateImage();
         if (isEndGame()) {
@@ -578,5 +595,5 @@ function gameLoop() {
         updateSnake();
         iterationCounter = 0;
     }
-    raf = window.requestAnimationFrame(gameLoop);
+    raf = window.requestAnimationFrame(gameLoop); */
 }
