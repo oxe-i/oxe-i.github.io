@@ -10,6 +10,8 @@
     --max-screen-width-for-directional-buttons: 1024px;
 }
 
+* {outline: 1px solid red; }
+
 .button {
     color: #f0f3f9;            
     padding: 1vmin;
@@ -33,16 +35,19 @@
     padding-top: 5vmin;
 }
 
-@media screen and (max-width: 1024px) {
+#directional-buttons { display: none; }
+
+@media screen and (pointer: coarse) {
     #directional-buttons {
+        display: block;
         min-width: var(--before-canvas-width);
         position: relative;
 
         #up, #down, #left, #right {
             border-radius: 0;
             position: absolute;
-            left: 50%;
-            top: 50%;
+            left: calc(50% - 5vmin);
+            top: calc(50% - 5vmin);
             width: var(--directional-button-size);
             height: var(--directional-button-size);
             background: #211d2f;
