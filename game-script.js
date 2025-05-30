@@ -78,7 +78,7 @@ function getCommonDivisors(...nums) {
 
 // initialization helpers
 function getCanvasSize() {
-    const xOffset = 90 * vMin;
+    const xOffset = 100 * vMin;
     const yOffset = 10 * vMin
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight - yOffset;

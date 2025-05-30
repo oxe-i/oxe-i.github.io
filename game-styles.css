@@ -1,10 +1,12 @@
 :root {
     --canvas-width: 90vmin;
     --canvas-height: 90vmin;
-    --before-canvas-width: 40vmin;
+    --before-canvas-width: 50vmin;
     --after-canvas-width: 50vmin;
     --game-canvas-margin: 5vmin;
-    --button-size: 10vmin;
+    --directional-button-size: 12vmin;
+    --difficulty-button-size: 10vmin;
+    --gameflow-button-size: 20vmin;
 }
 
 .button {
@@ -16,8 +18,9 @@
     border-radius: 2vmin;
     border: 1vmin solid #211d2f;
     text-align: center;
-    width: auto;
-    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #page {
@@ -37,8 +40,8 @@
         position: absolute;
         left: 50%;
         top: 50%;
-        width: var(--button-size);
-        height: var(--button-size);
+        width: var(--directional-button-size);
+        height: var(--directional-button-size);
         background: #211d2f;
     }
     
@@ -104,7 +107,7 @@
 }
 
 #easy, #medium, #hard { 
-    flex-basis: var(--button-size); 
+    flex-basis: var(--difficulty-button-size);
 }
 
 #score-board {
@@ -134,8 +137,8 @@
 #game-flow-buttons {
     flex-grow: 3;
     display: grid;
-    grid-template-rows: 1fr calc(2* var(--button-size)) 1fr;
-    grid-template-columns: 1fr calc(2* var(--button-size)) 1fr calc(2* var(--button-size)) 1fr;
+    grid-template-rows: 1fr var(--gameflow-button-size) 1fr;
+    grid-template-columns: 1fr var(--gameflow-button-size) 1fr var(--gameflow-button-size) 1fr;
     margin-bottom: 5vmin;
 }
 
