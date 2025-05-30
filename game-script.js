@@ -79,6 +79,7 @@ function getCommonDivisors(...nums) {
 // initialization helpers
 function getCanvasSize() {
     if (isTouchDevice()) {
+        alert("touch");
         const xOffset = 100 * vMin;
         const yOffset = 5 * vMin
         const usableWidth = windowWidth - xOffset;
