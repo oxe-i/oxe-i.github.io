@@ -1,33 +1,62 @@
 :root {
     --canvas-width: 90vmin;
     --canvas-height: 90vmin;
-    --stats-height: 18vmin;
-    --stats-width: 40vmin;
     --before-canvas-width: 40vmin;
-    --after-canvas-width: 50vmin;
+    --after-canvas-width: 40vmin;
     --game-canvas-margin: 5vmin;
+    --button-size: 10vmin;
+}
+
+.button {
+    color: #f0f3f9;            
+    padding: 1vmin;
+    font-size: 2vmin;
+    font-weight: 400; 
+    background: #211d2f;
+    border-radius: 2vmin;
+    border: 1vmin solid #211d2f;
+    text-align: center;
+    width: auto;
+    height: auto;
 }
 
 #page {
     background: #211d2f;
     display: flex;
-    flex-direction: row;
     font-family: "Ubuntu", sans-serif;
-    position: relative;
     width: 100vw;
     height: 100vh;
 }
 
+#directional-buttons {
+    flex-basis: var(--before-canvas-width);
+    position: relative;
+
+    #up, #down, #left, #right {
+        border-radius: 0;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: var(--button-size);
+        height: var(--button-size);
+        background: #211d2f;
+    }
+    
+    #up { transform: translate(-50%, -150%) rotate(-90deg); }
+
+    #down { transform: translate(-50%, 50%) rotate(90deg); }
+
+    #left { transform: translate(-150%, -50%) rotate(180deg); }
+
+    #right { transform: translate(50%, -50%); }
+}
+
 #game {
-    margin: 0;
     width: var(--canvas-width);
-    height: var(--canvas-height);
+    height: 100%;
     display: flex;
-    position: absolute;
-    top: 5vmin;
-    bottom: 5vmin;
-    left: 40vmin;
-    right: 50vmin;
+    justify-content: center;
+    align-items: center;
 }
 
 #game-canvas {
@@ -38,59 +67,44 @@
     image-rendering: crisp-edges;
 }
 
-#game-stats {
-    height: var(--stats-height);
-    width: var(--stats-width);
-    position: relative;
-    margin: var(--game-canvas-margin);
-    left: calc(var(--before-canvas-width) + var(--canvas-width));
+#after-canvas {
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    padding: 0;
 }
 
-#difficulty-buttons {
-    flex-grow: 2;
-    display: grid;
-    grid-template-rows: 1fr 4fr;
-    grid-template-columns: repeat(3, 1fr);
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    margin: 2vmin;
+#game-stats {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-#difficulty-buttons h1 { 
-    grid-row: 1/2; 
-    grid-column: 1/end;
-    width: 100%;
+#game-stats h1 { 
     text-align: center;
     margin: 0;
     padding: 0;
     text-transform: uppercase;
 }
 
-#difficulty-buttons h1, #score-board {
+#game-stats h1, #score-board {
     font-size: 3vmin;
     font-weight: 400;
     color: #f0f3f9;
 }
 
-#easy, #medium, #hard { 
-    width: auto;
+#difficulty-buttons {
+    flex-grow: 2;
     display: flex;
-    justify-content: center;
+    padding: 0;
     align-items: center;
-    grid-row: 2/3; 
+    justify-content: center;
 }
 
-#easy { grid-column: 1/2; }
-
-#medium { grid-column: 2/3; }
-
-#hard { grid-column: 3/4; }
+#easy, #medium, #hard { 
+    flex-basis: var(--button-size); 
+}
 
 #score-board {
     flex-grow: 1;
@@ -116,76 +130,16 @@
     margin-right: 2vmin;
 }
 
-.button {
-    color: #f0f3f9;            
-    padding: 1vmin;
-    font-size: 2vmin;
-    font-weight: 400; 
-    background: #211d2f;
-    border-radius: 2vmin;
-    border: 1vmin solid #211d2f;
-    text-align: center;
-    width: auto;
-    height: auto;
-}
-
-#directional-buttons {
-    --directional-button-img-width: 10vmin;
-    --directional-button-offset: calc(var(--directional-button-img-width) + calc(var(--directional-button-img-width) / 2));
-    display: flex;
-    position: absolute;
-    left: var(--directional-button-offset);
-    top: calc(50% - var(--directional-button-offset) + calc(2 * var(--game-canvas-margin)));
-
-    #up, #down, #left, #right {
-        border-radius: 0;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: var(--directional-button-img-width);
-        height: var(--directional-button-img-width);
-        background: #211d2f;
-    }
-    
-    #up img, #down img, #left img, #right img { 
-        transform-origin: center;
-        width: 100%; 
-        height: 100%;
-    }
-    
-    #up { transform: translate(0%, -150%); }
-
-    #up img { transform: rotate(-90deg); }
-
-    #down { transform: translate(0%, 150%); }
-
-    #down img { transform: rotate(90deg); }
-
-    #left { transform: translate(-150%, 0%); }
-
-    #left img { transform: rotate(180deg); }
-
-    #right { transform: translate(150%, 0%); }
-}
-
 #game-flow-buttons {
-    --game-flow-button-size: 15vmin;
-    width: 40vmin;
-    height: var(--game-flow-button-size);
+    flex-grow: 3;
     display: grid;
-    align-items: center;
-    grid-template-columns: 1fr var(--game-flow-button-size) 2fr var(--game-flow-button-size) 1fr;
-    position: absolute;
-    left: calc(var(--before-canvas-width) + var(--canvas-width));
-    margin: var(--game-canvas-margin);
-    top: 50%;
-    
-    #start-pause { grid-column: 2/3; }
-    #start-pause img { width: 100%; height: 100%; }
-    #stop { grid-column: 4/5; }
-    #stop img { width: 100%; height: 100%; }
+    grid-template-rows: 1fr var(--button-size) 1fr;
+    grid-template-columns: 1fr var(--button-size) 1fr var(--button-size) 1fr;
 }
 
+#start-pause, #stop { grid-row: 2/3; }
+#start-pause { grid-column: 2/3; }
+#stop { grid-column: 4/5; }
 
 
 
