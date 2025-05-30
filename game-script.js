@@ -78,7 +78,8 @@ function getCommonDivisors(...nums) {
 
 // initialization helpers
 function getCanvasSize() {
-    const maxScreenSizeForDirButtons = document.documentElement.style.getPropertyValue("--max-screen-width-for-directional-buttons");
+    const maxScreenSizeForDirButtonsAsString = document.documentElement.style.getPropertyValue("--max-screen-width-for-directional-buttons");
+    const maxScreenSizeForDirButtons = +([...maxScreenSizeForDirButtonsAsString].filter(char => "0123456789".includes(char)).join(""));
     if (windowWidth <= maxScreenSizeForDirButtons) {
         const xOffset = 100 * vMin;
         const yOffset = 5 * vMin

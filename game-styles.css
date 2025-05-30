@@ -61,6 +61,7 @@
         #right { transform: translate(100%, -50%); }
     }
 }
+
 #game {
     display: flex;
     justify-content: center;
