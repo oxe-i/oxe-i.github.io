@@ -37,7 +37,7 @@
     display: none;
 }
 
-@media screen and (max-width: var(--max-screen-width-for-directional-buttons)) {
+@media screen and (max-width: 1024px) {
     #directional-buttons {
         min-width: var(--before-canvas-width);
         position: relative;
