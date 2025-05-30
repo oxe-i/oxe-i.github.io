@@ -1,10 +1,11 @@
 :root {
-    --canvas-width: 600px;
-    --canvas-height: 600px;
+    --canvas-width: 90vmin;
+    --canvas-height: 90vmin;
     --stats-height: 18vmin;
     --stats-width: 40vmin;
     --before-canvas-width: 40vmin;
     --after-canvas-width: 50vmin;
+    --game-canvas-margin: 5vmin;
 }
 
 #page {
@@ -22,7 +23,7 @@
     background: rgb(214, 223, 138);
     width: var(--canvas-width);
     height: var(--canvas-height);
-    display: flex;
+    display: grid;
     border-radius: 1vmin;
     border: 0.5vmin solid black;
     position: absolute;
@@ -43,8 +44,8 @@
     height: var(--stats-height);
     width: var(--stats-width);
     position: relative;
-    top: 5vmin;
-    left: calc(50vmin + var(--canvas-width));
+    margin: var(--game-canvas-margin);
+    left: calc(var(--before-canvas-width) + var(--canvas-width));
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -60,7 +61,7 @@
     width: 100%;
     margin: 0;
     padding: 0;
-    margin: 1vmin;
+    margin: 2vmin;
 }
 
 #difficulty-buttons h1 { 
@@ -70,7 +71,7 @@
     text-align: center;
     margin: 0;
     padding: 0;
-    text-transform: capitalize;
+    text-transform: uppercase;
 }
 
 #difficulty-buttons h1, #score-board {
@@ -131,13 +132,28 @@
 }
 
 #directional-buttons {
+    --directional-button-img-width: 10vmin;
+    --directional-button-offset: calc(var(--directional-button-img-width) + calc(var(--directional-button-img-width) / 2));
     display: flex;
     position: absolute;
-    left: 0%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40vmin;
-    height: 40vmin;       
+    left: var(--directional-button-offset);
+    top: calc(50% - var(--directional-button-offset) + calc(2 * var(--game-canvas-margin)));
+
+    #up, #down, #left, #right {
+        border-radius: 0;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: var(--directional-button-img-width);
+        height: var(--directional-button-img-width);
+        background: #211d2f;
+    }
+    
+    #up img, #down img, #left img, #right img { 
+        transform-origin: center;
+        width: 100%; 
+        height: 100%;
+    }
     
     #up { transform: translate(0%, -150%); }
 
@@ -152,43 +168,27 @@
     #left img { transform: rotate(180deg); }
 
     #right { transform: translate(150%, 0%); }
-
-}
-
-#directional-buttons .button {
-    --directional-button-img-width: 8vmin;
-    position: absolute;
-    left: 15vmin;
-    top: 15vmin;
-    width: var(--directional-button-img-width);
-    height: var(--directional-button-img-width);
-    background: #211d2f;
-}
-
-#directional-buttons .button img { 
-    width: var(--directional-button-img-width); 
-    height: var(--directional-button-img-width);
 }
 
 #game-flow-buttons {
-    --before: calc(var(--canvas-width) + var(--before-canvas-width));
+    --game-flow-button-size: 15vmin;
     width: 40vmin;
-    height: minmax(3vmin, 5vmin);
+    height: var(--game-flow-button-size);
     display: grid;
-    grid-template-columns: 1fr minmax(10vmin, 15vmin) 2fr minmax(10vmin, 15vmin) 1fr;
-    justify-content: center;
     align-items: center;
+    grid-template-columns: 1fr var(--game-flow-button-size) 2fr var(--game-flow-button-size) 1fr;
     position: absolute;
-    left: calc(var(--before) + 10vmin);
-    top: calc(50% + 5vmin);
+    left: calc(var(--before-canvas-width) + var(--canvas-width));
+    margin: var(--game-canvas-margin);
+    top: 50%;
+    
+    #start-pause { grid-column: 2/3; }
+    #start-pause img { width: 100%; height: 100%; }
+    #stop { grid-column: 4/5; }
+    #stop img { width: 100%; height: 100%; }
 }
 
-#game-flow-buttons .button { width: minmax(10vmin, 15vmin); }
 
-#start-pause { grid-column: 2/3; }
-#start-pause img { width: 100%; }
-#stop { grid-column: 4/5; }
-#stop img { width: 100%; }
 
 
 

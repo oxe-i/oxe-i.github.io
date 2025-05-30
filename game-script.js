@@ -435,20 +435,22 @@ function addBlockScore() {
 
 // handle block and collisions
 function overlapsWithSnake(x, y) {
-    const headBounds = [
-        [snake[0].x, snake[0].x + segmentSize], 
-        [snake[0].y, snake[0].y + segmentSize]
-    ];
-
-    const blockBounds = [
-        [x, x + segmentSize],
-        [y, y + segmentSize]
-    ];
-
-    return headBounds.every(([min, max], idx) => {
-        return (min <= blockBounds[idx][0] && max >= blockBounds[idx][0]) ||
-               (min >= blockBounds[idx][0] && min <= blockBounds[idx][1]);
-    });
+    return snake.some(segment => {
+        const headBounds = [
+            [segment.x, segment.x + segmentSize], 
+            [segment.y, segment.y + segmentSize]
+        ];
+    
+        const blockBounds = [
+            [x, x + segmentSize],
+            [y, y + segmentSize]
+        ];
+    
+        return headBounds.every(([min, max], idx) => {
+            return (min <= blockBounds[idx][0] && max >= blockBounds[idx][0]) ||
+                   (min >= blockBounds[idx][0] && min <= blockBounds[idx][1]);
+        });
+    }); 
 }
 
 function hasTouchedBlock() {
