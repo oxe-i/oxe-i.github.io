@@ -78,11 +78,19 @@ function getCommonDivisors(...nums) {
 
 // initialization helpers
 function getCanvasSize() {
-    const xOffset = 100 * vMin;
-    const yOffset = 10 * vMin
+    const minScreenSizeForDirButtons = document.documentElement.style.getPropertyValue("--min-screen-width-for-directional-buttons");
+    if (windowWidth <= minScreenSizeForDirButtons) {
+        const xOffset = 100 * vMin;
+        const yOffset = 5 * vMin
+        const usableWidth = windowWidth - xOffset;
+        const usableHeight = windowHeight - yOffset;
+        return [usableWidth - (usableWidth % 32) + border, usableHeight - (usableHeight % 32) + border];
+    }
+    const xOffset = 50 * vMin;
+    const yOffset = 5 * vMin
     const usableWidth = windowWidth - xOffset;
     const usableHeight = windowHeight - yOffset;
-    return [usableWidth - (usableWidth % 32) + border, usableHeight - (usableHeight % 32) + border];
+    return [usableWidth - (usableWidth % 32) + border, usableHeight - (usableHeight % 32) + border];    
 }
 
 function getSegmentSize() {

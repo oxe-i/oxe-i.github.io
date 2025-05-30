@@ -2,11 +2,12 @@
     --canvas-width: 90vmin;
     --canvas-height: 90vmin;
     --before-canvas-width: 50vmin;
-    --after-canvas-width: 50vmin;
+    --after-canvas-width: 40vmin;
     --game-canvas-margin: 5vmin;
     --directional-button-size: 12vmin;
     --difficulty-button-size: 10vmin;
     --gameflow-button-size: 20vmin;
+    --min-screen-width-for-directional-buttons: 600px;
 }
 
 .button {
@@ -29,37 +30,42 @@
     font-family: "Ubuntu", sans-serif;
     width: 100vw;
     height: 100vh;
+    padding-top: 5vmin;
 }
 
 #directional-buttons {
-    flex-basis: var(--before-canvas-width);
-    position: relative;
-
-    #up, #down, #left, #right {
-        border-radius: 0;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: var(--directional-button-size);
-        height: var(--directional-button-size);
-        background: #211d2f;
-    }
-    
-    #up { transform: translate(-50%, -200%) rotate(-90deg); }
-
-    #down { transform: translate(-50%, 100%) rotate(90deg); }
-
-    #left { transform: translate(-200%, -50%) rotate(180deg); }
-
-    #right { transform: translate(100%, -50%); }
+    display: none;
 }
 
+@media screen and (max-width: var(--min-screen-width-for-directional-buttons)) {
+    #directional-buttons {
+        min-width: var(--before-canvas-width);
+        position: relative;
+
+        #up, #down, #left, #right {
+            border-radius: 0;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: var(--directional-button-size);
+            height: var(--directional-button-size);
+            background: #211d2f;
+        }
+        
+        #up { transform: translate(-50%, -200%) rotate(-90deg); }
+
+        #down { transform: translate(-50%, 100%) rotate(90deg); }
+
+        #left { transform: translate(-200%, -50%) rotate(180deg); }
+
+        #right { transform: translate(100%, -50%); }
+    }
+}
 #game {
-    width: var(--canvas-width);
-    height: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
+    height: var(--canvas-height);
+    width: var(--canvas-width);
 }
 
 #game-canvas {
@@ -82,7 +88,6 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-top: 5vmin;
 }
 
 #game-stats h1 { 
@@ -139,7 +144,6 @@
     display: grid;
     grid-template-rows: 1fr var(--gameflow-button-size) 1fr;
     grid-template-columns: 1fr var(--gameflow-button-size) 1fr var(--gameflow-button-size) 1fr;
-    margin-bottom: 5vmin;
 }
 
 #start-pause, #stop { grid-row: 2/3; }
