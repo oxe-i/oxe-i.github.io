@@ -27,6 +27,8 @@ let gameState = GameState.NOT_STARTED;
 let timePerStep = 0;
 let difficulty = Difficulty.MEDIUM;
 let crtScore = 0;
+let lastIterTime = 0;
+let remTime = 0;
 
 const scoreElem = document.querySelector("#score");
 
@@ -135,6 +137,8 @@ function initializeVariables() {
     difficulty = Difficulty.MEDIUM;   
 
     crtScore = 0;
+    lastIterTime = 0;
+    remTime = 0;
     scoreElem.textContent = `${crtScore}`;
 
     if (isTouchDevice()) { handleTouchDevice(); }
@@ -353,6 +357,7 @@ startPause.addEventListener("click", () => {
             startPause.querySelector("img").src = "play.svg"; 
             startPause.querySelector("img").alt = "play button";          
             window.cancelAnimationFrame(raf);
+            lastIterTime = 0;
             raf = null;
             return;
     }
@@ -567,9 +572,13 @@ function updateSnake() {
 }
 
 // main game loop
-let lastIterTime = 0;
-let remTime = 0;
 function gameLoop(timestamp) {
+    if (!lastIterTime) { 
+        lastIterTime = timestamp; 
+        raf = window.requestAnimationFrame(gameLoop);
+        return;
+    }
+
     let deltaTime = remTime + (timestamp - lastIterTime);
     while (deltaTime >= timePerStep) {
         deltaTime -= timePerStep;
