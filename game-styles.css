@@ -38,6 +38,7 @@
     width: var(--canvas-width);
     background: rgb(214, 223, 138);
     border-radius: 1vmin;    
+    image-rendering: crisp-edges;
 }
 
 #game-stats {
