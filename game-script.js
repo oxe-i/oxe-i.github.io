@@ -261,9 +261,9 @@ function createSnake() {
 }
 
 function createBlock() {
-    const horizontalMax = canvas.width - drawingSize;
+    const horizontalMax = canvas.width - (2 * drawingSize);
     const horizontalMin = 0;
-    const verticalMax = canvas.height - drawingSize;
+    const verticalMax = canvas.height - (2 * drawingSize);
     const verticalMin = 0;
 
     let randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
