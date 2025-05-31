@@ -194,8 +194,8 @@ function initializeVariables() {
 }
 
 function initialSetup() {
-    resetVariables();
     if (isTouchDevice()) { handleTouchDevice(); }
+    resetVariables();
     initializeVariables();
     snake = createSnake();
     block = createBlock();
@@ -206,6 +206,39 @@ function restart() {
     initialSetup();
 }
 
+function scaleCoordinate(coordinate, prevUnits, newUnits, prevDrawingSize, newDrawingSize) {
+    return Math.round(((coordinate / prevDrawingSize) / prevUnits) * newUnits) * newDrawingSize;
+}
+
+function scaleSnake(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize) {
+    const crtCoordinates = snake.map(segment => [segment.x, segment.y]);
+
+    snake[0].x = scaleCoordinate(snake[0].x, prevWidthUnits, newWidthUnits, prevDrawingSize, newDrawingSize);
+    snake[0].y = scaleCoordinate(snake[0].y, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
+
+    for (let i = 1; i < snake.length; ++i) {
+        if (snake[i].x < crtCoordinates[i - 1][0]) { snake[i].x = snake[i - 1].x - newDrawingSize; }
+        else if (snake[i].x > crtCoordinates[i - 1][0]) { snake[i].x = snake[i - 1].x + newDrawingSize; }
+        else { snake[i].x = snake[i - 1].x; }
+
+        if (snake[i].y < crtCoordinates[i - 1][1]) { snake[i].y = snake[i - 1].y - newDrawingSize; }
+        else if (snake[i].y > crtCoordinates[i - 1][1]) { snake[i].y = snake[i - 1].y + newDrawingSize; }
+        else { snake[i].y = snake[i - 1].y; }
+    }
+
+    snake.forEach(segment => {
+        if (segment.direction[0] < 0) { segment.direction = Direction.LEFT; }
+        else if (segment.direction[0] > 0) { segment.direction = Direction.RIGHT; }
+        else if (segment.direction[1] < 0) { segment.direction = Direction.UP; }
+        else { segment.direction = Direction.DOWN; }
+    });
+}
+
+function scaleBlock(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize) {
+    block.x = scaleCoordinate(block.x, prevWidthUnits, newWidthUnits, prevDrawingSize, newDrawingSize);
+    block.y = scaleCoordinate(block.y, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
+}
+
 // resizing functions 
 function resizeWindow() {
     switch (gameState) {
@@ -213,42 +246,20 @@ function resizeWindow() {
             initialSetup();
             return;
         default:
-            const crtDrawingSize = drawingSize;
-            const crtWidthUnits = (canvas.width - border) / crtDrawingSize;
-            const crtHeightUnits = (canvas.height - border) / crtDrawingSize;
-            const crtCoordinates = snake.map(segment => [segment.x, segment.y]);
+            const prevDrawingSize = drawingSize;
+            const prevWidthUnits = (canvas.width - border) / prevDrawingSize;
+            const prevHeightUnits = (canvas.height - border) / prevDrawingSize;            
 
             initializeVariables();
 
-            const newWidthUnits = (canvas.width - border) / drawingSize;
-            const newHeightUnits = (canvas.height - border) / drawingSize;
+            const newDrawingSize = drawingSize;
+            const newWidthUnits = (canvas.width - border) / newDrawingSize;
+            const newHeightUnits = (canvas.height - border) / newDrawingSize;
 
-            snake[0].x = Math.round(((snake[0].x / crtDrawingSize) / crtWidthUnits) * newWidthUnits) * drawingSize;
-            snake[0].y = Math.round(((snake[0].y / crtDrawingSize) / crtHeightUnits) * newHeightUnits) * drawingSize;
-
-            for (let i = 1; i < snake.length; ++i) {
-                if (snake[i].x < crtCoordinates[i - 1][0]) { snake[i].x = snake[i - 1].x - drawingSize; }
-                else if (snake[i].x > crtCoordinates[i - 1][0]) { snake[i].x = snake[i - 1].x + drawingSize; }
-                else { snake[i].x = snake[i - 1].x; }
-
-                if (snake[i].y < crtCoordinates[i - 1][1]) { snake[i].y = snake[i - 1].y - drawingSize; }
-                else if (snake[i].y > crtCoordinates[i - 1][1]) { snake[i].y = snake[i - 1].y + drawingSize; }
-                else { snake[i].y = snake[i - 1].y; }
-            }
-
-            snake.forEach(segment => {
-                if (segment.direction[0] < 0) { segment.direction = Direction.LEFT; }
-                else if (segment.direction[0] > 0) { segment.direction = Direction.RIGHT; }
-                else if (segment.direction[1] < 0) { segment.direction = Direction.UP; }
-                else { segment.direction = Direction.DOWN; }
-            });
-
-            block.x = Math.round(((block.x / crtDrawingSize) / crtWidthUnits) * newWidthUnits) * drawingSize;
-            block.y = Math.round(((block.y / crtDrawingSize) / crtHeightUnits) * newHeightUnits) * drawingSize;
-
-            drawCanvas();
-            drawSnake();
-            drawBlock();
+            scaleSnake(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
+            scaleBlock(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
+            
+            updateImage();
     }
 }
 
