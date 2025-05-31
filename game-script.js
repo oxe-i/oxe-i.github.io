@@ -127,8 +127,9 @@ function handleTouchDevice() {
         default:
             const alert = document.querySelector("#alert");
             const alertMessage = alert.querySelector("#alert-message");
-            alert.display = "flex";
+            alert.style.display = "flex";
             alertMessage.textContent = "The game is best experienced with the screen in landscape.";
+            alertMessage.style.flexBasis = "10%";
     }
 }
 
