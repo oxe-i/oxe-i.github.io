@@ -32,7 +32,7 @@ let remTime = 0;
 
 const scoreElem = document.querySelector("#score");
 
-// buttons variables
+// buttons
 const startPause = document.querySelector("#start-pause");
 const stopButton = document.querySelector("#stop");
 
@@ -79,7 +79,6 @@ function getCommonDivisors(...nums) {
 // initialization helpers
 function getCanvasSize() {
     if (isTouchDevice()) {
-        alert("touch");
         const xOffset = 100 * vMin;
         const yOffset = 5 * vMin
         const usableWidth = windowWidth - xOffset;
