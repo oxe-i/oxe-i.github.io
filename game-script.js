@@ -137,31 +137,27 @@ function isTouchDevice() {
     return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
 
+function resetVariables() {
+    snake = [];
+    block = null;
+    directionQueue = [];
+    iterationCounter = 0;
+    raf = null;
+    gameState = GameState.NOT_STARTED;
+    difficulty = Difficulty.MEDIUM;   
+    crtScore = 0;
+    lastIterTime = 0;
+    remTime = 0;
+    scoreElem.textContent = `${crtScore}`;
+}
+
 function initializeWindowVariables() {
     windowHeight = window.innerHeight;
     windowWidth = window.innerWidth;
     vMin = Math.floor(Math.min(windowWidth, windowHeight) / 100);
 }
 
-// initialization functions
-function initializeVariables() {
-    directionQueue = [];
-    iterationCounter = 0;
-    raf = null;
-    gameState = GameState.NOT_STARTED;
-
-    difficulty = Difficulty.MEDIUM;   
-
-    crtScore = 0;
-    lastIterTime = 0;
-    remTime = 0;
-    scoreElem.textContent = `${crtScore}`;
-
-    if (isTouchDevice()) { handleTouchDevice(); }
-    
-    initializeWindowVariables();
-
-    // canvas variables
+function initializeCanvasVariables() {
     const [scaledX, scaledY] = getCanvasSize();
 
     canvas.width = scaledX;
@@ -170,21 +166,36 @@ function initializeVariables() {
     // CSS properties
     document.documentElement.style.setProperty("--canvas-height", `${canvas.height}px`);
     document.documentElement.style.setProperty("--canvas-width", `${canvas.width}px`);
+}
 
-    // snake variables
+function initializeSnakeVariables() {
     segmentSize = getSegmentSize();
     drawingSize = segmentSize + border;
     speed = getSpeed();
     timePerStep = getTimePerStep();
+}
 
-    // direction variables
+function initializeDirectionVariables() {
     Direction.UP = [0, -speed];
     Direction.DOWN = [0, speed];
     Direction.LEFT = [-speed, 0];
     Direction.RIGHT = [speed, 0];
 }
 
+// initialization functions
+function initializeVariables() {    
+    initializeWindowVariables();
+
+    initializeCanvasVariables();   
+
+    initializeSnakeVariables();
+    
+    initializeDirectionVariables();    
+}
+
 function initialSetup() {
+    resetVariables();
+    if (isTouchDevice()) { handleTouchDevice(); }
     initializeVariables();
     snake = createSnake();
     block = createBlock();
@@ -192,30 +203,62 @@ function initialSetup() {
 }
 
 function restart() {
-    snake = null;
-    block = null;
-    directionQueue = null;
     initialSetup();
 }
 
 // resizing functions 
-function scaleCanvas() {
-    const xScaleFactor = window.innerWidth / canvas.width;
-    const yScaleFactor = window.innerHeight / canvas.height;
-    context.scale(xScaleFactor, yScaleFactor);
-}
-
 function resizeWindow() {
-    scaleCanvas();
+    switch (gameState) {
+        case GameState.NOT_STARTED:
+            initialSetup();
+            return;
+        default:
+            const crtDrawingSize = drawingSize;
+            const crtWidthUnits = (canvas.width - border) / crtDrawingSize;
+            const crtHeightUnits = (canvas.height - border) / crtDrawingSize;
+            const crtCoordinates = snake.map(segment => [segment.x, segment.y]);
+
+            initializeVariables();
+
+            const newWidthUnits = (canvas.width - border) / drawingSize;
+            const newHeightUnits = (canvas.height - border) / drawingSize;
+
+            snake[0].x = Math.round(((snake[0].x / crtDrawingSize) / crtWidthUnits) * newWidthUnits) * drawingSize;
+            snake[0].y = Math.round(((snake[0].y / crtDrawingSize) / crtHeightUnits) * newHeightUnits) * drawingSize;
+
+            for (let i = 1; i < snake.length; ++i) {
+                if (snake[i].x < crtCoordinates[i - 1][0]) { snake[i].x = snake[i - 1].x - drawingSize; }
+                else if (snake[i].x > crtCoordinates[i - 1][0]) { snake[i].x = snake[i - 1].x + drawingSize; }
+                else { snake[i].x = snake[i - 1].x; }
+
+                if (snake[i].y < crtCoordinates[i - 1][1]) { snake[i].y = snake[i - 1].y - drawingSize; }
+                else if (snake[i].y > crtCoordinates[i - 1][1]) { snake[i].y = snake[i - 1].y + drawingSize; }
+                else { snake[i].y = snake[i - 1].y; }
+            }
+
+            snake.forEach(segment => {
+                if (segment.direction[0] < 0) { segment.direction = Direction.LEFT; }
+                else if (segment.direction[0] > 0) { segment.direction = Direction.RIGHT; }
+                else if (segment.direction[1] < 0) { segment.direction = Direction.UP; }
+                else { segment.direction = Direction.DOWN; }
+            });
+
+            block.x = Math.round(((block.x / crtDrawingSize) / crtWidthUnits) * newWidthUnits) * drawingSize;
+            block.y = Math.round(((block.y / crtDrawingSize) / crtHeightUnits) * newHeightUnits) * drawingSize;
+
+            drawCanvas();
+            drawSnake();
+            drawBlock();
+    }
 }
 
 // creation functions
 function createSegment(idx) {
-    const startingX = (canvas.width / 2);
-    const startingY = (canvas.height / 2);
+    const centerX = (canvas.width / 2);
+    const centerY = (canvas.height / 2);
     const segment = {
-        x: startingX - (startingX % drawingSize) + (idx * drawingSize),
-        y: startingY - (startingY % drawingSize),
+        x: centerX - (centerX % drawingSize) + (idx * drawingSize),
+        y: centerY - (centerY % drawingSize),
         direction: Direction.LEFT,
         draw() {
             context.fillStyle = "rgb(214, 223, 138)";
@@ -258,9 +301,9 @@ function createSnake() {
 
 function createBlock() {
     const horizontalMax = canvas.width - (2 * drawingSize);
-    const horizontalMin = 0;
+    const horizontalMin = drawingSize;
     const verticalMax = canvas.height - (2 * drawingSize);
-    const verticalMin = 0;
+    const verticalMin = drawingSize;
 
     let randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
     let randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + drawingSize;
@@ -292,7 +335,7 @@ function debounce(fn, delay) {
 
 document.addEventListener("DOMContentLoaded", initialSetup);
 
-window.addEventListener("resize", debounce(resizeWindow, 100));
+window.addEventListener("resize", resizeWindow);
 
 document.addEventListener("keydown", (state) => {
     switch (state.key) {
