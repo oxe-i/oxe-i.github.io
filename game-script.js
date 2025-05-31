@@ -45,6 +45,8 @@ const easyButton = document.querySelector("#easy");
 const mediumButton = document.querySelector("#medium");
 const hardButton = document.querySelector("#hard");
 
+const closeAlert = document.querySelector("#close-alert");
+
 // snake variables
 const border = 1;
 
@@ -119,20 +121,6 @@ function getTimePerStep() {
     }
 }
 
-function handleTouchDevice() {
-    switch (screen.orientation.type) {
-        case "landscape-primary":
-        case "landscape-secondary":
-            return;
-        default:
-            const alert = document.querySelector("#alert");
-            const alertMessage = alert.querySelector("#alert-message");
-            alert.style.display = "flex";
-            alertMessage.textContent = "The game is best experienced with the screen in landscape.";
-            alertMessage.style.flexBasis = "10%";
-    }
-}
-
 function isTouchDevice() {
     return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
@@ -194,7 +182,6 @@ function initializeVariables() {
 }
 
 function initialSetup() {
-    if (isTouchDevice()) { handleTouchDevice(); }
     resetVariables();
     initializeVariables();
     snake = createSnake();
@@ -344,7 +331,9 @@ function debounce(fn, delay) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", initialSetup);
+document.addEventListener("DOMContentLoaded", () => {
+    initialSetup();
+});
 
 window.addEventListener("resize", resizeWindow);
 
@@ -463,6 +452,10 @@ hardButton.addEventListener("click", () => {
     hardButton.style.background = "rgb(247, 29, 14)";
     easyButton.style.background = " #211d2f";
     mediumButton.style.background = " #211d2f";
+});
+
+closeAlert.addEventListener("click", () => {
+    document.querySelector("#alert").style.display = "none";
 });
 
 function addIterationScore() {
