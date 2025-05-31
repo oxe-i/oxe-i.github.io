@@ -122,17 +122,25 @@ function getTimePerStep() {
 
 function handleTouchDevice() {
     switch (screen.orientation.type) {
-        case "portrait-primary":
-        case "portrait-secondary":
-            alert("Please, rotate your device to landscape.");
-            break;
+        case "landscape-primary":
+        case "landscape-secondary":
+            return;
         default:
-            break;
+            const alert = document.querySelector("#alert");
+            const alertMessage = alert.querySelector("#alert-message");
+            alert.display = "flex";
+            alertMessage.textContent = "The game is best experienced with the screen in landscape.";
     }
 }
 
 function isTouchDevice() {
     return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
+
+function initializeWindowVariables() {
+    windowHeight = window.innerHeight;
+    windowWidth = window.innerWidth;
+    vMin = Math.floor(Math.min(windowWidth, windowHeight) / 100);
 }
 
 // initialization functions
@@ -151,10 +159,7 @@ function initializeVariables() {
 
     if (isTouchDevice()) { handleTouchDevice(); }
     
-    // window variables
-    windowHeight = window.innerHeight;
-    windowWidth = window.innerWidth;
-    vMin = Math.floor(Math.min(windowWidth, windowHeight) / 100);    
+    initializeWindowVariables();
 
     // canvas variables
     const [scaledX, scaledY] = getCanvasSize();
@@ -194,31 +199,14 @@ function restart() {
 }
 
 // resizing functions 
-// TODO
-function updateSnakeOnResize(prevWidth, prevHeight) {
-    // TODO
-    const coordinates = snake.map(segment => [segment.x, segment.y]);
-    return snake.map((segment, idx) => {        
-        const scaleX = coordinates[idx][0] / prevWidth;
-        const scaleY = coordinates[idx][1] / prevHeight;
-
-        const scaledWidth = scaleX * windowWidth;
-        const scaledHeight = scaleY * windowHeight;
-
-        segment.x = scaledWidth - (scaledWidth % drawingSize);
-        segment.y = scaledHeight - (scaledHeight % drawingSize);
-
-        return segment;
-    });
+function scaleCanvas() {
+    const xScaleFactor = window.innerWidth / canvas.width;
+    const yScaleFactor = window.innerHeight / canvas.height;
+    context.scale(xScaleFactor, yScaleFactor);
 }
 
 function resizeWindow() {
-    if (raf) window.cancelAnimationFrame(raf);
-    initialSetup();
-}
-
-function changeOrientation(event) {
-    resizeWindow();
+    scaleCanvas();
 }
 
 // creation functions
@@ -304,9 +292,7 @@ function debounce(fn, delay) {
 
 document.addEventListener("DOMContentLoaded", initialSetup);
 
-window.addEventListener("resize", debounce(resizeWindow, 50));
-
-screen.orientation.addEventListener("change", debounce(changeOrientation, 50));
+window.addEventListener("resize", debounce(resizeWindow, 100));
 
 document.addEventListener("keydown", (state) => {
     switch (state.key) {

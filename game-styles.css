@@ -10,7 +10,26 @@
     --max-screen-width-for-directional-buttons: 1024px;
 }
 
-* {outline: 1px solid red; }
+#alert {
+    display: none;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+#alert-message {
+    text-align: center;
+    padding: 5%;
+    background: #76709f;
+    color: #211d2f;
+}
 
 .button {
     color: #f0f3f9;            
