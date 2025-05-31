@@ -45,6 +45,7 @@ const easyButton = document.querySelector("#easy");
 const mediumButton = document.querySelector("#medium");
 const hardButton = document.querySelector("#hard");
 
+const alertMessage = document.querySelector("#alert-message");
 const closeAlert = document.querySelector("#close-alert");
 
 // snake variables
@@ -333,7 +334,12 @@ function debounce(fn, delay) {
 
 document.addEventListener("DOMContentLoaded", () => {
     initialSetup();
+    if (isTouchDevice() && (screen.orientation.type == "portrait-primary" || screen.orientation.type == "portrait-secondary")) {
+        alertMessage.showModal();
+    }
 });
+
+closeAlert.addEventListener("click", () => alertMessage.close());
 
 window.addEventListener("resize", resizeWindow);
 
@@ -452,10 +458,6 @@ hardButton.addEventListener("click", () => {
     hardButton.style.background = "rgb(247, 29, 14)";
     easyButton.style.background = " #211d2f";
     mediumButton.style.background = " #211d2f";
-});
-
-closeAlert.addEventListener("click", () => {
-    document.querySelector("#alert").style.display = "none";
 });
 
 function addIterationScore() {

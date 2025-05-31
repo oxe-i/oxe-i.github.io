@@ -10,10 +10,6 @@
     --max-screen-width-for-directional-buttons: 1024px;
 }
 
-#alert {
-    display: none;
-}
-
 .button {
     color: #f0f3f9;            
     padding: 1vmin;
@@ -65,35 +61,23 @@
     }
 }
 
-@media screen and (pointer: coarse) and (orientation: portrait) {
-    #alert {
-        display: flex;
-        position: fixed;
-        z-index: 2;
-        left: 0;
-        top: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.7);
-        overflow: auto;
-        justify-content: center;
-        align-items: center;
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.8);
+}
 
-        #alert-message {
-            flex-basis: 20%;
-            text-align: center;
-            padding: 5%;
-            background: #76709f;
-            color: #211d2f;
-            position: relative;
+#alert-message {
+    background: #211d2f;
+    color: #f0f3f9;
+    font-size: 1.5rem;
+    position: relative;
+    border-radius: 10px;
 
-            #close-button {
-                position: absolute;
-                top: 0%;
-                left: 100%;
-                transform: translate(-50%, -50%);
-            }
-        }
+    #close-alert {
+        background: #f0f3f9;
+        color: #211d2f;
+        font-weight: 400;
+        font-size: 1rem;
+        border-radius: 5px;
     }
 }
 
