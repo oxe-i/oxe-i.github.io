@@ -60,6 +60,10 @@ let speed = null;
 let directionQueue = null;
 // enum-like class to represent direction of movement
 class Direction {};
+Direction.LEFT = [];
+Direction.RIGHT = [];
+Direction.UP = [];
+Direction.DOWN = [];
 
 // current block variable
 let block = null;
