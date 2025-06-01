@@ -83,7 +83,7 @@ function getCommonDivisors(...nums) {
 function getCanvasSize() {
     if (isTouchDevice()) {
         const xOffset = 100 * vMin;
-        const yOffset = 5 * vMin
+        const yOffset = 10 * vMin
         const usableWidth = windowWidth - xOffset;
         const usableHeight = windowHeight - yOffset;
         return [usableWidth - (usableWidth % 32) + border, usableHeight - (usableHeight % 32) + border];
@@ -185,13 +185,62 @@ function initializeVariables() {
 function initialSetup() {
     resetVariables();
     initializeVariables();
-    snake = createSnake();
-    block = createBlock();
     drawCanvas();
 }
 
-function restart() {
+function setupGame() {
     initialSetup();
+    snake = createSnake();
+    block = createBlock();
+}
+
+function startGame() {
+    setupGame();
+    startPause.querySelector("img").src = "pause.svg";
+    startPause.querySelector("img").alt = "pause button";
+    mediumButton.style.background = "rgb(233, 236, 7)";
+    hardButton.style.background = " #211d2f";
+    easyButton.style.background = " #211d2f";
+    gameState = GameState.RUNNING;
+    raf = window.requestAnimationFrame(gameLoop); 
+}
+
+function pauseGame() {
+    gameState = GameState.PAUSED;
+    startPause.querySelector("img").src = "play.svg"; 
+    startPause.querySelector("img").alt = "play button";          
+    window.cancelAnimationFrame(raf);
+    lastIterTime = 0;
+    raf = null;
+}
+
+function restartGame() {
+    setupGame();
+    gameState = GameState.RUNNING;
+    mediumButton.style.background = "rgb(233, 236, 7)";
+    hardButton.style.background = " #211d2f";
+    easyButton.style.background = " #211d2f";
+    startPause.querySelector("img").src = "pause.svg";
+    startPause.querySelector("img").alt = "pause button";
+    raf = window.requestAnimationFrame(gameLoop); 
+}
+
+function stopGame() {
+    resetVariables();
+    drawCanvas();
+    gameState = GameState.NOT_STARTED;
+    startPause.querySelector("img").src = "play.svg"; 
+    startPause.querySelector("img").alt = "play button";
+    easyButton.style.background = " #211d2f";
+    mediumButton.style.background = " #211d2f";
+    hardButton.style.background = " #211d2f";
+}
+
+function continueGame() {
+    startPause.querySelector("img").src = "pause.svg";
+    startPause.querySelector("img").alt = "pause button";
+    gameState = GameState.RUNNING;
+    raf = window.requestAnimationFrame(gameLoop);
 }
 
 function scaleCoordinate(coordinate, prevUnits, newUnits, prevDrawingSize, newDrawingSize) {
@@ -227,6 +276,21 @@ function scaleBlock(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUni
     block.y = scaleCoordinate(block.y, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
 }
 
+function scaleImage() {
+    const prevDrawingSize = drawingSize;
+    const prevWidthUnits = (canvas.width - border) / prevDrawingSize;
+    const prevHeightUnits = (canvas.height - border) / prevDrawingSize;            
+
+    initializeVariables();
+
+    const newDrawingSize = drawingSize;
+    const newWidthUnits = (canvas.width - border) / newDrawingSize;
+    const newHeightUnits = (canvas.height - border) / newDrawingSize;
+
+    scaleSnake(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
+    scaleBlock(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
+}
+
 // resizing functions 
 function resizeWindow() {
     switch (gameState) {
@@ -234,19 +298,7 @@ function resizeWindow() {
             initialSetup();
             return;
         default:
-            const prevDrawingSize = drawingSize;
-            const prevWidthUnits = (canvas.width - border) / prevDrawingSize;
-            const prevHeightUnits = (canvas.height - border) / prevDrawingSize;            
-
-            initializeVariables();
-
-            const newDrawingSize = drawingSize;
-            const newWidthUnits = (canvas.width - border) / newDrawingSize;
-            const newHeightUnits = (canvas.height - border) / newDrawingSize;
-
-            scaleSnake(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
-            scaleBlock(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
-            
+            scaleImage();
             updateImage();
     }
 }
@@ -371,50 +423,23 @@ document.addEventListener("keydown", (state) => {
 startPause.addEventListener("click", () => {
     switch (gameState) {
         case GameState.NOT_STARTED:
-            startPause.querySelector("img").src = "pause.svg";
-            startPause.querySelector("img").alt = "pause button";
-            mediumButton.style.background = "rgb(233, 236, 7)";
-            hardButton.style.background = " #211d2f";
-            easyButton.style.background = " #211d2f";
-            gameState = GameState.RUNNING;
-            raf = window.requestAnimationFrame(gameLoop); 
+            startGame();
             return;
         case GameState.PAUSED:
-            startPause.querySelector("img").src = "pause.svg";
-            startPause.querySelector("img").alt = "pause button";
-            gameState = GameState.RUNNING;
-            raf = window.requestAnimationFrame(gameLoop); 
+            continueGame(); 
             return;
         case GameState.ENDED:
-            restart();
-            gameState = GameState.RUNNING;
-            mediumButton.style.background = "rgb(233, 236, 7)";
-            hardButton.style.background = " #211d2f";
-            easyButton.style.background = " #211d2f";
-            startPause.querySelector("img").src = "pause.svg";
-            startPause.querySelector("img").alt = "pause button";
-            raf = window.requestAnimationFrame(gameLoop); 
+            restartGame();
             return;
         case GameState.RUNNING:
-            gameState = GameState.PAUSED;
-            startPause.querySelector("img").src = "play.svg"; 
-            startPause.querySelector("img").alt = "play button";          
-            window.cancelAnimationFrame(raf);
-            lastIterTime = 0;
-            raf = null;
+            pauseGame();
             return;
     }
 });
 
 stopButton.addEventListener("click", () => {
     window.cancelAnimationFrame(raf); 
-    restart();
-    gameState = GameState.NOT_STARTED;
-    startPause.querySelector("img").src = "play.svg"; 
-    startPause.querySelector("img").alt = "play button";
-    easyButton.style.background = " #211d2f";
-    mediumButton.style.background = " #211d2f";
-    hardButton.style.background = " #211d2f";
+    stopGame();
 });
 
 dirUp.addEventListener("click", () => {

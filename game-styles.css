@@ -7,8 +7,9 @@
     --directional-button-size: 12vmin;
     --difficulty-button-size: 10vmin;
     --gameflow-button-size: 20vmin;
-    --max-screen-width-for-directional-buttons: 1024px;
 }
+
+* {outline: 1px solid red;}
 
 .button {
     color: #f0f3f9;            
@@ -31,6 +32,7 @@
     width: 100vw;
     height: 100vh;
     padding-top: 5vmin;
+    padding-bottom: 5vmin;
 }
 
 #directional-buttons { display: none; }
@@ -59,25 +61,25 @@
 
         #right { transform: translate(100%, -50%); }
     }
-}
 
-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.8);
-}
-
-#alert-message {
-    background: #211d2f;
-    color: #f0f3f9;
-    font-size: 1.5rem;
-    position: relative;
-    border-radius: 10px;
-
-    #close-alert {
-        background: #f0f3f9;
-        color: #211d2f;
-        font-weight: 400;
-        font-size: 1rem;
-        border-radius: 5px;
+    dialog::backdrop {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    #alert-message {
+        background: #211d2f;
+        color: #f0f3f9;
+        font-size: 1.5rem;
+        position: relative;
+        border-radius: 10px;
+    
+        #close-alert {
+            background: #f0f3f9;
+            color: #211d2f;
+            font-weight: 400;
+            font-size: 1rem;
+            border-radius: 5px;
+        }
     }
 }
 
@@ -90,14 +92,14 @@ dialog::backdrop {
 
 #game-canvas {
     flex-grow: 1;
-    background: rgb(214, 223, 138);
     border: 0.5vmin solid black;
     border-radius: 1vmin;    
     image-rendering: crisp-edges;
 }
 
 #after-canvas {
-    flex-grow: 1;
+    height: var(--canvas-height);
+    width: calc(100% - var(--canvas-width));
     display: flex;
     flex-direction: column;
     justify-content: center;
