@@ -209,10 +209,19 @@ function setupGame() {
 }
 
 // game flow functions
+function setIconToPlay() {
+    startPause.querySelector("img").src = "SVG/play.svg"; 
+    startPause.querySelector("img").alt = "play button"; 
+}
+
+function setIconToPause() {
+    startPause.querySelector("img").src = "SVG/pause.svg";
+    startPause.querySelector("img").alt = "pause button";
+}
+
 function startGame() {
     setupGame();
-    startPause.querySelector("img").src = "pause.svg";
-    startPause.querySelector("img").alt = "pause button";
+    setIconToPause();
     mediumButton.style.background = "rgb(233, 236, 7)";
     hardButton.style.background = " #211d2f";
     easyButton.style.background = " #211d2f";
@@ -222,8 +231,7 @@ function startGame() {
 
 function pauseGame() {
     gameState = GameState.PAUSED;
-    startPause.querySelector("img").src = "play.svg"; 
-    startPause.querySelector("img").alt = "play button";          
+    setIconToPlay();
     window.cancelAnimationFrame(raf);
     lastIterTime = 0;
     raf = null;
@@ -235,8 +243,7 @@ function restartGame() {
     mediumButton.style.background = "rgb(233, 236, 7)";
     hardButton.style.background = " #211d2f";
     easyButton.style.background = " #211d2f";
-    startPause.querySelector("img").src = "pause.svg";
-    startPause.querySelector("img").alt = "pause button";
+    setIconToPause();
     raf = window.requestAnimationFrame(gameLoop); 
 }
 
@@ -244,16 +251,14 @@ function stopGame() {
     resetVariables();
     drawCanvas();
     gameState = GameState.NOT_STARTED;
-    startPause.querySelector("img").src = "play.svg"; 
-    startPause.querySelector("img").alt = "play button";
+    setIconToPlay();
     easyButton.style.background = " #211d2f";
     mediumButton.style.background = " #211d2f";
     hardButton.style.background = " #211d2f";
 }
 
 function continueGame() {
-    startPause.querySelector("img").src = "pause.svg";
-    startPause.querySelector("img").alt = "pause button";
+    setIconToPause();
     gameState = GameState.RUNNING;
     raf = window.requestAnimationFrame(gameLoop);
 }
@@ -587,8 +592,7 @@ function isEndGame() {
 function handleEndGame() {
     window.cancelAnimationFrame(raf);
     gameState = GameState.ENDED;
-    startPause.querySelector("img").src = "play.svg"; 
-    startPause.querySelector("img").alt = "play button";
+    setIconToPlay();
     iterationCounter = 0;
 }
 
