@@ -310,44 +310,20 @@ function createSegment(idx) {
     const segment = {
         x: centerX - (centerX % drawingSize) + (idx * drawingSize),
         y: centerY - (centerY % drawingSize),
-        direction: Direction.LEFT,
-        draw() {
-            context.fillStyle = "rgb(214, 223, 138)";
-            context.fillRect(segment.x, segment.y, drawingSize, drawingSize);
-            context.fillStyle = "rgb(0, 0, 0)";
-            context.fillRect(segment.x + border, segment.y + border, segmentSize, segmentSize);
-        },
-        move() {
-            const [xspeed, yspeed] = segment.direction;
-            segment.x += xspeed;
-            segment.y += yspeed;
-        },
-        changeDirection(newDirection) {
-            let willChange = false;
-
-            switch (segment.direction) {
-                case Direction.LEFT:
-                    willChange = newDirection != Direction.RIGHT;
-                    break;
-                case Direction.RIGHT:
-                    willChange = newDirection != Direction.LEFT;
-                    break;
-                case Direction.DOWN:
-                    willChange = newDirection != Direction.UP;
-                    break;
-                case Direction.UP:
-                    willChange = newDirection != Direction.DOWN;
-                    break;
-            }
-            
-            if (willChange) { segment.direction = newDirection; }
-        }
+        direction: Direction.LEFT
     };
     return segment;
 }
 
 function createSnake() {
     return Array.from({ length: 5 }, (_, idx) => createSegment(idx));
+}
+
+function createHead(x, y, direction) {
+    snake.unshift(createSegment(0));
+    snake[0].x = x;
+    snake[0].y = y;
+    snake[0].direction = direction;
 }
 
 function createBlock() {
@@ -370,7 +346,8 @@ function createBlock() {
 
     return {
         x: normalizedX,
-        y: normalizedY
+        y: normalizedY,
+        direction: Direction.NONE
     };
 }
 
@@ -515,63 +492,6 @@ function addBlockScore() {
     scoreElem.textContent = `${crtScore}`;
 }
 
-// handle block and collisions
-function overlapsWithSegment(x, y) {
-    return function(segment) {
-        const headBounds = [
-            [segment.x, segment.x + segmentSize], 
-            [segment.y, segment.y + segmentSize]
-        ];
-    
-        const blockBounds = [
-            [x, x + segmentSize],
-            [y, y + segmentSize]
-        ];
-    
-        return headBounds.every(([min, max], idx) => {
-            return (min <= blockBounds[idx][0] && max >= blockBounds[idx][0]) ||
-                   (min >= blockBounds[idx][0] && min <= blockBounds[idx][1]);
-        });
-    };
-}
-
-function overlapsWithSnake(x, y) {
-    return snake.some(overlapsWithSegment(x, y)); 
-}
-
-function hasTouchedBlock() {
-    return overlapsWithSegment(block.x, block.y)(snake[0]);
-}
-
-function addBlock() {
-    snake.unshift(createSegment(0));
-    snake[0].direction = snake[1].direction;
-
-    switch (snake[0].direction) {
-        case Direction.UP:
-            snake[0].x = snake[1].x;
-            snake[0].y = snake[1].y - drawingSize;
-            return;
-        case Direction.DOWN:
-            snake[0].x = snake[1].x;
-            snake[0].y = snake[1].y + drawingSize;
-            return;
-        case Direction.LEFT:
-            snake[0].y = snake[1].y;
-            snake[0].x = snake[1].x - drawingSize;
-            return;
-        case Direction.RIGHT:
-            snake[0].y = snake[1].y;
-            snake[0].x = snake[1].x + drawingSize;
-            return;
-    }
-}
-
-function handleBlockCollision() {
-    addBlock();
-    block = createBlock();
-}
-
 // handle end game
 function isEndGame() {
     const head = snake[0];
@@ -599,26 +519,97 @@ function drawCanvas() {
     context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+function updateSnakeImage() {
+    drawSquare(snake[0].x, snake[0].y);
+}
+
 function drawSnake() {
-    snake.forEach(segment => segment.draw());
+    snake.forEach(segment => {
+        drawSquare(segment.x, segment.y);
+    });
+}
+
+function eraseSquare(x, y) {
+    context.fillStyle = "rgb(214, 223, 138)";
+    context.fillRect(x, y, drawingSize, drawingSize);
+}
+
+function drawSquare(x, y) {
+    context.fillStyle = "rgb(0, 0, 0)";
+    context.fillRect(x + 1, y + 1, segmentSize, segmentSize);
 }
 
 function drawBlock() {
-    context.fillStyle = "rgb(214, 223, 138)";
-    context.fillRect(block.x, block.y, drawingSize, drawingSize);
-    context.fillStyle = "rgb(0, 0, 0)";
-    context.fillRect(block.x + 1, block.y + 1, segmentSize, segmentSize);
+    drawSquare(block.x, block.y);
 }
 
-function updateImage() {
-    drawCanvas();
+
+// handle block and collisions
+function overlapsWithSegment(x, y) {
+    return function(segment) {
+        const headBounds = [
+            [segment.x, segment.x + segmentSize], 
+            [segment.y, segment.y + segmentSize]
+        ];
+    
+        const blockBounds = [
+            [x, x + segmentSize],
+            [y, y + segmentSize]
+        ];
+    
+        return headBounds.every(([min, max], idx) => {
+            return (min <= blockBounds[idx][0] && max >= blockBounds[idx][0]) ||
+                   (min >= blockBounds[idx][0] && min <= blockBounds[idx][1]);
+        });
+    };
+}
+
+function overlapsWithSnake(x, y) {
+    return snake.some(overlapsWithSegment(x, y)); 
+}
+
+function willTouchBlock(newHead) {
+    return overlapsWithSegment(block.x, block.y)(newHead);
+}
+
+function addHead(newHead) {
+    snake.unshift(newHead);
+}
+
+function handleBlockCollision(newHead) {
+    addHead(newHead);
+    addBlockScore();
+    block = createBlock();
     drawBlock();
-    drawSnake();
 }
 
 // handle snake updates
-function moveSnake() {
-    snake.forEach(segment => segment.move());
+function moveSegment(segment) {
+    const [xspeed, yspeed] = segment.direction;
+    segment.x += xspeed;
+    segment.y += yspeed;
+    return segment;
+}
+
+function changeHeadDirection(newDirection) {
+    const segment = snake[0];
+    const oppositeDirections = [
+        [Direction.RIGHT, Direction.LEFT],
+        [Direction.DOWN, Direction.UP]
+    ];
+    if (!oppositeDirections.find(opposites => opposites.includes(segment.direction)).includes(newDirection)) {
+        segment.direction = newDirection;
+    }
+}
+
+function removeTail() {
+    eraseSquare(snake.at(-1).x, snake.at(-1).y);
+    snake.pop();
+}
+
+function moveSnake(newHead) {
+    removeTail();
+    addHead(newHead);
 }
 
 function updateSnakeDirection() {
@@ -629,16 +620,25 @@ function updateSnakeDirection() {
     const newDirection = directionQueue.shift();
 
     if (newDirection) {
-        snake[0].changeDirection(newDirection);
+        changeHeadDirection(newDirection);
     }
 }
 
-function updateSnake() {  
-    updateSnakeDirection(); 
-    moveSnake();
-    if (hasTouchedBlock()) { 
-        addBlockScore();
-        handleBlockCollision(); 
+function updateSnake() {   
+    updateSnakeDirection();
+
+    const newHead = moveSegment({
+        x: snake[0].x,
+        y: snake[0].y,
+        direction: snake[0].direction
+    });
+
+    if (willTouchBlock(newHead)) { 
+        handleBlockCollision(newHead); 
+    }
+    else {
+        moveSnake(newHead); 
+        updateSnakeImage();
     }
 }
 
@@ -646,6 +646,8 @@ function updateSnake() {
 function gameLoop(timestamp) {
     if (!lastIterTime) { 
         lastIterTime = timestamp; 
+        drawBlock();
+        drawSnake();
         raf = window.requestAnimationFrame(gameLoop);
         return;
     }
@@ -653,27 +655,16 @@ function gameLoop(timestamp) {
     let deltaTime = remTime + (timestamp - lastIterTime);
     while (deltaTime >= timePerStep) {
         deltaTime -= timePerStep;
-        updateImage();
+
+        updateSnake();
+        addIterationScore();  
+
         if (isEndGame()) {
             handleEndGame();
             return;
-        }
-        addIterationScore();
-        updateSnake();
+        }     
     }
     remTime = deltaTime;
     lastIterTime = timestamp;
     raf = window.requestAnimationFrame(gameLoop);
-/*
-    if (++iterationCounter >= numIterationsBeforeDrawing) {
-        updateImage();
-        if (isEndGame()) {
-            handleEndGame();
-            return;
-        }
-        addIterationScore();
-        updateSnake();
-        iterationCounter = 0;
-    }
-    raf = window.requestAnimationFrame(gameLoop); */
 }
