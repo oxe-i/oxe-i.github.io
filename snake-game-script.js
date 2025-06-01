@@ -48,6 +48,12 @@ const hardButton = document.querySelector("#hard");
 const alertMessage = document.querySelector("#alert-message");
 const closeAlert = document.querySelector("#close-alert");
 
+const tutorialMessage = document.querySelector("#tutorial-message");
+const tutorialText = tutorialMessage.querySelector("p");
+const closeTutorial = document.querySelector("#close-tutorial");
+const nextTutorial = document.querySelector("#next-tutorial");
+let tutorialStep = 0;
+
 // snake variables
 const border = 1;
 
@@ -375,9 +381,69 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isTouchDevice() && isInPortraitMode()) {
         alertMessage.showModal();
     }
+    else {
+        tutorialMessage.showModal();
+    }
 });
 
 closeAlert.addEventListener("click", () => alertMessage.close());
+
+alertMessage.addEventListener("close", () => {
+    tutorialMessage.showModal();
+});
+
+nextTutorial.addEventListener("click", () => {
+    switch (tutorialStep) {
+        case 0: 
+            tutorialText.innerHTML = "In this game, you move a snake around to catch as many blocks as you can.";
+            break;
+        case 1:
+            tutorialText.innerHTML = "Once the snake touches a block, the snake grows and the block is added to its head.";
+            break;
+        case 2:
+            tutorialText.innerHTML = "If the snake touches the grid or its tail, however, the game ends.";
+            break;
+        case 3:
+            if (isTouchDevice()) {
+                tutorialText.innerHTML = "You can move the snake with the directional buttons on the left.";
+            }
+            else {
+                tutorialText.innerHTML = "You can move the snake by pressing W, A, S, D or the directional buttons in your keyboard.<br> W moves up, S moves down, A moves left and D moves right";
+            }                
+            break;
+        case 4:
+            tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right of the page.<br>
+                                        The snake moves faster on harder difficulties.`;
+            break;
+        case 5:
+            tutorialText.innerHTML = `There's a score counter below the difficulty buttons. <br>
+                You gain points whenever you catch a block and also as the time passes. <br>
+                The greater the snake, the more points you gain.`;
+            break;
+        case 6:
+            tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game. <br>
+                Once the game starts, you can pause it too.`
+            break;
+        case 7:
+            tutorialText.innerHTML = "That's it! Do you want me to repeat?";
+            nextTutorial.innerHTML = "Yes";
+            closeTutorial.innerHTML = "No";
+            closeTutorial.focus();
+            break;
+        default:
+            nextTutorial.innerHTML = "Next";
+            closeTutorial.innerHTML = "Close";
+            nextTutorial.focus();
+            tutorialStep = 0;
+            tutorialText.innerHTML = "In this game, you move a snake around to catch as many blocks as you can.";
+            break;
+    }
+    tutorialStep++;
+});
+
+closeTutorial.addEventListener("click", () => {
+    tutorialMessage.close();
+});
 
 window.addEventListener("resize", resizeWindow);
 

@@ -59,26 +59,48 @@
 
         #right { transform: translate(100%, -50%); }
     }
+}
 
-    dialog::backdrop {
-        background: rgba(0, 0, 0, 0.8);
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+#alert-message, #tutorial-message {
+    background: #211d2f;
+    color: #f0f3f9;
+    font-size: 1.5rem;
+    position: fixed;
+    border-radius: 10px;
+    border: 5px solid #f0f3f9;
+}
+
+#tutorial-message {
+    div {
+        display: grid;
+        grid-template-columns: 5rem 1fr 5rem;
     }
+}
+
+#close-alert, #close-tutorial, #next-tutorial {
+    background: #f0f3f9;
+    color: #211d2f;
+    font-weight: 400;
+    font-size: 1rem;
+    border-radius: 5px;
+}
+
+#next-tutorial, #close-tutorial {
+    grid-row: 4/5;
+    width: 5rem;
+}
+
+#next-tutorial { 
+    grid-column: 1/2;
     
-    #alert-message {
-        background: #211d2f;
-        color: #f0f3f9;
-        font-size: 1.5rem;
-        position: relative;
-        border-radius: 10px;
-    
-        #close-alert {
-            background: #f0f3f9;
-            color: #211d2f;
-            font-weight: 400;
-            font-size: 1rem;
-            border-radius: 5px;
-        }
-    }
+}
+
+#close-tutorial {
+    grid-column: 3/4;
 }
 
 #game {
