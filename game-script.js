@@ -562,7 +562,6 @@ function willTouchBlock(newHead) {
     return overlapsWithSegment(block.x, block.y, newHead);
 }
 
-
 function handleBlockCollision(newHead) {
     addHead(newHead);
     addBlockScore();
