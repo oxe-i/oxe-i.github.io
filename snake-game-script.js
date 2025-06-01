@@ -379,9 +379,11 @@ function debounce(fn, delay) {
 document.addEventListener("DOMContentLoaded", () => {
     initialSetup();
     if (isTouchDevice() && isInPortraitMode()) {
+        alertMessage.focus();
         alertMessage.showModal();
     }
     else {
+        tutorialMessage.focus();
         tutorialMessage.showModal();
     }
 });
@@ -389,6 +391,7 @@ document.addEventListener("DOMContentLoaded", () => {
 closeAlert.addEventListener("click", () => alertMessage.close());
 
 alertMessage.addEventListener("close", () => {
+    tutorialMessage.focus();
     tutorialMessage.showModal();
 });
 
