@@ -9,8 +9,6 @@
     --gameflow-button-size: 20vmin;
 }
 
-* {outline: 1px solid red;}
-
 .button {
     color: #f0f3f9;            
     padding: 1vmin;

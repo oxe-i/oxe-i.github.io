@@ -155,6 +155,12 @@ function initializeCanvasVariables() {
     // CSS properties
     document.documentElement.style.setProperty("--canvas-height", `${canvas.height}px`);
     document.documentElement.style.setProperty("--canvas-width", `${canvas.width}px`);
+
+    // Get the DPR of the canvas
+    const dpr = window.devicePixelRatio;
+
+    // Scale the context to ensure correct drawing operations
+    context.scale(dpr, dpr);
 }
 
 function initializeSnakeVariables() {
