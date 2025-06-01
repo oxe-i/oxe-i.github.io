@@ -79,7 +79,30 @@ function getCommonDivisors(...nums) {
     return divisors[0].filter(num => divisors.slice(1).every(divisorList => divisorList.includes(num)));
 }
 
-// initialization helpers
+// checks kind of device
+function isTouchDevice() {
+    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
+
+function isInPortraitMode() {
+    return screen.orientation.type == "portrait-primary" || screen.orientation.type == "portrait-secondary";
+}
+
+// initialization functions
+function resetVariables() {
+    snake = [];
+    block = null;
+    directionQueue = [];
+    iterationCounter = 0;
+    raf = null;
+    gameState = GameState.NOT_STARTED;
+    difficulty = Difficulty.MEDIUM;   
+    crtScore = 0;
+    lastIterTime = 0;
+    remTime = 0;
+    scoreElem.textContent = `${crtScore}`;
+}
+
 function getCanvasSize() {
     if (isTouchDevice()) {
         const xOffset = 100 * vMin;
@@ -122,24 +145,6 @@ function getTimePerStep() {
     }
 }
 
-function isTouchDevice() {
-    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
-}
-
-function resetVariables() {
-    snake = [];
-    block = null;
-    directionQueue = [];
-    iterationCounter = 0;
-    raf = null;
-    gameState = GameState.NOT_STARTED;
-    difficulty = Difficulty.MEDIUM;   
-    crtScore = 0;
-    lastIterTime = 0;
-    remTime = 0;
-    scoreElem.textContent = `${crtScore}`;
-}
-
 function initializeWindowVariables() {
     windowHeight = window.innerHeight;
     windowWidth = window.innerWidth;
@@ -171,7 +176,6 @@ function initializeDirectionVariables() {
     Direction.RIGHT = [speed, 0];
 }
 
-// initialization functions
 function initializeVariables() {    
     initializeWindowVariables();
 
@@ -194,6 +198,7 @@ function setupGame() {
     block = createBlock();
 }
 
+// game flow functions
 function startGame() {
     setupGame();
     startPause.querySelector("img").src = "pause.svg";
@@ -243,6 +248,7 @@ function continueGame() {
     raf = window.requestAnimationFrame(gameLoop);
 }
 
+// resizing functions 
 function scaleCoordinate(coordinate, prevUnits, newUnits, prevDrawingSize, newDrawingSize) {
     return Math.round(((coordinate / prevDrawingSize) / prevUnits) * newUnits) * newDrawingSize;
 }
@@ -291,7 +297,6 @@ function scaleImage() {
     scaleBlock(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
 }
 
-// resizing functions 
 function resizeWindow() {
     switch (gameState) {
         case GameState.NOT_STARTED:
@@ -363,7 +368,7 @@ function debounce(fn, delay) {
 
 document.addEventListener("DOMContentLoaded", () => {
     initialSetup();
-    if (isTouchDevice() && (screen.orientation.type == "portrait-primary" || screen.orientation.type == "portrait-secondary")) {
+    if (isTouchDevice() && isInPortraitMode()) {
         alertMessage.showModal();
     }
 });
@@ -462,6 +467,7 @@ hardButton.addEventListener("click", () => {
     mediumButton.style.background = " #211d2f";
 });
 
+// handle score updates
 function addIterationScore() {
     switch (difficulty) {
         case Difficulty.EASY:
@@ -500,7 +506,7 @@ function isEndGame() {
         return head.x == 0 || head.x == (canvas.width - drawingSize - border) || head.y == 0 || head.y == (canvas.height - drawingSize - border);
     })();
 
-    const touchesTail = snake.slice(1).some(segment => overlapsWithSegment(segment.x, segment.y)(head));
+    const touchesTail = snake.slice(1).some(segment => overlapsWithSegment(segment.x, segment.y, head));
     
     return touchesGrid || touchesTail;
 }
@@ -543,38 +549,19 @@ function drawBlock() {
     drawSquare(block.x, block.y);
 }
 
-
 // handle block and collisions
-function overlapsWithSegment(x, y) {
-    return function(segment) {
-        const headBounds = [
-            [segment.x, segment.x + segmentSize], 
-            [segment.y, segment.y + segmentSize]
-        ];
-    
-        const blockBounds = [
-            [x, x + segmentSize],
-            [y, y + segmentSize]
-        ];
-    
-        return headBounds.every(([min, max], idx) => {
-            return (min <= blockBounds[idx][0] && max >= blockBounds[idx][0]) ||
-                   (min >= blockBounds[idx][0] && min <= blockBounds[idx][1]);
-        });
-    };
+function overlapsWithSegment(x, y, segment) {
+    return segment.x == x && segment.y == y;
 }
 
 function overlapsWithSnake(x, y) {
-    return snake.some(overlapsWithSegment(x, y)); 
+    return snake.some(segment => overlapsWithSegment(x, y, segment)); 
 }
 
 function willTouchBlock(newHead) {
-    return overlapsWithSegment(block.x, block.y)(newHead);
+    return overlapsWithSegment(block.x, block.y, newHead);
 }
 
-function addHead(newHead) {
-    snake.unshift(newHead);
-}
 
 function handleBlockCollision(newHead) {
     addHead(newHead);
@@ -584,6 +571,10 @@ function handleBlockCollision(newHead) {
 }
 
 // handle snake updates
+function addHead(newHead) {
+    snake.unshift(newHead);
+}
+
 function moveSegment(segment) {
     const [xspeed, yspeed] = segment.direction;
     segment.x += xspeed;
@@ -592,13 +583,13 @@ function moveSegment(segment) {
 }
 
 function changeHeadDirection(newDirection) {
-    const segment = snake[0];
     const oppositeDirections = [
         [Direction.RIGHT, Direction.LEFT],
         [Direction.DOWN, Direction.UP]
     ];
-    if (!oppositeDirections.find(opposites => opposites.includes(segment.direction)).includes(newDirection)) {
-        segment.direction = newDirection;
+
+    if (!oppositeDirections.find(opposites => opposites.includes(snake[0].direction)).includes(newDirection)) {
+        snake[0].direction = newDirection;
     }
 }
 
