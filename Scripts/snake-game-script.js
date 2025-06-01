@@ -406,17 +406,17 @@ nextTutorial.addEventListener("click", () => {
             tutorialText.innerHTML = "In this game, you move a snake around to catch as many blocks as you can.";
             break;
         case 1:
-            tutorialText.innerHTML = "Once the snake touches a block, the snake grows and the block is added to its head.";
+            tutorialText.innerHTML = "Once the snake touches a block, the block is added to its head and the snake grows.";
             break;
         case 2:
-            tutorialText.innerHTML = "If the snake touches the grid or its tail, however, the game ends.";
+            tutorialText.innerHTML = "If the snake touches the grid or its body, however, the game ends.";
             break;
         case 3:
             if (isTouchDevice()) {
-                tutorialText.innerHTML = "You can move the snake with the directional buttons on the left.";
+                tutorialText.innerHTML = "You can move the snake with the directional pad on the left.";
             }
             else {
-                tutorialText.innerHTML = "You can move the snake by pressing W, A, S, D or the directional buttons in your keyboard.<br> W moves up, S moves down, A moves left and D moves right";
+                tutorialText.innerHTML = "You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br> W moves up, S moves down, A moves left and D moves right";
             }                
             break;
         case 4:
