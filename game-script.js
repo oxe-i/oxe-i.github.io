@@ -155,12 +155,6 @@ function initializeCanvasVariables() {
     // CSS properties
     document.documentElement.style.setProperty("--canvas-height", `${canvas.height}px`);
     document.documentElement.style.setProperty("--canvas-width", `${canvas.width}px`);
-
-    // Get the DPR of the canvas
-    const dpr = window.devicePixelRatio;
-
-    // Scale the context to ensure correct drawing operations
-    context.scale(dpr, dpr);
 }
 
 function initializeSnakeVariables() {
@@ -494,13 +488,13 @@ hardButton.addEventListener("click", () => {
 function addIterationScore() {
     switch (difficulty) {
         case Difficulty.EASY:
-            crtScore += 50;
+            crtScore += 5 * snake.length;
             break;
         case Difficulty.MEDIUM:
-            crtScore += 100;
+            crtScore += 15 * snake.length;
             break;
         case Difficulty.HARD:
-            crtScore += 200;
+            crtScore += 25 * snake.length;
             break;
     }
     scoreElem.textContent = `${crtScore}`;
@@ -509,13 +503,13 @@ function addIterationScore() {
 function addBlockScore() {
     switch (difficulty) {
         case Difficulty.EASY:
-            crtScore += 2000;
+            crtScore += 500 * snake.length;
             break;
         case Difficulty.MEDIUM:
-            crtScore += 4000;
+            crtScore += 1000 * snake.length;
             break;
         case Difficulty.HARD:
-            crtScore += 8000;
+            crtScore += 2000 * snake.length;
             break;
     }
     scoreElem.textContent = `${crtScore}`;
