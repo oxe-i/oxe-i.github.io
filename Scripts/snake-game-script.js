@@ -30,6 +30,9 @@ let crtScore = 0;
 let lastIterTime = 0;
 let remTime = 0;
 
+const prevSkipTutorial = localStorage.getItem("skipTutorial");
+let endTutorial = false;
+
 const scoreElem = document.querySelector("#score");
 
 // buttons
@@ -319,7 +322,9 @@ function resizeWindow() {
             return;
         default:
             scaleImage();
-            updateImage();
+            drawCanvas();
+            drawSnake();
+            drawBlock();
     }
 }
 
@@ -387,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alertMessage.focus();
         alertMessage.showModal();
     }
-    else {
+    else if (!prevSkipTutorial) {
         tutorialMessage.focus();
         tutorialMessage.showModal();
     }
@@ -396,11 +401,19 @@ document.addEventListener("DOMContentLoaded", () => {
 closeAlert.addEventListener("click", () => alertMessage.close());
 
 alertMessage.addEventListener("close", () => {
-    tutorialMessage.focus();
-    tutorialMessage.showModal();
+    if (!prevSkipTutorial) {
+        tutorialMessage.focus();
+        tutorialMessage.showModal();
+    }
 });
 
 nextTutorial.addEventListener("click", () => {
+    if (endTutorial) {
+        localStorage.setItem("skipTutorial", "true");
+        tutorialMessage.close();
+        return;
+    }
+
     switch (tutorialStep) {
         case 0: 
             tutorialText.innerHTML = "In this game, you move a snake around to catch as many blocks as you can.";
@@ -450,7 +463,16 @@ nextTutorial.addEventListener("click", () => {
 });
 
 closeTutorial.addEventListener("click", () => {
-    tutorialMessage.close();
+    if (!endTutorial) {
+        endTutorial = true;
+        tutorialText.innerHTML = "Do you want to skip this tutorial in the future?"
+        nextTutorial.innerHTML = "Yes";
+        closeTutorial.innerHTML = "No";
+        closeTutorial.focus();
+    }
+    else {
+        tutorialMessage.close();
+    }
 });
 
 window.addEventListener("resize", resizeWindow);
@@ -731,6 +753,7 @@ function gameLoop(timestamp) {
             return;
         }     
     }
+    
     remTime = deltaTime;
     lastIterTime = timestamp;
     raf = window.requestAnimationFrame(gameLoop);
