@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device.width, initial-scale=1.0">
         <title>Slithery Snake</title>
-        <link rel="stylesheet" href="Styles/snake-game-styles.css">
+        <link rel="stylesheet" href="./styles/snake-game-styles.css">
     </head>
     <body id="page">
         <dialog id="alert-message">
@@ -19,10 +19,10 @@
             </div>
         </dialog>
         <div id="directional-buttons">
-            <button class="button" id="up"><img src="SVG/arrow.svg" alt="up button" /></button>
-            <button class="button" id="left"><img src="SVG/arrow.svg" alt="left button" /></button>
-            <button class="button" id="down"><img src="SVG/arrow.svg" alt="down button" /></button>
-            <button class="button" id="right"><img src="SVG/arrow.svg" alt="right button" /></button>
+            <button class="button" id="up"><img src="./assets/arrow.svg" alt="up button" /></button>
+            <button class="button" id="left"><img src="./assets/arrow.svg" alt="left button" /></button>
+            <button class="button" id="down"><img src="./assets/arrow.svg" alt="down button" /></button>
+            <button class="button" id="right"><img src="./assets/arrow.svg" alt="right button" /></button>
         </div>
         <div id="game">
             <canvas id="game-canvas"></canvas>
@@ -31,9 +31,9 @@
             <div id="game-stats">
                 <h1>difficulty:</h1>
                 <div id="difficulty-buttons">
-                    <button class="button" id="easy"><img src="SVG/easy.svg" alt="easy button" /></button>
-                    <button class="button" id="medium"><img src="SVG/medium.svg" alt="medium button" /></button>
-                    <button class="button" id="hard"><img src="SVG/hard.svg" alt="hard button" /></button>
+                    <button class="button" id="easy"><img src="./assets/easy.svg" alt="easy button" /></button>
+                    <button class="button" id="medium"><img src="./assets/medium.svg" alt="medium button" /></button>
+                    <button class="button" id="hard"><img src="./assets/hard.svg" alt="hard button" /></button>
                 </div>
                 <div id="score-board">
                     <h1 id="score-title">score:</h1>
@@ -44,10 +44,10 @@
                 <button class="button" id="show-tutorial">show tutorial</button>
             </div>
             <div id="game-flow-buttons">
-                <button class="button" id="start-pause"><img src="SVG/play.svg" alt="play button" /></button>
-                <button class="button" id="stop"><img src="SVG/stop.svg" alt="stop button" /></button>
+                <button class="button" id="start-pause"><img src="./assets/play.svg" alt="play button" /></button>
+                <button class="button" id="stop"><img src="./assets/stop.svg" alt="stop button" /></button>
             </div>  
         </div>          
-        <script src="Scripts/snake-game-script.js"></script>
+        <script src="./scripts/snake-game-script.js"></script>
     </body>
 </html>

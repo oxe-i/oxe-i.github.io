@@ -16,11 +16,10 @@
 .button {
     color: #f0f3f9;            
     padding: 1vmin;
-    font-size: 2vmin;
     font-weight: 400; 
     background: #211d2f;
-    border-radius: 1vmin;
-    border: 1vmin solid #211d2f;
+    border-radius: 5px;
+    border: 1px solid #211d2f;
     text-align: center;
     display: flex;
     align-items: center;
@@ -132,7 +131,6 @@ dialog::backdrop {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     margin: 0 5vmin 5vmin 5vmin;
     gap: 5vmin;
 }
@@ -155,8 +153,7 @@ dialog::backdrop {
     display: flex;
     padding: 0;
     align-items: center;
-    justify-content: center;
-    gap: 4vmin;
+    justify-content: space-around;
 }
 
 #easy, #medium, #hard { 
@@ -167,17 +164,19 @@ dialog::backdrop {
     height: auto;
     display: flex;
     text-transform: uppercase;
-    gap: 4vmin;
+    gap: 5vmin;
 }
 
 #score {
     text-align: center;
     flex-grow: 1;
     background: #302b42;
+    border-radius: 5px;
 }
 
 #control-panel {
     display: flex;
+    flex-basis: 10%;
 }
 
 #show-tutorial {
@@ -187,10 +186,11 @@ dialog::backdrop {
     color: #f0f3f9; 
     border: 0;
     margin: 5vmin;
+    font-size: 2.5vmin;
 }
 
 #game-flow-buttons {
-    flex-basis: 60%;
+    flex-grow: 5;
     display: grid;
     grid-template-rows: 1fr var(--gameflow-button-size) 1fr;
     grid-template-columns: 1fr var(--gameflow-button-size) 1fr var(--gameflow-button-size) 1fr;
