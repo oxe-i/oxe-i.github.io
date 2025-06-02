@@ -9,13 +9,17 @@
     --gameflow-button-size: 20vmin;
 }
 
+* { 
+    box-sizing: border-box;
+}
+
 .button {
     color: #f0f3f9;            
     padding: 1vmin;
     font-size: 2vmin;
     font-weight: 400; 
     background: #211d2f;
-    border-radius: 2vmin;
+    border-radius: 1vmin;
     border: 1vmin solid #211d2f;
     text-align: center;
     display: flex;
@@ -26,7 +30,7 @@
 #page {
     background: #211d2f;
     display: flex;
-    font-family: "Ubuntu", sans-serif;
+    font-family: sans-serif;
     width: 100vw;
     height: 100vh;
     padding-top: 5vmin;
@@ -68,16 +72,25 @@ dialog::backdrop {
 #alert-message, #tutorial-message {
     background: #211d2f;
     color: #f0f3f9;
-    font-size: 1.5rem;
+    font-size: 16px;
     position: fixed;
     border-radius: 10px;
-    border: 5px solid #f0f3f9;
+    border: 1px solid #f0f3f9;
 }
 
 #tutorial-message {
+    --button-font-size: 14px;
+    --button-width: calc(5 * var(--button-font-size));
+
+    p {
+        text-align: justify;
+        line-height: 130%;
+    }
+
     div {
         display: grid;
-        grid-template-columns: 5rem 1fr 5rem;
+        grid-template-columns: [first-button] var(--button-width) 1fr [second-button] var(--button-width);
+        align-items: center;
     }
 }
 
@@ -85,22 +98,13 @@ dialog::backdrop {
     background: #f0f3f9;
     color: #211d2f;
     font-weight: 400;
-    font-size: 1rem;
+    font-size: var(--button-font-size);
     border-radius: 5px;
 }
 
-#next-tutorial, #close-tutorial {
-    grid-row: 4/5;
-    width: 5rem;
-}
+#next-tutorial { grid-column: first-button; }
 
-#next-tutorial { 
-    grid-column: 1/2;
-}
-
-#close-tutorial {
-    grid-column: 3/4;
-}
+#close-tutorial { grid-column: second-button; }
 
 #game {
     display: flex;
@@ -122,6 +126,7 @@ dialog::backdrop {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    gap: 5vmin;
 }
 
 #game-stats {
@@ -129,6 +134,8 @@ dialog::backdrop {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin: 0 5vmin;
+    gap: 5vmin;
 }
 
 #game-stats h1 { 
@@ -145,11 +152,12 @@ dialog::backdrop {
 }
 
 #difficulty-buttons {
-    flex-grow: 2;
+    flex-grow: 1;
     display: flex;
     padding: 0;
     align-items: center;
     justify-content: center;
+    gap: 4vmin;
 }
 
 #easy, #medium, #hard { 
@@ -157,31 +165,33 @@ dialog::backdrop {
 }
 
 #score-board {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    width: 100%;
     height: auto;
-    text-align: justify;
+    display: flex;
     text-transform: uppercase;
-}
-
-#score-title {
-    width: auto;
-    margin-left: 2vmin;
-    margin-right: 2vmin;
+    gap: 4vmin;
 }
 
 #score {
     text-align: center;
-    flex-grow: 5;
-    height: auto;
+    flex-grow: 1;
     background: #302b42;
-    margin-right: 2vmin;
+}
+
+#control-panel {
+    display: flex;
+}
+
+#show-tutorial {
+    flex-grow: 1;
+    background: #302b42; 
+    text-transform: capitalize;
+    color: #f0f3f9; 
+    border: 0;
+    margin: 0 5vmin;
 }
 
 #game-flow-buttons {
-    flex-grow: 3;
+    flex-basis: 60%;
     display: grid;
     grid-template-rows: 1fr var(--gameflow-button-size) 1fr;
     grid-template-columns: 1fr var(--gameflow-button-size) 1fr var(--gameflow-button-size) 1fr;

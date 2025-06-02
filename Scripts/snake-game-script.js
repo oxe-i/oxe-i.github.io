@@ -57,6 +57,8 @@ const closeTutorial = document.querySelector("#close-tutorial");
 const nextTutorial = document.querySelector("#next-tutorial");
 let tutorialStep = 0;
 
+const showTutorial = document.querySelector("#show-tutorial");
+
 // snake variables
 const border = 1;
 
@@ -429,7 +431,8 @@ nextTutorial.addEventListener("click", () => {
                 tutorialText.innerHTML = "You can move the snake with the directional pad on the left.";
             }
             else {
-                tutorialText.innerHTML = "You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br> W moves up, S moves down, A moves left and D moves right";
+                tutorialText.innerHTML = `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br> 
+                                            W moves up, S moves down, A moves left and D moves right.`;
             }                
             break;
         case 4:
@@ -473,6 +476,14 @@ closeTutorial.addEventListener("click", () => {
     else {
         tutorialMessage.close();
     }
+});
+
+showTutorial.addEventListener("click", () => {
+    if (gameState == GameState.RUNNING) { pauseGame(); }
+    localStorage.removeItem("skipTutorial");
+    endTutorial = false;
+    tutorialMessage.focus();
+    tutorialMessage.showModal();
 });
 
 window.addEventListener("resize", resizeWindow);
