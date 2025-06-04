@@ -75,11 +75,8 @@ function createSolution() {
     const rows = Array.from({ length: 9 }, (_) => { value: 0 });
     const cols = Array.from({ length: 9 }, (_) => { value: 0 });
     const boxes = Array.from({ length: 9 }, (_) => { value: 0 });
-
-    
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     fillGrid();
-
 });

@@ -1,3 +1,18 @@
+:root {
+    --background-color: #291528;
+    --black-olive: #3A3E3B;
+    --ball-color: #F0EFF4;
+    --other: #9E829C;
+}
+
 #page {
-    background-color: darkslateblue;
+    background-color: var(--black-olive);
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+#drawing-area {
+    image-rendering: crisp-edges;
 }
