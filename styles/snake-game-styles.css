@@ -7,6 +7,11 @@
     --directional-button-size: 12vmin;
     --difficulty-button-size: 10vmin;
     --gameflow-button-size: 20vmin;
+    --canvas-color: rgb(214, 223, 138);
+    --background-color: #211d2f;
+    --letter-color: #f0f3f9;
+    --medium-contrast-color: ;
+    --piece-color: black;
 }
 
 * { 
@@ -14,12 +19,12 @@
 }
 
 .button {
-    color: #f0f3f9;            
+    color: var(--letter-color);            
     padding: 1vmin;
     font-weight: 400; 
-    background: #211d2f;
+    background: var(--background-color);
     border-radius: 5px;
-    border: 1px solid #211d2f;
+    border: 1px solid var(--background-color);
     text-align: center;
     display: flex;
     align-items: center;
@@ -27,7 +32,7 @@
 }
 
 #page {
-    background: #211d2f;
+    background: var(--background-color);
     display: flex;
     font-family: sans-serif;
     width: 100vw;
@@ -51,7 +56,7 @@
             top: 50%;
             width: var(--directional-button-size);
             height: var(--directional-button-size);
-            background: #211d2f;
+            background: var(--background-color);
         }
         
         #up { transform: translate(-50%, -200%) rotate(-90deg); }
@@ -69,12 +74,12 @@ dialog::backdrop {
 }
 
 #alert-message, #tutorial-message {
-    background: #211d2f;
-    color: #f0f3f9;
+    background: var(--background-color);
+    color: var(--letter-color);
     font-size: 16px;
     position: fixed;
     border-radius: 10px;
-    border: 1px solid #f0f3f9;
+    border: 1px solid var(--letter-color);
 }
 
 #tutorial-message {
@@ -94,8 +99,8 @@ dialog::backdrop {
 }
 
 #close-alert, #close-tutorial, #next-tutorial {
-    background: #f0f3f9;
-    color: #211d2f;
+    background: var(--letter-color);
+    color: var(--background-color);
     font-weight: 400;
     font-size: var(--button-font-size);
     border-radius: 5px;
@@ -145,7 +150,7 @@ dialog::backdrop {
 #game-stats h1, #score-board {
     font-size: 3vmin;
     font-weight: 400;
-    color: #f0f3f9;
+    color: var(--letter-color);
 }
 
 #difficulty-buttons {
@@ -183,7 +188,7 @@ dialog::backdrop {
     flex-grow: 1;
     background: #302b42; 
     text-transform: capitalize;
-    color: #f0f3f9; 
+    color: var(--letter-color); 
     border: 0;
     margin: 5vmin;
     font-size: 2.5vmin;

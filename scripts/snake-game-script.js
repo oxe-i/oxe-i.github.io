@@ -1,43 +1,11 @@
-// window variables
-let windowHeight = null;
-let windowWidth = null;
-let vMin = null;
+// elements
+const page = document.querySelector("#page");
+const styles = getComputedStyle(document.documentElement);
 
-// canvas variables
-const canvas = document.querySelector("#game-canvas");
-const context = canvas.getContext("2d", {alpha: false});
-
-// class to get game state
-class GameState {};
-GameState.NOT_STARTED = 0;
-GameState.RUNNING = 1;
-GameState.PAUSED = 2;
-GameState.ENDED = 3;
-
-// class to get difficulty
-class Difficulty {};
-Difficulty.EASY = 0;
-Difficulty.MEDIUM = 1;
-Difficulty.HARD = 2;
-
-// game control variables
-let numIterationsBeforeDrawing = 0;
-let raf = null;
-let gameState = GameState.NOT_STARTED;
-let timePerStep = 0;
-let difficulty = Difficulty.MEDIUM;
-let crtScore = 0;
-let lastIterTime = 0;
-let remTime = 0;
-
-const prevSkipTutorial = localStorage.getItem("skipTutorial");
-let endTutorial = false;
-
-const scoreElem = document.querySelector("#score");
-
-// buttons
 const startPause = document.querySelector("#start-pause");
 const stopButton = document.querySelector("#stop");
+
+const scoreElem = document.querySelector("#score");
 
 const dirUp = document.querySelector("#up");
 const dirDown = document.querySelector("#down");
@@ -53,31 +21,12 @@ const closeAlert = document.querySelector("#close-alert");
 
 const tutorialMessage = document.querySelector("#tutorial-message");
 const tutorialText = tutorialMessage.querySelector("p");
+const showTutorial = document.querySelector("#show-tutorial");
 const closeTutorial = document.querySelector("#close-tutorial");
 const nextTutorial = document.querySelector("#next-tutorial");
+const prevSkipTutorial = localStorage.getItem("skipTutorial");
+let endTutorial = false;
 let tutorialStep = 0;
-
-const showTutorial = document.querySelector("#show-tutorial");
-
-// snake variables
-const border = 1;
-
-let snake = null;
-let segmentSize = null;
-let drawingSize = null;
-let speed = null;
-
-// direction variables
-let directionQueue = null;
-// enum-like class to represent direction of movement
-class Direction {};
-Direction.LEFT = [];
-Direction.RIGHT = [];
-Direction.UP = [];
-Direction.DOWN = [];
-
-// current block variable
-let block = null;
 
 // math helper functions
 function getDivisors(num) {
@@ -94,126 +43,15 @@ function getCommonDivisors(...nums) {
     return divisors[0].filter(num => divisors.slice(1).every(divisorList => divisorList.includes(num)));
 }
 
-// checks kind of device
-function isTouchDevice() {
-    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+function generateValidRandomNums(xMin, xMax, yMin, yMax, norm) {
+    let randomizedX = Math.floor(Math.random() * (xMax - xMin));
+    let randomizedY = Math.floor(Math.random() * (yMax - yMin));
+    let normalizedX = randomizedX - (randomizedX % norm);
+    let normalizedY = randomizedY - (randomizedY % norm);
+    return [normalizedX, normalizedY];
 }
 
-function isInPortraitMode() {
-    return screen.orientation.type == "portrait-primary" || screen.orientation.type == "portrait-secondary";
-}
-
-// initialization functions
-function resetVariables() {
-    snake = [];
-    block = null;
-    directionQueue = [];
-    iterationCounter = 0;
-    raf = null;
-    gameState = GameState.NOT_STARTED;
-    difficulty = Difficulty.MEDIUM;   
-    crtScore = 0;
-    lastIterTime = 0;
-    remTime = 0;
-    scoreElem.textContent = `${crtScore}`;
-}
-
-function getCanvasSize() {
-    if (isTouchDevice()) {
-        const xOffset = 100 * vMin;
-        const yOffset = 10 * vMin
-        const usableWidth = windowWidth - xOffset;
-        const usableHeight = windowHeight - yOffset;
-        return [usableWidth - (usableWidth % 32) + border, usableHeight - (usableHeight % 32) + border];
-    }
-    const xOffset = 50 * vMin;
-    const yOffset = 5 * vMin
-    const usableWidth = windowWidth - xOffset;
-    const usableHeight = windowHeight - yOffset;
-    return [usableWidth - (usableWidth % 32) + border, usableHeight - (usableHeight % 32) + border];    
-}
-
-function getSegmentSize() {
-    const minCanvasSize = Math.min(canvas.width, canvas.height) - border;
-    const maxCanvasSize = Math.max(canvas.width, canvas.height) - border;
-    const avgCanvasSize = (minCanvasSize + maxCanvasSize) / 2;
-
-    const minDivisors = getDivisors(minCanvasSize);
-    const maxDivisors = getDivisors(maxCanvasSize);
-    const possibleMinValues = minDivisors.filter(divisor => minDivisors.includes(minCanvasSize / divisor));
-    const possibleMaxValues = maxDivisors.filter(divisor => maxDivisors.includes(maxCanvasSize / divisor));
-    const possibleValue = possibleMaxValues.findLast(divisor => possibleMinValues.includes(divisor) && divisor >= 2*vMin && divisor <= 5*vMin);
-
-    if (possibleValue) { return possibleValue - border; }
-    return (avgCanvasSize / 64) - border;
-}
-
-function getSpeed() {
-    return drawingSize;
-}
-
-function getTimePerStep() {
-    switch (difficulty) {
-        case Difficulty.EASY: return 400;
-        case Difficulty.MEDIUM: return 300;
-        case Difficulty.HARD: return 200;
-    }
-}
-
-function initializeWindowVariables() {
-    windowHeight = window.innerHeight;
-    windowWidth = window.innerWidth;
-    vMin = Math.floor(Math.min(windowWidth, windowHeight) / 100);
-}
-
-function initializeCanvasVariables() {
-    const [scaledX, scaledY] = getCanvasSize();
-
-    canvas.width = scaledX;
-    canvas.height = scaledY;
-
-    // CSS properties
-    document.documentElement.style.setProperty("--canvas-height", `${canvas.height}px`);
-    document.documentElement.style.setProperty("--canvas-width", `${canvas.width}px`);
-}
-
-function initializeSnakeVariables() {
-    segmentSize = getSegmentSize();
-    drawingSize = segmentSize + border;
-    speed = getSpeed();
-    timePerStep = getTimePerStep();
-}
-
-function initializeDirectionVariables() {
-    Direction.UP = [0, -speed];
-    Direction.DOWN = [0, speed];
-    Direction.LEFT = [-speed, 0];
-    Direction.RIGHT = [speed, 0];
-}
-
-function initializeVariables() {    
-    initializeWindowVariables();
-
-    initializeCanvasVariables();   
-
-    initializeSnakeVariables();
-    
-    initializeDirectionVariables();    
-}
-
-function initialSetup() {
-    resetVariables();
-    initializeVariables();
-    drawCanvas();
-}
-
-function setupGame() {
-    initialSetup();
-    snake = createSnake();
-    block = createBlock();
-}
-
-// game flow functions
+// icon setters
 function setIconToPlay() {
     startPause.querySelector("img").src = "./assets/play.svg"; 
     startPause.querySelector("img").alt = "play button"; 
@@ -224,172 +62,407 @@ function setIconToPause() {
     startPause.querySelector("img").alt = "pause button";
 }
 
-function startGame() {
-    setupGame();
-    setIconToPause();
-    mediumButton.style.background = "rgb(233, 236, 7)";
-    hardButton.style.background = " #211d2f";
-    easyButton.style.background = " #211d2f";
-    gameState = GameState.RUNNING;
-    raf = window.requestAnimationFrame(gameLoop); 
-}
+// helper classes
+class GameState {
+    static NOT_STARTED = 1;
+    static RUNNING = 2;
+    static PAUSED = 3;
+    static ENDED = 4;
+};
 
-function pauseGame() {
-    gameState = GameState.PAUSED;
-    setIconToPlay();
-    window.cancelAnimationFrame(raf);
-    lastIterTime = 0;
-    raf = null;
-}
+class Difficulty {
+    static EASY = 1;
+    static MEDIUM = 2;
+    static HARD = 3;
+};
 
-function restartGame() {
-    setupGame();
-    gameState = GameState.RUNNING;
-    mediumButton.style.background = "rgb(233, 236, 7)";
-    hardButton.style.background = " #211d2f";
-    easyButton.style.background = " #211d2f";
-    setIconToPause();
-    raf = window.requestAnimationFrame(gameLoop); 
-}
+class Direction {
+    static LEFT = 1;
+    static RIGHT = 2;
+    static UP = 3;
+    static DOWN = 4;
+};
 
-function stopGame() {
-    resetVariables();
-    drawCanvas();
-    gameState = GameState.NOT_STARTED;
-    setIconToPlay();
-    easyButton.style.background = " #211d2f";
-    mediumButton.style.background = " #211d2f";
-    hardButton.style.background = " #211d2f";
-}
-
-function continueGame() {
-    setIconToPause();
-    gameState = GameState.RUNNING;
-    raf = window.requestAnimationFrame(gameLoop);
-}
-
-// resizing functions 
-function scaleCoordinate(coordinate, prevUnits, newUnits, prevDrawingSize, newDrawingSize) {
-    return Math.round(((coordinate / prevDrawingSize) / prevUnits) * newUnits) * newDrawingSize;
-}
-
-function scaleSnake(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize) {
-    const crtCoordinates = snake.map(segment => [segment.x, segment.y]);
-
-    snake[0].x = scaleCoordinate(snake[0].x, prevWidthUnits, newWidthUnits, prevDrawingSize, newDrawingSize);
-    snake[0].y = scaleCoordinate(snake[0].y, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
-
-    for (let i = 1; i < snake.length; ++i) {
-        if (snake[i].x < crtCoordinates[i - 1][0]) { snake[i].x = snake[i - 1].x - newDrawingSize; }
-        else if (snake[i].x > crtCoordinates[i - 1][0]) { snake[i].x = snake[i - 1].x + newDrawingSize; }
-        else { snake[i].x = snake[i - 1].x; }
-
-        if (snake[i].y < crtCoordinates[i - 1][1]) { snake[i].y = snake[i - 1].y - newDrawingSize; }
-        else if (snake[i].y > crtCoordinates[i - 1][1]) { snake[i].y = snake[i - 1].y + newDrawingSize; }
-        else { snake[i].y = snake[i - 1].y; }
+class Piece {
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.direction = null;
     }
 
-    snake.forEach(segment => {
-        if (segment.direction[0] < 0) { segment.direction = Direction.LEFT; }
-        else if (segment.direction[0] > 0) { segment.direction = Direction.RIGHT; }
-        else if (segment.direction[1] < 0) { segment.direction = Direction.UP; }
-        else { segment.direction = Direction.DOWN; }
-    });
-}
+    render(context, pieceSize) {
+        context.fillStyle = styles.getPropertyValue("--piece-color").trim();
+        context.fillRect(this.x + 1, this.y + 1, pieceSize, pieceSize);
+    }
 
-function scaleBlock(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize) {
-    block.x = scaleCoordinate(block.x, prevWidthUnits, newWidthUnits, prevDrawingSize, newDrawingSize);
-    block.y = scaleCoordinate(block.y, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
-}
+    clear(context, pieceSize) {
+        context.fillStyle = styles.getPropertyValue("--canvas-color").trim();
+        context.fillRect(this.x + 1, this.y + 1, pieceSize, pieceSize);
+    }
 
-function scaleImage() {
-    const prevDrawingSize = drawingSize;
-    const prevWidthUnits = (canvas.width - border) / prevDrawingSize;
-    const prevHeightUnits = (canvas.height - border) / prevDrawingSize;            
+    move(speed) {
+        switch (this.direction) {
+            case Direction.LEFT:
+                this.x -= speed;
+                return;
+            case Direction.RIGHT:
+                this.x += speed;
+                return;
+            case Direction.UP:
+                this.y -= speed;
+                return;
+            case Direction.DOWN:
+                this.y += speed;
+                return;
+        }
+    }
 
-    initializeVariables();
+    scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits) {
+        this.x = Math.round(((this.x / prevDrawingSize) / prevWidthUnits) * newWidthUnits) * newDrawingSize;
+        this.y = Math.round(((this.y / prevDrawingSize) / prevHeightUnits) * newHeightUnits) * newDrawingSize;
+    }
+};
 
-    const newDrawingSize = drawingSize;
-    const newWidthUnits = (canvas.width - border) / newDrawingSize;
-    const newHeightUnits = (canvas.height - border) / newDrawingSize;
+class Snake {
+    constructor(segments) {
+        this.segments = segments;
+    }
 
-    scaleSnake(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
-    scaleBlock(prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits, prevDrawingSize, newDrawingSize);
-}
+    renderFull(context, pieceSize) {
+        this.segments.forEach(segment => segment.render(context, pieceSize));
+    }
 
-function resizeWindow() {
-    switch (gameState) {
-        case GameState.NOT_STARTED:
-            initialSetup();
+    changeDirection(newDirection) {
+        if (!newDirection) { return; }
+        switch (this.segments[0].direction) {
+            case Direction.LEFT:
+                if (newDirection != Direction.RIGHT) { this.segments[0].direction = newDirection; }
+                return;
+            case Direction.RIGHT:
+                if (newDirection != Direction.LEFT) { this.segments[0].direction = newDirection; }
+                return;
+            case Direction.UP:
+                if (newDirection != Direction.DOWN) { this.segments[0].direction = newDirection; }
+                return;
+            case Direction.DOWN:
+                if (newDirection != Direction.UP) { this.segments[0].direction = newDirection; }
+                return;
+        }
+    }
+
+    updateDirection() {
+        for (let idx = this.segments.length - 1; idx > 0; --idx) {
+            this.segments[idx].direction = this.segments[idx - 1].direction;
+        }
+    }
+
+    updateAndRender(newPiece, context, pieceSize, block) {
+        this.updateDirection();
+
+        newPiece.x = this.segments[0].x;
+        newPiece.y = this.segments[0].y;
+        newPiece.direction = this.segments[0].direction;
+        newPiece.move(pieceSize + 1);
+
+        if (newPiece.x == block.x && newPiece.y == block.y) {
+            this.segments.unshift(newPiece);
+            return true;
+        }
+
+        this.segments.at(-1).clear(context, pieceSize);
+        this.segments.pop();
+        this.segments.unshift(newPiece);
+        this.segments[0].render(context, pieceSize);
+
+        return false;
+    }
+
+    checkCollision(x, y) {
+        return this.segments.some(segment => segment.x == x && segment.y == y);
+    }
+
+    touchesGrid(width, height, pieceSize) {
+        return this.segments[0].x == 0 && this.segments[0].direction == Direction.LEFT
+        || this.segments[0].y == 0 && this.segments[0].direction == Direction.UP
+        || this.segments[0].x == width - (pieceSize + 2) && this.segments[0].direction == Direction.RIGHT
+        || this.segments[0].y == height - (pieceSize + 2) && this.segments[0].direction == Direction.DOWN;
+    }
+
+    touchesTail() {
+        return this.segments.slice(1).some(segment => segment.x == this.segments[0].x && segment.y == this.segments[0].y);
+    }
+
+    scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits) {
+        const crtCoordinates = this.segments.map(segment => [segment.x, segment.y]);
+        
+        this.segments[0].scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits);
+
+        for (let i = 1; i < this.segments.length; ++i) {
+            if (this.segments[i].x < crtCoordinates[i - 1][0]) { this.segments[i].x = this.segments[i - 1].x - newDrawingSize; }
+            else if (this.segments[i].x > crtCoordinates[i - 1][0]) { this.segments[i].x = this.segments[i - 1].x + newDrawingSize; }
+            else { this.segments[i].x = this.segments[i - 1].x; }
+
+            if (this.segments[i].y < crtCoordinates[i - 1][1]) { this.segments[i].y = this.segments[i - 1].y - newDrawingSize; }
+            else if (this.segments[i].y > crtCoordinates[i - 1][1]) { this.segments[i].y = this.segments[i - 1].y + newDrawingSize; }
+            else { this.segments[i].y = this.segments[i - 1].y; }
+        }
+    }
+
+    size() {
+        return this.segments.length;
+    }
+};
+
+
+// canvas variables
+class Game {
+    constructor() {
+        if (Game.instance) { return Game.instance; }
+        Game.instance = this;
+
+        this.gamestate = GameState.NOT_STARTED;
+        this.difficulty = Difficulty.MEDIUM;
+
+        this.canvas = document.querySelector("#game-canvas");
+        this.context = this.canvas.getContext("2d", {alpha: false});
+        this.setCanvasSize();
+
+        this.pieceSize = this.getPieceSize();            
+        this.snake = this.initializeSnake();       
+        this.block = this.createBlock();  
+        this.crtScore = 0;
+        
+        this.directionQueue = [];
+        
+        this.timestamp = 0;
+        this.remTime = 0;
+        this.timeframe = 400;
+        this.raf = null;
+
+        this.renderCanvas();
+    }
+
+    renderCanvas() {
+        this.context.fillStyle = styles.getPropertyValue("--canvas-color").trim();
+        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    renderSnake() {
+        this.snake.renderFull(this.context, this.pieceSize);
+    }
+
+    renderBlock() {
+        this.block.render(this.context, this.pieceSize);
+    }
+
+    update() {
+        if (this.isEnd()) { return false; }
+
+        this.addIterationScore();
+        this.snake.updateDirection();
+        this.snake.changeDirection(this.directionQueue.shift());
+
+        if (this.snake.updateAndRender(new Piece(), this.context, this.pieceSize, this.block)) {
+            this.addBlockScore();
+            this.block = this.createBlock();
+            this.renderBlock();
+        }
+
+        return true;
+    }
+
+    setCanvasSize() {
+        const vMin = Math.floor(Math.min(window.innerWidth, window.innerHeight) / 100);
+        const isTouch = isTouchDevice();
+        const xOffset = isTouch ? 100 * vMin : 50 * vMin;
+        const yOffset = isTouch ? 10 * vMin : 5 * vMin;
+        const usableWidth = window.innerWidth - xOffset;
+        const usableHeight = window.innerHeight - yOffset;
+        this.canvas.width = usableWidth - (usableWidth % 32) + 1;
+        this.canvas.height = usableHeight - (usableHeight % 32) + 1;
+        document.documentElement.style.setProperty("--canvas-height", `${this.canvas.height}px`);
+        document.documentElement.style.setProperty("--canvas-width", `${this.canvas.width}px`);
+    }
+
+    resize() {
+        if (this.gamestate == GameState.NOT_STARTED) {
+            this.setCanvasSize();     
+            this.renderCanvas();
             return;
-        default:
-            scaleImage();
-            drawCanvas();
-            drawSnake();
-            drawBlock();
-    }
-}
+        }   
 
-// creation functions
-function createSegment(idx) {
-    const centerX = (canvas.width / 2);
-    const centerY = (canvas.height / 2);
-    const segment = {
-        x: centerX - (centerX % drawingSize) + (idx * drawingSize),
-        y: centerY - (centerY % drawingSize),
-        direction: Direction.LEFT
-    };
-    return segment;
-}
+        const prevDrawingSize = this.pieceSize + 1;
+        const prevWidthUnits = (this.canvas.width - 1) / prevDrawingSize;
+        const prevHeightUnits = (this.canvas.height - 1) / prevDrawingSize;            
 
-function createSnake() {
-    return Array.from({ length: 5 }, (_, idx) => createSegment(idx));
-}
+        this.setCanvasSize();
+        this.pieceSize = this.getPieceSize();
+        
+        const newDrawingSize = this.pieceSize + 1;
+        const newWidthUnits = (this.canvas.width - 1) / newDrawingSize;
+        const newHeightUnits = (this.canvas.height - 1) / newDrawingSize;
 
-function createHead(x, y, direction) {
-    snake.unshift(createSegment(0));
-    snake[0].x = x;
-    snake[0].y = y;
-    snake[0].direction = direction;
-}
+        this.snake.scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits);   
+        this.block.scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits);
 
-function createBlock() {
-    const horizontalMax = canvas.width - (2 * drawingSize);
-    const horizontalMin = drawingSize;
-    const verticalMax = canvas.height - (2 * drawingSize);
-    const verticalMin = drawingSize;
-
-    let randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
-    let randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + drawingSize;
-    let normalizedX = randomizedX - (randomizedX % drawingSize);
-    let normalizedY = randomizedY - (randomizedY % drawingSize);
-
-    while (overlapsWithSnake(normalizedX, normalizedY)) { 
-        randomizedX = Math.floor(Math.random() * (horizontalMax - horizontalMin + 1)) + drawingSize;
-        randomizedY = Math.floor(Math.random() * (verticalMax - verticalMin + 1)) + drawingSize;
-        normalizedX = randomizedX - (randomizedX % drawingSize);
-        normalizedY = randomizedY - (randomizedY % drawingSize);
+        this.renderCanvas();
+        this.renderBlock();
+        this.renderSnake();
     }
 
-    return {
-        x: normalizedX,
-        y: normalizedY,
-        direction: Direction.NONE
-    };
+    getPieceSize() {
+        const minCanvasSize = Math.min(this.canvas.width, this.canvas.height) - 1;
+        const maxCanvasSize = Math.max(this.canvas.width, this.canvas.height) - 1;
+        const avgCanvasSize = (minCanvasSize + maxCanvasSize) / 2;
+
+        const minDivisors = getDivisors(minCanvasSize);
+        const maxDivisors = getDivisors(maxCanvasSize);
+        const possibleMinValues = minDivisors.filter(divisor => minDivisors.includes(minCanvasSize / divisor));
+        const possibleMaxValues = maxDivisors.filter(divisor => maxDivisors.includes(maxCanvasSize / divisor));
+
+        const possibleValue = possibleMaxValues.findLast(divisor => possibleMinValues.includes(divisor) && divisor >= 0.02 * minCanvasSize && divisor <= 0.05 * minCanvasSize);
+
+        if (possibleValue) { return possibleValue - 1; }
+        return (avgCanvasSize / 64);
+    }
+
+    initializeSnake() {
+        const segments = Array.from({ length: 5 }, (_, idx) => {
+            const segment = new Piece();
+            const centerX = this.canvas.width / 2;
+            const centerY = this.canvas.height / 2;
+            segment.x = centerX - (centerX % (this.pieceSize + 1)) + idx * (this.pieceSize + 1);
+            segment.y = centerY - (centerY % (this.pieceSize + 1));            
+            segment.direction = Direction.LEFT;
+            return segment;
+        });
+        
+        return new Snake(segments);
+    }
+
+    createBlock() {
+        const block = new Piece();
+
+        [block.x, block.y] = generateValidRandomNums(
+            0, this.canvas.width - (this.pieceSize + 1),
+            0, this.canvas.height - (this.pieceSize + 1),
+            this.pieceSize + 1
+        );
+        
+        while (this.snake.checkCollision(block.x, block.y)) { 
+            [block.x, block.y] = generateValidRandomNums(
+                0, this.canvas.width - (this.pieceSize + 1),
+                0, this.canvas.height - (this.pieceSize + 1),
+                this.pieceSize + 1
+            );
+        }
+
+        return block;
+    }
+
+    end() {
+        setIconToPlay();
+        this.gamestate = GameState.ENDED;
+        this.timestamp = 0;
+        window.cancelAnimationFrame(this.raf);
+    }
+
+    reset() {
+        this.difficulty = Difficulty.MEDIUM;  
+        this.snake = this.initializeSnake();
+        this.block = this.createBlock();
+        this.timestamp = 0;
+        this.remTime = 0;
+        this.crtScore = 0;
+        scoreElem.textContent = "0";
+        this.renderCanvas();
+    }
+
+    start() {
+        setIconToPause();
+        this.gamestate = GameState.RUNNING;        
+        activateMediumButtonBackground()      
+        
+        this.raf = requestAnimationFrame(gameLoop); 
+    }
+
+    pause() {
+        setIconToPlay();
+        this.gamestate = GameState.PAUSED;
+        this.timestamp = 0;
+        cancelAnimationFrame(this.raf);
+    }
+
+    restart() {
+        this.reset();
+        this.start(); 
+    }
+    
+    stop() {
+        this.reset();
+        setIconToPlay();
+        this.gamestate = GameState.NOT_STARTED;                      
+
+        cancelAnimationFrame(this.raf);
+    }
+
+    continue() {
+        setIconToPause();
+        this.gamestate = GameState.RUNNING;
+
+        this.raf = window.requestAnimationFrame(gameLoop);
+    }
+
+    isEnd() {
+        const touchesGrid = this.snake.touchesGrid(this.canvas.width, this.canvas.height, this.pieceSize);        
+        const touchesTail = this.snake.touchesTail();
+
+        return touchesGrid || touchesTail;
+    }
+
+    addIterationScore() {
+        switch (this.difficulty) {
+            case Difficulty.EASY:
+                this.crtScore += 25 * this.snake.size();
+                break;
+            case Difficulty.MEDIUM:
+                this.crtScore += 50 * this.snake.size();
+                break;
+            case Difficulty.HARD:
+                this.crtScore += 75 * this.snake.size();
+                break;
+        }
+        scoreElem.textContent = `${this.crtScore}`;
+    }
+
+    addBlockScore() {
+        switch (this.difficulty) {
+            case Difficulty.EASY:
+                this.crtScore += 500 * this.snake.size();
+                break;
+            case Difficulty.MEDIUM:
+                this.crtScore += 1000 * this.snake.size();
+                break;
+            case Difficulty.HARD:
+                this.crtScore += 2000 * this.snake.size();
+                break;
+        }
+        scoreElem.textContent = `${this.crtScore}`;
+    }
+};
+
+const game = new Game();
+
+// checks kind of device
+function isTouchDevice() {
+    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
 
-// listeners
-function debounce(fn, delay) {
-    return function() {
-        clearTimeout(fn.timeout);
-        fn.timeout = setTimeout(() => {
-            fn.apply(this, arguments);
-        }, delay);
-    }
+function isInPortraitMode() {
+    return screen.orientation.type == "portrait-primary" || screen.orientation.type == "portrait-secondary";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    initialSetup();
     if (isTouchDevice() && isInPortraitMode()) {
         alertMessage.focus();
         alertMessage.showModal();
@@ -432,7 +505,8 @@ nextTutorial.addEventListener("click", () => {
             }
             else {
                 tutorialText.innerHTML = `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br> 
-                                            W moves up, S moves down, A moves left and D moves right.`;
+                                            W moves up, S moves down, A moves left and D moves right.<br>
+                                          You can also start, restart or pause the game pressing spacebar.`;
             }                
             break;
         case 4:
@@ -471,7 +545,7 @@ closeTutorial.addEventListener("click", () => {
         tutorialText.innerHTML = "Do you want to skip this tutorial in the future?"
         nextTutorial.innerHTML = "Yes";
         closeTutorial.innerHTML = "No";
-        closeTutorial.focus();
+        return;
     }
     else {
         tutorialMessage.close();
@@ -479,293 +553,185 @@ closeTutorial.addEventListener("click", () => {
 });
 
 showTutorial.addEventListener("click", () => {
-    if (gameState == GameState.RUNNING) { pauseGame(); }
+    if (game.gamestate == GameState.RUNNING) { game.pause(); }
     localStorage.removeItem("skipTutorial");
     endTutorial = false;
+    tutorialStep = 0;
+    tutorialText.innerHTML = "Do you want to see the tutorial?";
+    nextTutorial.innerHTML = "Next";
+    closeTutorial.innerHTML = "Close";
     tutorialMessage.focus();
     tutorialMessage.showModal();
 });
 
-window.addEventListener("resize", resizeWindow);
+function handleGameStateChange() {
+    switch (game.gamestate) {
+        case GameState.NOT_STARTED:
+            game.start();
+            return;
+        case GameState.PAUSED:
+            game.continue(); 
+            return;
+        case GameState.ENDED:
+            game.restart();
+            return;
+        case GameState.RUNNING:
+            game.pause();
+            return;
+    }
+}
 
 document.addEventListener("keydown", (state) => {
     switch (state.key) {
         case "ArrowUp":
         case "w":
         case "W":
-            directionQueue.push(Direction.UP);
+            game.directionQueue.push(Direction.UP);
             break;
         case "ArrowDown":
         case "s":
         case "S":
-            directionQueue.push(Direction.DOWN);
+            game.directionQueue.push(Direction.DOWN);
             break;
         case "ArrowRight":
         case "d":
         case "D":
-            directionQueue.push(Direction.RIGHT);
+            game.directionQueue.push(Direction.RIGHT);
             break;
         case "ArrowLeft":
         case "a":
         case "A":
-            directionQueue.push(Direction.LEFT);
+            game.directionQueue.push(Direction.LEFT);
+            break;
+        case " ":
+            state.preventDefault();
+            handleGameStateChange();
+            break;
+        case "+":
+            increaseDifficulty();
+            break;
+        case "-":
+            reduceDifficulty();
             break;
     }
 });
 
-startPause.addEventListener("click", () => {
-    switch (gameState) {
-        case GameState.NOT_STARTED:
-            startGame();
-            return;
-        case GameState.PAUSED:
-            continueGame(); 
-            return;
-        case GameState.ENDED:
-            restartGame();
-            return;
-        case GameState.RUNNING:
-            pauseGame();
-            return;
-    }
-});
+startPause.addEventListener("click", handleGameStateChange);
 
-stopButton.addEventListener("click", () => {
-    window.cancelAnimationFrame(raf); 
-    stopGame();
-});
+stopButton.addEventListener("click", () => game.stop());
 
 dirUp.addEventListener("click", () => {
-    directionQueue.push(Direction.UP);
+    game.directionQueue.push(Direction.UP);
 });
 
 dirDown.addEventListener("click", () => {
-    directionQueue.push(Direction.DOWN);
+    game.directionQueue.push(Direction.DOWN);
 });
 
 dirLeft.addEventListener("click", () => {
-    directionQueue.push(Direction.LEFT);
+    game.directionQueue.push(Direction.LEFT);
 });
 
 dirRight.addEventListener("click", () => {
-    directionQueue.push(Direction.RIGHT);
+    game.directionQueue.push(Direction.RIGHT);
 });
 
-easyButton.addEventListener("click", () => {
-    if (gameState === GameState.NOT_STARTED) { return; }
-    difficulty = Difficulty.EASY;
-    timePerStep = getTimePerStep();
+function resetDifficultyButtonsBackground() {
+    const backgroundColor = styles.getPropertyValue("--background-color").trim();
+    easyButton.style.background = backgroundColor;
+    mediumButton.style.background = backgroundColor;
+    hardButton.style.background = backgroundColor;
+}
+
+function activateEasyButtonBackground() {
+    const backgroundColor = styles.getPropertyValue("--background-color").trim();
     easyButton.style.background = "rgb(127, 228, 88)";
-    mediumButton.style.background = " #211d2f";
-    hardButton.style.background = " #211d2f";
+    mediumButton.style.background = backgroundColor;
+    hardButton.style.background = backgroundColor;
+}
+
+function activateMediumButtonBackground() {
+    const backgroundColor = styles.getPropertyValue("--background-color").trim();
+    easyButton.style.background = backgroundColor;
+    mediumButton.style.background = "rgb(233, 236, 7)";
+    hardButton.style.background = backgroundColor;
+}
+
+function activateHardButtonBackground() {
+    const backgroundColor = styles.getPropertyValue("--background-color").trim();
+    easyButton.style.background = backgroundColor;
+    mediumButton.style.background = backgroundColor;
+    hardButton.style.background = "rgb(247, 29, 14)";
+}
+
+function increaseDifficulty() {
+    switch (game.difficulty) {
+        case Difficulty.EASY:
+            mediumButton.click();
+            return;
+        case Difficulty.MEDIUM:
+            hardButton.click();
+            return;
+    }
+}
+
+function reduceDifficulty() {
+    switch (game.difficulty) {
+        case Difficulty.HARD:
+            mediumButton.click();
+            return;
+        case Difficulty.MEDIUM:
+            easyButton.click();
+            return;
+    }
+}
+
+easyButton.addEventListener("click", () => {
+    if (game.gamestate === GameState.NOT_STARTED) { return; }
+    game.difficulty = Difficulty.EASY;
+    game.timeframe = 600;
+    activateEasyButtonBackground();
 });
 
 mediumButton.addEventListener("click", () => {
-    if (gameState === GameState.NOT_STARTED) { return; }
-    difficulty = Difficulty.MEDIUM;
-    timePerStep = getTimePerStep();
-    mediumButton.style.background = "rgb(233, 236, 7)";
-    hardButton.style.background = " #211d2f";
-    easyButton.style.background = " #211d2f";
+    if (game.gamestate === GameState.NOT_STARTED) { return; }
+    game.difficulty = Difficulty.MEDIUM;
+    game.timeframe = 400;
+    activateMediumButtonBackground();
 });
 
 hardButton.addEventListener("click", () => {
-    if (gameState === GameState.NOT_STARTED) { return; }
-    difficulty = Difficulty.HARD;
-    timePerStep = getTimePerStep();
-    hardButton.style.background = "rgb(247, 29, 14)";
-    easyButton.style.background = " #211d2f";
-    mediumButton.style.background = " #211d2f";
+    if (game.gamestate === GameState.NOT_STARTED) { return; }
+    game.difficulty = Difficulty.HARD;
+    game.timeframe = 200;
+    activateHardButtonBackground();
 });
 
-// handle score updates
-function addIterationScore() {
-    switch (difficulty) {
-        case Difficulty.EASY:
-            crtScore += 5 * snake.length;
-            break;
-        case Difficulty.MEDIUM:
-            crtScore += 15 * snake.length;
-            break;
-        case Difficulty.HARD:
-            crtScore += 25 * snake.length;
-            break;
-    }
-    scoreElem.textContent = `${crtScore}`;
-}
+window.addEventListener("resize", () => {
+    game.resize();
+});
 
-function addBlockScore() {
-    switch (difficulty) {
-        case Difficulty.EASY:
-            crtScore += 500 * snake.length;
-            break;
-        case Difficulty.MEDIUM:
-            crtScore += 1000 * snake.length;
-            break;
-        case Difficulty.HARD:
-            crtScore += 2000 * snake.length;
-            break;
-    }
-    scoreElem.textContent = `${crtScore}`;
-}
-
-// handle end game
-function isEndGame() {
-    const head = snake[0];
-
-    const touchesGrid = (() => {
-        return head.x == 0 || head.x == (canvas.width - drawingSize - border) || head.y == 0 || head.y == (canvas.height - drawingSize - border);
-    })();
-
-    const touchesTail = snake.slice(1).some(segment => overlapsWithSegment(segment.x, segment.y, head));
-    
-    return touchesGrid || touchesTail;
-}
-
-function handleEndGame() {
-    window.cancelAnimationFrame(raf);
-    gameState = GameState.ENDED;
-    setIconToPlay();
-    iterationCounter = 0;
-}
-
-// drawing functions
-function drawCanvas() {
-    context.fillStyle = "rgb(214, 223, 138)";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function updateSnakeImage() {
-    drawSquare(snake[0].x, snake[0].y);
-}
-
-function drawSnake() {
-    snake.forEach(segment => {
-        drawSquare(segment.x, segment.y);
-    });
-}
-
-function eraseSquare(x, y) {
-    context.fillStyle = "rgb(214, 223, 138)";
-    context.fillRect(x, y, drawingSize, drawingSize);
-}
-
-function drawSquare(x, y) {
-    context.fillStyle = "rgb(0, 0, 0)";
-    context.fillRect(x + 1, y + 1, segmentSize, segmentSize);
-}
-
-function drawBlock() {
-    drawSquare(block.x, block.y);
-}
-
-// handle block and collisions
-function overlapsWithSegment(x, y, segment) {
-    return segment.x == x && segment.y == y;
-}
-
-function overlapsWithSnake(x, y) {
-    return snake.some(segment => overlapsWithSegment(x, y, segment)); 
-}
-
-function willTouchBlock(newHead) {
-    return overlapsWithSegment(block.x, block.y, newHead);
-}
-
-function handleBlockCollision(newHead) {
-    addHead(newHead);
-    addBlockScore();
-    block = createBlock();
-    drawBlock();
-}
-
-// handle snake updates
-function addHead(newHead) {
-    snake.unshift(newHead);
-}
-
-function moveSegment(segment) {
-    const [xspeed, yspeed] = segment.direction;
-    segment.x += xspeed;
-    segment.y += yspeed;
-    return segment;
-}
-
-function changeHeadDirection(newDirection) {
-    const oppositeDirections = [
-        [Direction.RIGHT, Direction.LEFT],
-        [Direction.DOWN, Direction.UP]
-    ];
-
-    if (!oppositeDirections.find(opposites => opposites.includes(snake[0].direction)).includes(newDirection)) {
-        snake[0].direction = newDirection;
-    }
-}
-
-function removeTail() {
-    eraseSquare(snake.at(-1).x, snake.at(-1).y);
-    snake.pop();
-}
-
-function moveSnake(newHead) {
-    removeTail();
-    addHead(newHead);
-}
-
-function updateSnakeDirection() {
-    for (let i = snake.length - 1; i > 0; --i) {
-        snake[i].direction = snake[i - 1].direction;
-    }
-
-    const newDirection = directionQueue.shift();
-
-    if (newDirection) {
-        changeHeadDirection(newDirection);
-    }
-}
-
-function updateSnake() {   
-    updateSnakeDirection();
-
-    const newHead = moveSegment({
-        x: snake[0].x,
-        y: snake[0].y,
-        direction: snake[0].direction
-    });
-
-    if (willTouchBlock(newHead)) { 
-        handleBlockCollision(newHead); 
-    }
-    else {
-        moveSnake(newHead); 
-        updateSnakeImage();
-    }
-}
-
-// main game loop
 function gameLoop(timestamp) {
-    if (!lastIterTime) { 
-        lastIterTime = timestamp; 
-        drawBlock();
-        drawSnake();
-        raf = window.requestAnimationFrame(gameLoop);
+    if (!game.timestamp) {
+        game.timestamp = timestamp;
+        game.renderSnake();        
+        game.renderBlock();
+        game.raf = requestAnimationFrame(gameLoop);
         return;
     }
 
-    let deltaTime = remTime + (timestamp - lastIterTime);
-    while (deltaTime >= timePerStep) {
-        deltaTime -= timePerStep;
-
-        updateSnake();
-        addIterationScore();  
-
-        if (isEndGame()) {
-            handleEndGame();
+    let deltaTime = game.remTime + timestamp - game.timestamp;
+    while (deltaTime >= game.timeframe) {
+        deltaTime -= game.timeframe;
+        
+        if (!game.update()) {
+            game.end();
             return;
-        }     
+        }  
     }
+
+    game.remTime = deltaTime;
+    game.timestamp = timestamp;
     
-    remTime = deltaTime;
-    lastIterTime = timestamp;
-    raf = window.requestAnimationFrame(gameLoop);
+    game.raf = requestAnimationFrame(gameLoop);
 }

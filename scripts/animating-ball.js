@@ -1,10 +1,10 @@
 const canvas = document.querySelector("#drawing-area");
-[canvas.width, canvas.height] = [window.innerWidth, window.innerHeight];
+[canvas.width, canvas.height] = getCanvasSize();
 
 const context = canvas.getContext("2d", { alpha: false });
 const styles = getComputedStyle(document.documentElement);
 
-const timePerFrame = 1000 / 120;
+let timePerFrame = 1000 / 120;
 
 let remTime = 0;
 let crtTime = 0;
@@ -58,19 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let isHolding = false;
-canvas.addEventListener("pointerdown", (event) => {
-    const diffX = event.clientX - ball.x;
-    const diffY = event.clientY - ball.y;
-    if (ball.radius >= diffX && ball.radius <= -diffX && ball.radius >= diffY && ball.radius <= diffY) {
-        isHolding = true;
-    }
-});
 
 let initialX = 0;
 let initialY = 0;
 let initialTime = 0;
-let diffX = 0;
-let diffY = 0;
 
 function handlePointerDown(timestamp) {
     let deltaTime = remTime + timestamp - crtTime;
@@ -83,63 +74,52 @@ function handlePointerDown(timestamp) {
     raf = requestAnimationFrame(handlePointerDown);
 }
 
-canvas.addEventListener("pointerdown", (event) => {
-    if (!isHolding) {
-        diffX = Math.abs(event.clientX - ball.x);
-        diffY = Math.abs(event.clientY - ball.y);
-        if (ball.radius >= diffX && ball.radius >= diffY) {
-            initialX = ball.x;
-            initialY = ball.y;
-            isHolding = true;
-            initialTime = event.timeStamp;
-            crtTime = event.timeStamp;
-            cancelAnimationFrame(raf);
-            raf = requestAnimationFrame(handlePointerDown);
-        }
-    }
-});
-
-canvas.addEventListener("pointermove", (event) => {
-    if (isHolding) {
-        if (event.clientX == ball.x && event.clientY == ball.y) {
-            initialTime = event.timeStamp;
-        }
-        else {
-            ball.x = event.clientX;
-            ball.y = event.clientY; 
-        } 
+canvas.addEventListener("pointerdown", (event) => { 
+    if (!isHolding) { 
+        isHolding = true; 
+        initialX = ball.x;
+        initialY = ball.y;
+        initialTime = event.timeStamp;
+        crtTime = event.timeStamp;
+        ball.x = event.clientX;
+        ball.y = event.clientY;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(handlePointerDown);
     } 
 });
 
+canvas.addEventListener("pointermove", (event) => {
+    if (!isHolding) { return; }
+    ball.x = event.clientX;
+    ball.y = event.clientY;
+});
+
 canvas.addEventListener("pointerup", (event) => {
-    if (isHolding) {
-        const deltaX = ball.x - initialX;
-        const deltaY = ball.y - initialY;
-        const deltaTime = event.timeStamp - initialTime;
-        ball.xVelocity = deltaX / deltaTime;
-        ball.yVelocity = deltaY / deltaTime;
+    const deltaX = ball.x - initialX;
+    const deltaY = ball.y - initialY;
+    const deltaTime = event.timeStamp - initialTime;
 
-        isHolding = false;
-        initialX = 0;
-        initialY = 0;
-        initialTime = 0;
-        diffX = 0;
-        diffY = 0;
+    ball.xVelocity = deltaX / deltaTime;
+    ball.yVelocity = deltaY / deltaTime;
 
-        crtTime = event.timeStamp;
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(gameLoop);
-    }
+    isHolding = false;
+    initialX = 0;
+    initialY = 0;
+    initialTime = 0;
+    crtTime = event.timeStamp;
+
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(gameLoop);
 });
 
 function getCanvasSize() {
-    const usableWidth = window.innerWidth - (window.innerWidth % 16);
-    const usableHeight = window.innerHeight - (window.innerHeight % 16);
+    const usableWidth = window.innerWidth - (window.innerWidth % 8);
+    const usableHeight = window.innerHeight - (window.innerHeight % 8);
     return [usableWidth, usableHeight];    
 }
 
 function drawBackGround() {
-    context.fillStyle = styles.getPropertyValue("--background-color").trim();
+    context.fillStyle = styles.getPropertyValue("--black-olive").trim();
     context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
