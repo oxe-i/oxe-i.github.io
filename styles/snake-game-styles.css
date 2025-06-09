@@ -13,7 +13,17 @@
     --medium-contrast-color: ;
     --piece-color: black;
     --game-over-background-color: rgba(28, 10, 10);
-    --game-over-text-color: #39fa49;
+    --game-over-text-color: #7FE458;
+    --light-red-color: #FF4F4F;
+    --light-green-color: #7FE458;
+    --light-yellow-color: rgb(244, 247, 111);
+}
+
+@font-face {
+    font-family: Atkinson;
+    src: url("./fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2"),
+         url("./fonts/AtkinsonHyperlegible-Regular.ttf") format("ttf");
+    font-display: swap;
 }
 
 * { 
@@ -37,7 +47,7 @@
 #page {
     background: var(--background-color);
     display: flex;
-    font-family: sans-serif;
+    font-family: Atkinson;
     width: 100vw;
     height: 100vh;
     padding: 0 0;
@@ -78,7 +88,7 @@ dialog::backdrop {
 
 body.game-over dialog::backdrop {
     background: var(--game-over-background-color);
-    opacity: 90%;
+    opacity: 98%;
 }
 
 body.game-over #game-over {
@@ -107,8 +117,8 @@ body.game-over #game-over {
             border-radius: 0.5vmin;
             text-transform: uppercase;
             line-height: 1.5;
-            flex-basis: 15vw;
             font-size: 2vw;
+            padding: 0 1vw;
             color: var(--game-over-text-color);
         }
         

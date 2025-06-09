@@ -63,7 +63,7 @@ function setIconToPlay() {
     hlaWdodD0iMTAwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iNSIgeT0
     iNSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAg
     PHBhdGggZD0iTTc1IDUwIEwzNSA3NSBMMzUgMjUgWiIgCiAgICAgICAgICBmaWxsP
-    SJyZ2IoMTgsIDEyNiwgMjQpIiAvPgo8L3N2Zz4=`; 
+    SIjN0ZFNDU4IiAvPgo8L3N2Zz4=`; 
     startPause.querySelector("img").alt = "play button"; 
 }
 
@@ -72,9 +72,9 @@ function setIconToPause() {
     PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9I
     jAgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIG
     hlaWdodD0iMTAwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iMzUiIHk
-    9IjMwIiB3aWR0aD0iMTAiIGhlaWdodD0iNDAiIGZpbGw9InJnYigxOTUsIDIxNCwg
-    MTkpIiAvPgogICAgPHJlY3QgeD0iNTUiIHk9IjMwIiB3aWR0aD0iMTAiIGhlaWdod
-    D0iNDAiIGZpbGw9InJnYigxOTUsIDIxNCwgMTkpIiAvPgo8L3N2Zz4=`;
+    9IjMwIiB3aWR0aD0iMTAiIGhlaWdodD0iNDAiIGZpbGw9InJnYigyNDQsIDI0Nywg
+    MTExKSIgLz4KICAgIDxyZWN0IHg9IjU1IiB5PSIzMCIgd2lkdGg9IjEwIiBoZWlna
+    HQ9IjQwIiBmaWxsPSJyZ2IoMjQ0LCAyNDcsIDExMSkiIC8+Cjwvc3ZnPg==`;
     startPause.querySelector("img").alt = "pause button";
 }
 
@@ -708,7 +708,7 @@ function resetDifficultyButtonsBackground() {
 
 function activateEasyButtonBackground() {
     const backgroundColor = styles.getPropertyValue("--background-color").trim();
-    easyButton.style.background = "rgb(127, 228, 88)";
+    easyButton.style.background = styles.getPropertyValue("--light-green-color").trim();
     mediumButton.style.background = backgroundColor;
     hardButton.style.background = backgroundColor;
 }
@@ -716,7 +716,7 @@ function activateEasyButtonBackground() {
 function activateMediumButtonBackground() {
     const backgroundColor = styles.getPropertyValue("--background-color").trim();
     easyButton.style.background = backgroundColor;
-    mediumButton.style.background = "rgb(233, 236, 7)";
+    mediumButton.style.background = styles.getPropertyValue("--light-yellow-color").trim();
     hardButton.style.background = backgroundColor;
 }
 
@@ -724,7 +724,7 @@ function activateHardButtonBackground() {
     const backgroundColor = styles.getPropertyValue("--background-color").trim();
     easyButton.style.background = backgroundColor;
     mediumButton.style.background = backgroundColor;
-    hardButton.style.background = "rgb(247, 29, 14)";
+    hardButton.style.background = styles.getPropertyValue("--light-red-color").trim();
 }
 
 function increaseDifficulty() {
