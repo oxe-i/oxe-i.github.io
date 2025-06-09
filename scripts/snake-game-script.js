@@ -297,11 +297,12 @@ class Game {
     }
 
     setCanvasSize() {
-        const vMin = Math.floor(Math.min(window.innerWidth, window.innerHeight) / 100);
+        const vW = Math.floor(window.innerWidth / 100);
+        const vH = Math.floor(window.innerHeight / 100);
         const isTouch = isTouchDevice();
         
-        const xOffset = isTouch ? 100 * vMin : 50 * vMin;
-        const yOffset = isTouch ? 10 * vMin : 5 * vMin;
+        const xOffset = isTouch? 40 * vW : 20 * vW;
+        const yOffset = 10 * vH;
 
         const usableWidth = window.innerWidth - xOffset;
         const usableHeight = window.innerHeight - yOffset;

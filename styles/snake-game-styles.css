@@ -1,12 +1,12 @@
 :root {
-    --canvas-width: 90vmin;
-    --canvas-height: 90vmin;
-    --before-canvas-width: 50vmin;
-    --after-canvas-width: 40vmin;
-    --game-canvas-margin: 5vmin;
-    --directional-button-size: 12vmin;
-    --difficulty-button-size: 10vmin;
-    --gameflow-button-size: 20vmin;
+    --canvas-width: 60vw;
+    --canvas-height: 90vh;
+    --before-canvas-width: 20vw;
+    --after-canvas-width: 20vw;
+    --game-canvas-margin: 5vh;
+    --directional-button-size: 4vw;
+    --difficulty-button-size: 4vw;
+    --gameflow-button-size: 7.5vw;
     --canvas-color: rgb(214, 223, 138);
     --background-color: #211d2f;
     --letter-color: #f0f3f9;
@@ -64,7 +64,7 @@ h1 {
     font-family: Atkinson;
     width: 100vw;
     height: 100vh;
-    padding: 0 0;
+    padding: 0;
     align-items: center;
 }
 
