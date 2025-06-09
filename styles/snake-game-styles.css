@@ -17,6 +17,8 @@
     --light-red-color: #FF4F4F;
     --light-green-color: #7FE458;
     --light-yellow-color: rgb(244, 247, 111);
+    --head-text-size: calc(0.75vw + 0.75rem);
+    --common-text-size: calc(0.5vw + 0.5rem)
 }
 
 @font-face {
@@ -100,7 +102,7 @@ dialog::backdrop {
 
 body.game-over dialog::backdrop {
     background: var(--game-over-background-color);
-    opacity: 98%;
+    opacity: 95%;
 }
 
 body.game-over #game-over {
@@ -140,21 +142,19 @@ body.game-over #game-over {
 #alert-message, #tutorial-message {
     background: var(--background-color);
     color: var(--letter-color);
-    font-size: 16px;
+    font-size: calc(0.75vw + 0.75rem);
     position: fixed;
     border-radius: 10px;
     border: 1px solid var(--letter-color);
 }
 
 #tutorial-message {
-    --text-font-size: 18px;
-    --button-font-size: 16px;
-    --button-width: calc(4 * var(--button-font-size));
+    --button-width: calc(4 * var(--common-text-size));
 
     padding: 3vmin;
 
     p {
-        font-size: var(--text-font-size);
+        font-size: var(--common-text-size);
         text-align: justify;
         line-height: 150%;
     }
@@ -163,6 +163,7 @@ body.game-over #game-over {
         display: grid;
         grid-template-columns: [first-button] var(--button-width) 1fr [second-button] var(--button-width);
         align-items: center;
+        margin: 5vh 0 0 0;
     }
 }
 
@@ -170,7 +171,7 @@ body.game-over #game-over {
     background: var(--letter-color);
     color: var(--background-color);
     font-weight: 400;
-    font-size: var(--button-font-size);
+    font-size: var(--common-text-size);
     border-radius: 5px;
 }
 
@@ -205,7 +206,7 @@ body.game-over #game-over {
     display: flex;
     flex-direction: column;
     margin: 0 2vw 5vh 2vw;
-    gap: 2vh;
+    gap: 5vh;
 }
 
 #game-stats h1 { 
@@ -220,11 +221,11 @@ body.game-over #game-over {
 }
 
 #game-stats h1, #score-board {
-    font-size: calc(0.75vw + 0.75rem);
+    font-size: var(--head-text-size);
 }
 
 #show-tutorial {
-    font-size: calc(0.75vw + 0.5rem);
+    font-size: var(--common-text-size);
 }
 
 #difficulty-buttons {
