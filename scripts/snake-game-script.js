@@ -16,6 +16,10 @@ const easyButton = document.querySelector("#easy");
 const mediumButton = document.querySelector("#medium");
 const hardButton = document.querySelector("#hard");
 
+const gameOver = document.querySelector("#game-over");
+const gameOverMessage = gameOver.querySelector("p");
+const playAgain = gameOver.querySelector("#play-again");
+
 const alertMessage = document.querySelector("#alert-message");
 const closeAlert = document.querySelector("#close-alert");
 
@@ -53,12 +57,24 @@ function generateValidRandomNums(xMin, xMax, yMin, yMax, norm) {
 
 // icon setters
 function setIconToPlay() {
-    startPause.querySelector("img").src = "./assets/play.svg"; 
+    startPause.querySelector("img").src = `data:image/svg+xml;base64,
+    PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9I
+    jAgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIG
+    hlaWdodD0iMTAwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iNSIgeT0
+    iNSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAg
+    PHBhdGggZD0iTTc1IDUwIEwzNSA3NSBMMzUgMjUgWiIgCiAgICAgICAgICBmaWxsP
+    SJyZ2IoMTgsIDEyNiwgMjQpIiAvPgo8L3N2Zz4=`; 
     startPause.querySelector("img").alt = "play button"; 
 }
 
 function setIconToPause() {
-    startPause.querySelector("img").src = "./assets/pause.svg";
+    startPause.querySelector("img").src = `data:image/svg+xml;base64,
+    PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9I
+    jAgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIG
+    hlaWdodD0iMTAwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iMzUiIHk
+    9IjMwIiB3aWR0aD0iMTAiIGhlaWdodD0iNDAiIGZpbGw9InJnYigxOTUsIDIxNCwg
+    MTkpIiAvPgogICAgPHJlY3QgeD0iNTUiIHk9IjMwIiB3aWR0aD0iMTAiIGhlaWdod
+    D0iNDAiIGZpbGw9InJnYigxOTUsIDIxNCwgMTkpIiAvPgo8L3N2Zz4=`;
     startPause.querySelector("img").alt = "pause button";
 }
 
@@ -90,14 +106,14 @@ class Piece {
         this.direction = null;
     }
 
-    render(context, pieceSize) {
+    render(context, pieceSize, border) {
         context.fillStyle = styles.getPropertyValue("--piece-color").trim();
-        context.fillRect(this.x + 1, this.y + 1, pieceSize, pieceSize);
+        context.fillRect(this.x + border, this.y + border, pieceSize, pieceSize);
     }
 
-    clear(context, pieceSize) {
+    clear(context, pieceSize, border) {
         context.fillStyle = styles.getPropertyValue("--canvas-color").trim();
-        context.fillRect(this.x + 1, this.y + 1, pieceSize, pieceSize);
+        context.fillRect(this.x + border, this.y + border, pieceSize, pieceSize);
     }
 
     move(speed) {
@@ -128,8 +144,8 @@ class Snake {
         this.segments = segments;
     }
 
-    renderFull(context, pieceSize) {
-        this.segments.forEach(segment => segment.render(context, pieceSize));
+    renderFull(context, pieceSize, border) {
+        this.segments.forEach(segment => segment.render(context, pieceSize, border));
     }
 
     changeDirection(newDirection) {
@@ -156,7 +172,7 @@ class Snake {
         }
     }
 
-    updateAndRender(newPiece, context, pieceSize, block) {
+    updateAndRender(newPiece, context, pieceSize, border, block) {
         this.updateDirection();
 
         newPiece.x = this.segments[0].x;
@@ -169,10 +185,10 @@ class Snake {
             return true;
         }
 
-        this.segments.at(-1).clear(context, pieceSize);
+        this.segments.at(-1).clear(context, pieceSize, border);
         this.segments.pop();
         this.segments.unshift(newPiece);
-        this.segments[0].render(context, pieceSize);
+        this.segments[0].render(context, pieceSize, border);
 
         return false;
     }
@@ -181,29 +197,36 @@ class Snake {
         return this.segments.some(segment => segment.x == x && segment.y == y);
     }
 
-    touchesGrid(width, height, pieceSize) {
+    touchesGrid(width, height, drawingSize, border) {
         return this.segments[0].x == 0 && this.segments[0].direction == Direction.LEFT
         || this.segments[0].y == 0 && this.segments[0].direction == Direction.UP
-        || this.segments[0].x == width - (pieceSize + 2) && this.segments[0].direction == Direction.RIGHT
-        || this.segments[0].y == height - (pieceSize + 2) && this.segments[0].direction == Direction.DOWN;
+        || this.segments[0].x == width - (drawingSize + border) && this.segments[0].direction == Direction.RIGHT
+        || this.segments[0].y == height - (drawingSize + border) && this.segments[0].direction == Direction.DOWN;
     }
 
     touchesTail() {
-        return this.segments.slice(1).some(segment => segment.x == this.segments[0].x && segment.y == this.segments[0].y);
+        return this.segments
+            .slice(1)
+            .some(segment => 
+                segment.x == this.segments[0].x && 
+                segment.y == this.segments[0].y
+            );
     }
 
-    scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits) {
-        const crtCoordinates = this.segments.map(segment => [segment.x, segment.y]);
-        
+    scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits) {  
+        const coordinates = this.segments.map(segment => { return { x : segment.x, y: segment.y } });
+
         this.segments[0].scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits);
 
         for (let i = 1; i < this.segments.length; ++i) {
-            if (this.segments[i].x < crtCoordinates[i - 1][0]) { this.segments[i].x = this.segments[i - 1].x - newDrawingSize; }
-            else if (this.segments[i].x > crtCoordinates[i - 1][0]) { this.segments[i].x = this.segments[i - 1].x + newDrawingSize; }
+            const coordinate = coordinates[i - 1];
+
+            if (this.segments[i].x < coordinate.x) { this.segments[i].x = this.segments[i - 1].x - newDrawingSize; }
+            else if (this.segments[i].x > coordinate.x) { this.segments[i].x = this.segments[i - 1].x + newDrawingSize; }
             else { this.segments[i].x = this.segments[i - 1].x; }
 
-            if (this.segments[i].y < crtCoordinates[i - 1][1]) { this.segments[i].y = this.segments[i - 1].y - newDrawingSize; }
-            else if (this.segments[i].y > crtCoordinates[i - 1][1]) { this.segments[i].y = this.segments[i - 1].y + newDrawingSize; }
+            if (this.segments[i].y < coordinate.y) { this.segments[i].y = this.segments[i - 1].y - newDrawingSize; }
+            else if (this.segments[i].y > coordinate.y) { this.segments[i].y = this.segments[i - 1].y + newDrawingSize; }
             else { this.segments[i].y = this.segments[i - 1].y; }
         }
     }
@@ -222,12 +245,15 @@ class Game {
 
         this.gamestate = GameState.NOT_STARTED;
         this.difficulty = Difficulty.MEDIUM;
+        this.border = 1;
 
         this.canvas = document.querySelector("#game-canvas");
         this.context = this.canvas.getContext("2d", {alpha: false});
-        this.setCanvasSize();
+        this.setCanvasSize();        
+        
+        this.pieceSize = this.getPieceSize();
+        this.drawingSize = this.pieceSize + this.border;
 
-        this.pieceSize = this.getPieceSize();            
         this.snake = this.initializeSnake();       
         this.block = this.createBlock();  
         this.crtScore = 0;
@@ -248,21 +274,20 @@ class Game {
     }
 
     renderSnake() {
-        this.snake.renderFull(this.context, this.pieceSize);
+        this.snake.renderFull(this.context, this.pieceSize, this.border);
     }
 
     renderBlock() {
-        this.block.render(this.context, this.pieceSize);
+        this.block.render(this.context, this.pieceSize, this.border);
     }
 
     update() {
         if (this.isEnd()) { return false; }
 
-        this.addIterationScore();
         this.snake.updateDirection();
         this.snake.changeDirection(this.directionQueue.shift());
 
-        if (this.snake.updateAndRender(new Piece(), this.context, this.pieceSize, this.block)) {
+        if (this.snake.updateAndRender(new Piece(), this.context, this.pieceSize, this.border, this.block)) {
             this.addBlockScore();
             this.block = this.createBlock();
             this.renderBlock();
@@ -274,45 +299,55 @@ class Game {
     setCanvasSize() {
         const vMin = Math.floor(Math.min(window.innerWidth, window.innerHeight) / 100);
         const isTouch = isTouchDevice();
+        
         const xOffset = isTouch ? 100 * vMin : 50 * vMin;
         const yOffset = isTouch ? 10 * vMin : 5 * vMin;
+
         const usableWidth = window.innerWidth - xOffset;
         const usableHeight = window.innerHeight - yOffset;
-        this.canvas.width = usableWidth - (usableWidth % 32) + 1;
-        this.canvas.height = usableHeight - (usableHeight % 32) + 1;
+        const normalizedWidth = usableWidth - (usableWidth % 32);
+        const normalizedHeight = usableHeight - (usableHeight % 32);
+
+        this.canvas.width = normalizedWidth + this.border;
+        this.canvas.height = normalizedHeight + this.border;        
+
         document.documentElement.style.setProperty("--canvas-height", `${this.canvas.height}px`);
         document.documentElement.style.setProperty("--canvas-width", `${this.canvas.width}px`);
     }
 
     resize() {
-        if (this.gamestate == GameState.NOT_STARTED) {
-            this.setCanvasSize();     
-            this.renderCanvas();
-            return;
-        }   
+        switch (this.gamestate) {
+            case GameState.NOT_STARTED:
+                this.setCanvasSize();     
+                this.renderCanvas();
+                return;
+            case GameState.RUNNING:
+                this.pause();
+            default:
+                const prevDrawingSize = this.drawingSize;
+                const prevWidthUnits = (this.canvas.width - this.border) / prevDrawingSize;
+                const prevHeightUnits = (this.canvas.height - this.border) / prevDrawingSize;            
 
-        const prevDrawingSize = this.pieceSize + 1;
-        const prevWidthUnits = (this.canvas.width - 1) / prevDrawingSize;
-        const prevHeightUnits = (this.canvas.height - 1) / prevDrawingSize;            
+                this.setCanvasSize();
+                this.pieceSize = this.getPieceSize();
+                this.drawingSize = this.pieceSize + this.border;
+                
+                const newDrawingSize = this.drawingSize;
+                const newWidthUnits = (this.canvas.width - this.border) / newDrawingSize;
+                const newHeightUnits = (this.canvas.height - this.border) / newDrawingSize;
 
-        this.setCanvasSize();
-        this.pieceSize = this.getPieceSize();
-        
-        const newDrawingSize = this.pieceSize + 1;
-        const newWidthUnits = (this.canvas.width - 1) / newDrawingSize;
-        const newHeightUnits = (this.canvas.height - 1) / newDrawingSize;
+                this.snake.scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits);   
+                this.block.scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits);
 
-        this.snake.scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits);   
-        this.block.scale(prevDrawingSize, newDrawingSize, prevWidthUnits, newWidthUnits, prevHeightUnits, newHeightUnits);
-
-        this.renderCanvas();
-        this.renderBlock();
-        this.renderSnake();
+                this.renderCanvas();
+                this.renderBlock();
+                this.renderSnake();
+        }
     }
 
     getPieceSize() {
-        const minCanvasSize = Math.min(this.canvas.width, this.canvas.height) - 1;
-        const maxCanvasSize = Math.max(this.canvas.width, this.canvas.height) - 1;
+        const minCanvasSize = Math.min(this.canvas.width, this.canvas.height) - this.border;
+        const maxCanvasSize = Math.max(this.canvas.width, this.canvas.height) - this.border;
         const avgCanvasSize = (minCanvasSize + maxCanvasSize) / 2;
 
         const minDivisors = getDivisors(minCanvasSize);
@@ -322,8 +357,8 @@ class Game {
 
         const possibleValue = possibleMaxValues.findLast(divisor => possibleMinValues.includes(divisor) && divisor >= 0.02 * minCanvasSize && divisor <= 0.05 * minCanvasSize);
 
-        if (possibleValue) { return possibleValue - 1; }
-        return (avgCanvasSize / 64);
+        if (possibleValue) { return possibleValue - this.border; }
+        return (avgCanvasSize / 32) - this.border;
     }
 
     initializeSnake() {
@@ -331,8 +366,8 @@ class Game {
             const segment = new Piece();
             const centerX = this.canvas.width / 2;
             const centerY = this.canvas.height / 2;
-            segment.x = centerX - (centerX % (this.pieceSize + 1)) + idx * (this.pieceSize + 1);
-            segment.y = centerY - (centerY % (this.pieceSize + 1));            
+            segment.x = centerX - (centerX % this.drawingSize) + idx * (this.drawingSize);
+            segment.y = centerY - (centerY % this.drawingSize);            
             segment.direction = Direction.LEFT;
             return segment;
         });
@@ -344,16 +379,16 @@ class Game {
         const block = new Piece();
 
         [block.x, block.y] = generateValidRandomNums(
-            0, this.canvas.width - (this.pieceSize + 1),
-            0, this.canvas.height - (this.pieceSize + 1),
-            this.pieceSize + 1
+            0, this.canvas.width - this.drawingSize,
+            0, this.canvas.height - this.drawingSize,
+            this.drawingSize
         );
         
         while (this.snake.checkCollision(block.x, block.y)) { 
             [block.x, block.y] = generateValidRandomNums(
-                0, this.canvas.width - (this.pieceSize + 1),
-                0, this.canvas.height - (this.pieceSize + 1),
-                this.pieceSize + 1
+                0, this.canvas.width - this.drawingSize,
+                0, this.canvas.height - this.drawingSize,
+                this.drawingSize
             );
         }
 
@@ -364,11 +399,14 @@ class Game {
         setIconToPlay();
         this.gamestate = GameState.ENDED;
         this.timestamp = 0;
+        gameOver.showModal();  
+        document.body.classList.add("game-over");      
         window.cancelAnimationFrame(this.raf);
     }
 
     reset() {
         this.difficulty = Difficulty.MEDIUM;  
+        this.directionQueue = [];
         this.snake = this.initializeSnake();
         this.block = this.createBlock();
         this.timestamp = 0;
@@ -381,8 +419,7 @@ class Game {
     start() {
         setIconToPause();
         this.gamestate = GameState.RUNNING;        
-        activateMediumButtonBackground()      
-        
+        activateMediumButtonBackground();         
         this.raf = requestAnimationFrame(gameLoop); 
     }
 
@@ -402,19 +439,17 @@ class Game {
         this.reset();
         setIconToPlay();
         this.gamestate = GameState.NOT_STARTED;                      
-
         cancelAnimationFrame(this.raf);
     }
 
     continue() {
         setIconToPause();
         this.gamestate = GameState.RUNNING;
-
         this.raf = window.requestAnimationFrame(gameLoop);
     }
 
     isEnd() {
-        const touchesGrid = this.snake.touchesGrid(this.canvas.width, this.canvas.height, this.pieceSize);        
+        const touchesGrid = this.snake.touchesGrid(this.canvas.width, this.canvas.height, this.drawingSize, this.border);        
         const touchesTail = this.snake.touchesTail();
 
         return touchesGrid || touchesTail;
@@ -438,13 +473,13 @@ class Game {
     addBlockScore() {
         switch (this.difficulty) {
             case Difficulty.EASY:
-                this.crtScore += 500 * this.snake.size();
+                this.crtScore += 50 * this.snake.size();
                 break;
             case Difficulty.MEDIUM:
-                this.crtScore += 1000 * this.snake.size();
+                this.crtScore += 100 * this.snake.size();
                 break;
             case Difficulty.HARD:
-                this.crtScore += 2000 * this.snake.size();
+                this.crtScore += 200 * this.snake.size();
                 break;
         }
         scoreElem.textContent = `${this.crtScore}`;
@@ -482,6 +517,16 @@ alertMessage.addEventListener("close", () => {
     }
 });
 
+gameOver.addEventListener("close", () => {
+    document.body.classList.remove("game-over");
+    game.reset();
+});
+
+playAgain.addEventListener("click", () => {
+    gameOver.close();
+    game.start();
+});
+
 nextTutorial.addEventListener("click", () => {
     if (endTutorial) {
         localStorage.setItem("skipTutorial", "true");
@@ -491,38 +536,47 @@ nextTutorial.addEventListener("click", () => {
 
     switch (tutorialStep) {
         case 0: 
-            tutorialText.innerHTML = "In this game, you move a snake around to catch as many blocks as you can.";
+            tutorialText.innerHTML = `In this game, you move a snake around to catch as many blocks as you can.<br>
+                                        Once the snake touches a block, the block is added to its head and the snake grows.<br>
+                                        If the snake touches the grid or its body, however, the game ends.`;
             break;
         case 1:
-            tutorialText.innerHTML = "Once the snake touches a block, the block is added to its head and the snake grows.";
+            if (isTouchDevice()) {
+                tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right of the page.<br>
+                                        The snake moves faster on harder difficulties.`;
+            }
+            else {
+                tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right of the page.<br>
+                                        It's also possible to increase or reduce the difficulty pressing + and -, respectively. <br>
+                                        The snake moves faster on harder difficulties.`;
+            }
             break;
         case 2:
-            tutorialText.innerHTML = "If the snake touches the grid or its body, however, the game ends.";
+            tutorialText.innerHTML = `There's a score counter below the difficulty buttons. <br>
+                You gain points whenever you catch a block and also as the time passes. <br>
+                The greater the snake, the more points you gain.`;
             break;
         case 3:
+            if (isTouchDevice()) {
+                tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game. <br>
+                    Once the game starts, you can pause it too.`
+            }
+            else {
+                tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game. <br>
+                    Once the game starts, you can pause it too. <br>
+                    You can also start, restart or pause the game pressing spacebar.`
+            }
+            break;
+        case 4:
             if (isTouchDevice()) {
                 tutorialText.innerHTML = "You can move the snake with the directional pad on the left.";
             }
             else {
                 tutorialText.innerHTML = `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br> 
-                                            W moves up, S moves down, A moves left and D moves right.<br>
-                                          You can also start, restart or pause the game pressing spacebar.`;
+                                            W moves up, S moves down, A moves left and D moves right.`;
             }                
             break;
-        case 4:
-            tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right of the page.<br>
-                                        The snake moves faster on harder difficulties.`;
-            break;
         case 5:
-            tutorialText.innerHTML = `There's a score counter below the difficulty buttons. <br>
-                You gain points whenever you catch a block and also as the time passes. <br>
-                The greater the snake, the more points you gain.`;
-            break;
-        case 6:
-            tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game. <br>
-                Once the game starts, you can pause it too.`
-            break;
-        case 7:
             tutorialText.innerHTML = "That's it! Do you want me to repeat?";
             nextTutorial.innerHTML = "Yes";
             closeTutorial.innerHTML = "No";
@@ -545,6 +599,7 @@ closeTutorial.addEventListener("click", () => {
         tutorialText.innerHTML = "Do you want to skip this tutorial in the future?"
         nextTutorial.innerHTML = "Yes";
         closeTutorial.innerHTML = "No";
+        nextTutorial.focus();
         return;
     }
     else {
@@ -582,26 +637,34 @@ function handleGameStateChange() {
 }
 
 document.addEventListener("keydown", (state) => {
+    if 
+    (
+        tutorialMessage.open ||
+        alertMessage.open ||
+        gameOver.open
+    ) 
+    { return; }
+
     switch (state.key) {
         case "ArrowUp":
         case "w":
         case "W":
-            game.directionQueue.push(Direction.UP);
+            if (game.gamestate == GameState.RUNNING) { game.directionQueue.push(Direction.UP); }
             break;
         case "ArrowDown":
         case "s":
         case "S":
-            game.directionQueue.push(Direction.DOWN);
+            if (game.gamestate == GameState.RUNNING) { game.directionQueue.push(Direction.DOWN); }
             break;
         case "ArrowRight":
         case "d":
         case "D":
-            game.directionQueue.push(Direction.RIGHT);
+            if (game.gamestate == GameState.RUNNING) { game.directionQueue.push(Direction.RIGHT); }
             break;
         case "ArrowLeft":
         case "a":
         case "A":
-            game.directionQueue.push(Direction.LEFT);
+            if (game.gamestate == GameState.RUNNING) { game.directionQueue.push(Direction.LEFT); }
             break;
         case " ":
             state.preventDefault();

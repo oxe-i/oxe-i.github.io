@@ -12,6 +12,8 @@
     --letter-color: #f0f3f9;
     --medium-contrast-color: ;
     --piece-color: black;
+    --game-over-background-color: rgba(28, 10, 10);
+    --game-over-text-color: #39fa49;
 }
 
 * { 
@@ -19,6 +21,7 @@
 }
 
 .button {
+    cursor: pointer;
     color: var(--letter-color);            
     padding: 1vmin;
     font-weight: 400; 
@@ -70,7 +73,46 @@
 }
 
 dialog::backdrop {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
+}
+
+body.game-over dialog::backdrop {
+    background: var(--game-over-background-color);
+    opacity: 90%;
+}
+
+body.game-over #game-over {
+    border: 0;
+    background: none;    
+
+    p {
+        text-align: center;
+        width: auto;
+        height: 6vw;
+        font-size: 6vw;
+        text-transform: uppercase;
+        color: var(--game-over-text-color);
+    }
+
+    div {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+
+        button {
+            border: 0;
+            background: var(--game-over-background-color);
+            outline: 1px solid var(--game-over-text-color);
+            border-radius: 0.5vmin;
+            text-transform: uppercase;
+            line-height: 1.5;
+            flex-basis: 15vw;
+            font-size: 2vw;
+            color: var(--game-over-text-color);
+        }
+        
+    }
 }
 
 #alert-message, #tutorial-message {
@@ -83,12 +125,16 @@ dialog::backdrop {
 }
 
 #tutorial-message {
-    --button-font-size: 14px;
-    --button-width: calc(5 * var(--button-font-size));
+    --text-font-size: 18px;
+    --button-font-size: 16px;
+    --button-width: calc(4 * var(--button-font-size));
+
+    padding: 3vmin;
 
     p {
+        font-size: var(--text-font-size);
         text-align: justify;
-        line-height: 130%;
+        line-height: 150%;
     }
 
     div {

@@ -7,9 +7,13 @@
         <link rel="stylesheet" href="./styles/snake-game-styles.css">
     </head>
     <body id="page">
+        <dialog id="game-over">
+            <p>Game Over</p>
+            <div><button autofocus id="play-again" class="button">Play Again</button></div>
+        </dialog>
         <dialog id="alert-message">
             <p>The game is best experienced with the screen in landscape.</p>
-            <button autofocus id="close-alert">OK</button>
+            <button autofocus id="close-alert" class="button">OK</button>
         </dialog>
         <dialog id="tutorial-message">
             <p>Do you want to see the tutorial?</p>
@@ -20,16 +24,32 @@
         </dialog>
         <div id="directional-buttons">
             <button class="button" id="up">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNSBaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" alt="up" />
+                <img src="data:image/svg+xml;base64,
+                PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzM
+                CAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNS
+                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" 
+                alt="up" />
             </button>
             <button class="button" id="left">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNSBaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" alt="left" />
+                <img src="data:image/svg+xml;base64,
+                PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzM
+                CAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNS
+                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" 
+                alt="left" />
             </button>
             <button class="button" id="down">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNSBaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" alt="down" />
+                <img src="data:image/svg+xml;base64,
+                PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzM
+                CAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNS
+                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" 
+                alt="down" />
             </button>
             <button class="button" id="right">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNSBaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" alt="right" />
+                <img src="data:image/svg+xml;base64,
+                PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzM
+                CAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNS
+                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" 
+                alt="right" />
             </button>
         </div>
         <div id="game">
@@ -40,13 +60,34 @@
                 <h1>difficulty:</h1>
                 <div id="difficulty-buttons">
                     <button class="button" id="easy">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjBmM2Y5IiAvPgogICAgPHJlY3QgeD0iNSIgeT0iNSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iNDAiIHk9IjYwIiB3aWR0aD0iMjAiIGhlaWdodD0iMzAiIGZpbGw9InJnYigxMjcsIDIyOCwgODgpIiAvPgo8L3N2Zz4=" alt="easy button" />
+                        <img src="data:image/svg+xml;base64,
+                        PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ij
+                        AgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhl
+                        aWdodD0iMTAwIiBmaWxsPSIjZjBmM2Y5IiAvPgogICAgPHJlY3QgeD0iNSIgeT0iNS
+                        Igd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJl
+                        Y3QgeD0iNDAiIHk9IjYwIiB3aWR0aD0iMjAiIGhlaWdodD0iMzAiIGZpbGw9InJnYi
+                        gxMjcsIDIyOCwgODgpIiAvPgo8L3N2Zz4=" 
+                        alt="easy button" />
                     </button>
                     <button class="button" id="medium">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjBmM2Y5IiAvPgogICAgPHJlY3QgeD0iNSIgeT0iNSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iNDAiIHk9IjQwIiB3aWR0aD0iMjAiIGhlaWdodD0iNTAiIGZpbGw9InJnYigyMzMsIDIzNiwgNykiIC8+Cjwvc3ZnPg==" alt="medium button" />
+                        <img src="data:image/svg+xml;base64,
+                        PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ij
+                        AgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhl
+                        aWdodD0iMTAwIiBmaWxsPSIjZjBmM2Y5IiAvPgogICAgPHJlY3QgeD0iNSIgeT0iNS
+                        Igd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJl
+                        Y3QgeD0iNDAiIHk9IjQwIiB3aWR0aD0iMjAiIGhlaWdodD0iNTAiIGZpbGw9InJnYi
+                        gyMzMsIDIzNiwgNykiIC8+Cjwvc3ZnPg==" 
+                        alt="medium button" />
                     </button>
                     <button class="button" id="hard">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjBmM2Y5IiAvPgogICAgPHJlY3QgeD0iNSIgeT0iNSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iNDAiIHk9IjIwIiB3aWR0aD0iMjAiIGhlaWdodD0iNzAiIGZpbGw9InJnYigyNDcsIDI5LCAxNCkiIC8+Cjwvc3ZnPg==" alt="hard button" />
+                        <img src="data:image/svg+xml;base64,
+                        PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ij
+                        AgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhl
+                        aWdodD0iMTAwIiBmaWxsPSIjZjBmM2Y5IiAvPgogICAgPHJlY3QgeD0iNSIgeT0iNS
+                        Igd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJl
+                        Y3QgeD0iNDAiIHk9IjIwIiB3aWR0aD0iMjAiIGhlaWdodD0iNzAiIGZpbGw9InJnYi
+                        gyNDcsIDI5LCAxNCkiIC8+Cjwvc3ZnPg==" 
+                        alt="hard button" />
                     </button>
                 </div>
                 <div id="score-board">
@@ -59,10 +100,22 @@
             </div>
             <div id="game-flow-buttons">
                 <button class="button" id="start-pause">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iNSIgeT0iNSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHBhdGggZD0iTTc1IDUwIEwzNSA3NSBMMzUgMjUgWiIgCiAgICAgICAgICBmaWxsPSJyZ2IoMTgsIDEyNiwgMjQpIiAvPgo8L3N2Zz4=" alt="play button" />
+                    <img src="data:image/svg+xml;base64,
+                    PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMC
+                    AxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0i
+                    MTAwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iNSIgeT0iNSIgd2lkdGg9Ij
+                    kwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHBhdGggZD0iTTc1IDUw
+                    IEwzNSA3NSBMMzUgMjUgWiIgCiAgICAgICAgICBmaWxsPSJyZ2IoMTgsIDEyNiwgMjQpIi
+                    AvPgo8L3N2Zz4=" 
+                    alt="play button" />
                 </button>
                 <button class="button" id="stop">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9InJnYigyNTAsIDksIDIyKSIgLz4KPC9zdmc+" alt="stop button" />
+                    <img src="data:image/svg+xml;base64,
+                    PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMC
+                    AxMDAgMTAwIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0i
+                    MTAwIiBmaWxsPSIjMjExZDJmIiAvPgogICAgPHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD
+                    0iNDAiIGhlaWdodD0iNDAiIGZpbGw9InJnYigyNTAsIDksIDIyKSIgLz4KPC9zdmc+" 
+                    alt="stop button" />
                 </button>
             </div>  
         </div>    
