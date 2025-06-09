@@ -23,6 +23,15 @@
     font-family: Atkinson;
     src: url("./fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2"),
          url("./fonts/AtkinsonHyperlegible-Regular.ttf") format("ttf");
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Atkinson;
+    src: url("./fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2"),
+         url("./fonts/AtkinsonHyperlegible-Bold.ttf") format("ttf");
+    font-weight: 700;
     font-display: swap;
 }
 
