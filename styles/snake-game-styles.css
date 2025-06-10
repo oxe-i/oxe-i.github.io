@@ -8,9 +8,9 @@
     --difficulty-button-size: 12vh;
     --gameflow-button-size: 20vh;
     --canvas-color: rgb(214, 223, 138);
-    --background-color: #211d2f;
+    --background-color: #1B0F21;
     --letter-color: #f0f3f9;
-    --medium-contrast-color: ;
+    --medium-contrast-color: #33203d;
     --piece-color: black;
     --game-over-background-color: rgba(28, 10, 10);
     --game-over-text-color: #7FE458;
@@ -254,7 +254,7 @@ body.game-over #game-over {
 #score {
     text-align: center;
     flex-grow: 1;
-    background: #302b42;
+    background: var(--medium-contrast-color);
     border-radius: 5px;
     margin: 0;
     padding: 0;
@@ -267,7 +267,7 @@ body.game-over #game-over {
 
 #show-tutorial {
     flex-grow: 1;
-    background: #302b42; 
+    background: var(--medium-contrast-color); 
     text-transform: capitalize;
     border: 0; 
 }
