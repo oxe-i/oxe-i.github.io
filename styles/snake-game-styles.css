@@ -4,9 +4,9 @@
     --before-canvas-width: 20vw;
     --after-canvas-width: 20vw;
     --game-canvas-margin: 5vh;
-    --directional-button-size: 4vw;
-    --difficulty-button-size: 4vw;
-    --gameflow-button-size: 7.5vw;
+    --directional-button-size: 10vh;
+    --difficulty-button-size: 12vh;
+    --gameflow-button-size: 20vh;
     --canvas-color: rgb(214, 223, 138);
     --background-color: #211d2f;
     --letter-color: #f0f3f9;
@@ -17,8 +17,8 @@
     --light-red-color: #FF4F4F;
     --light-green-color: #7FE458;
     --light-yellow-color: rgb(244, 247, 111);
-    --head-text-size: calc(0.75vw + 0.75rem);
-    --common-text-size: calc(0.5vw + 0.5rem)
+    --head-text-size: 1.25vmax;
+    --common-text-size: 1vmax;
 }
 
 @font-face {
@@ -41,6 +41,15 @@
     box-sizing: border-box;
 }
 
+#page {
+    background: var(--background-color);
+    display: flex;
+    font-family: Atkinson;
+    width: 100vw;
+    height: 100vh;
+    padding: 5vh 0;
+}
+
 h1 {
     font-weight: 400;
 }
@@ -58,19 +67,9 @@ h1 {
     justify-content: center;
 }
 
-#page {
-    background: var(--background-color);
-    display: flex;
-    font-family: Atkinson;
-    width: 100vw;
-    height: 100vh;
-    padding: 0;
-    align-items: center;
-}
-
 #directional-buttons { display: none; }
 
-@media screen and (pointer: coarse) {
+@media screen  and (pointer: coarse) {
     #directional-buttons {
         display: block;
         min-width: var(--before-canvas-width);
@@ -142,7 +141,7 @@ body.game-over #game-over {
 #alert-message, #tutorial-message {
     background: var(--background-color);
     color: var(--letter-color);
-    font-size: calc(0.75vw + 0.75rem);
+    font-size: var(--common-text-size);
     position: fixed;
     border-radius: 10px;
     border: 1px solid var(--letter-color);
@@ -156,7 +155,7 @@ body.game-over #game-over {
     p {
         font-size: var(--common-text-size);
         text-align: justify;
-        line-height: 150%;
+        line-height: 1.5;
     }
 
     div {
@@ -195,22 +194,21 @@ body.game-over #game-over {
 
 #after-canvas {
     height: var(--canvas-height);
-    width: calc(100% - var(--canvas-width));
+    min-width: var(--after-canvas-width);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
+    padding: 0;
 }
 
 #game-stats {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    margin: 0 2vw 5vh 2vw;
+    margin: 0 2vw;
     gap: 5vh;
 }
 
 #game-stats h1 { 
-    text-align: center;
     margin: 0;
     padding: 0;
     text-transform: uppercase;
@@ -220,8 +218,9 @@ body.game-over #game-over {
     color: var(--letter-color);
 }
 
-#game-stats h1, #score-board {
+#game-stats h1, #score-title, #score {
     font-size: var(--head-text-size);
+    text-align: center;
 }
 
 #show-tutorial {
@@ -229,11 +228,10 @@ body.game-over #game-over {
 }
 
 #difficulty-buttons {
-    flex-grow: 1;
     display: flex;
+    justify-content: space-between;
+    margin: 0;
     padding: 0;
-    align-items: center;
-    justify-content: space-around;
 }
 
 #easy, #medium, #hard { 
@@ -241,10 +239,17 @@ body.game-over #game-over {
 }
 
 #score-board {
-    height: auto;
     display: flex;
+    justify-content: space-between;
     text-transform: uppercase;
-    gap: 1vw;
+    margin: 0 2vw;
+    padding: 0;
+    gap: 2vw;
+}
+
+#score-title {
+    margin: 0;
+    padding: 0;
 }
 
 #score {
@@ -252,31 +257,33 @@ body.game-over #game-over {
     flex-grow: 1;
     background: #302b42;
     border-radius: 5px;
+    margin: 0;
+    padding: 0;
 }
 
 #control-panel {
     display: flex;
-    flex-basis: 10%;
+    margin: 0 2vw;
 }
 
 #show-tutorial {
     flex-grow: 1;
     background: #302b42; 
     text-transform: capitalize;
-    border: 0;
-    margin: 5vh 2vw;
+    border: 0; 
 }
 
 #game-flow-buttons {
-    flex-grow: 5;
-    display: grid;
-    grid-template-rows: 1fr var(--gameflow-button-size) 1fr;
-    grid-template-columns: 1fr var(--gameflow-button-size) 1fr var(--gameflow-button-size) 1fr;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5vh 2vw;
 }
 
-#start-pause, #stop { grid-row: 2/3; }
-#start-pause { grid-column: 2/3; }
-#stop { grid-column: 4/5; }
+#start-pause, #stop { 
+    width: var(--gameflow-button-size);
+    aspect-ratio: 1;
+}
 
 
 
