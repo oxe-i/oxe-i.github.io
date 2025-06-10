@@ -159,10 +159,14 @@ body.game-over #game-over {
     }
 
     div {
-        display: grid;
-        grid-template-columns: [first-button] var(--button-width) 1fr [second-button] var(--button-width);
+        display: flex;
+        justify-content: space-between;
         align-items: center;
         margin: 5vh 0 0 0;
+    }
+
+    button {
+        width: var(--button-width);
     }
 }
 
@@ -174,13 +178,8 @@ body.game-over #game-over {
     border-radius: 5px;
 }
 
-#next-tutorial { grid-column: first-button; }
-
-#close-tutorial { grid-column: second-button; }
-
 #game {
     display: flex;
-    justify-content: center;
     height: var(--canvas-height);
     width: var(--canvas-width);
 }
@@ -197,8 +196,8 @@ body.game-over #game-over {
     min-width: var(--after-canvas-width);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     padding: 0;
+    gap: 5vh;
 }
 
 #game-stats {
@@ -274,10 +273,11 @@ body.game-over #game-over {
 }
 
 #game-flow-buttons {
+    flex-grow: 1;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 5vh 2vw;
+    margin: 0 2vw;
 }
 
 #start-pause, #stop { 

@@ -554,8 +554,7 @@ nextTutorial.addEventListener("click", () => {
             break;
         case 2:
             tutorialText.innerHTML = `There's a score counter below the difficulty buttons. <br>
-                You gain points whenever you catch a block and also as the time passes. <br>
-                The greater the snake, the more points you gain.`;
+                You gain points whenever you catch a blocks. The greater the snake, the more points you gain.`;
             break;
         case 3:
             if (isTouchDevice()) {
@@ -565,7 +564,7 @@ nextTutorial.addEventListener("click", () => {
             else {
                 tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game. <br>
                     Once the game starts, you can pause it too. <br>
-                    You can also start, restart or pause the game pressing spacebar.`
+                    You can also start, pause or continue the game pressing spacebar.`
             }
             break;
         case 4:
