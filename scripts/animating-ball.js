@@ -75,26 +75,19 @@ function handlePointerDown(timestamp) {
 }
 
 canvas.addEventListener("pointerdown", (event) => { 
-    if (!isHolding) { 
-        isHolding = true; 
-        initialX = ball.x;
-        initialY = ball.y;
-        initialTime = event.timeStamp;
-        crtTime = event.timeStamp;
-        ball.x = event.clientX;
-        ball.y = event.clientY;
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(handlePointerDown);
-    } 
-});
-
-canvas.addEventListener("pointermove", (event) => {
-    if (!isHolding) { return; }
+    isHolding = true;
     ball.x = event.clientX;
     ball.y = event.clientY;
 });
 
+canvas.addEventListener("pointermove", (event) => {
+    if (!isHolding) { return; }
+    
+});
+
 canvas.addEventListener("pointerup", (event) => {
+    isHolding = false;
+
     const deltaX = ball.x - initialX;
     const deltaY = ball.y - initialY;
     const deltaTime = event.timeStamp - initialTime;
@@ -119,7 +112,7 @@ function getCanvasSize() {
 }
 
 function drawBackGround() {
-    context.fillStyle = styles.getPropertyValue("--black-olive").trim();
+    context.fillStyle = styles.getPropertyValue("--background-color").trim();
     context.fillRect(0, 0, canvas.width, canvas.height);
 }
 

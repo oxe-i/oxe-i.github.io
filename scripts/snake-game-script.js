@@ -427,6 +427,7 @@ class Game {
     stop() {
         this.reset();
         setIconToPlay();
+        resetDifficultyButtonsBackground();
         this.gamestate = GameState.NOT_STARTED;                      
         cancelAnimationFrame(this.raf);
     }
@@ -445,30 +446,32 @@ class Game {
     }
 
     addIterationScore() {
+        const multiplier = this.snake.size() - 1;
         switch (this.difficulty) {
             case Difficulty.EASY:
-                this.crtScore += 25 * this.snake.size();
+                this.crtScore += 25 * multiplier;
                 break;
             case Difficulty.MEDIUM:
-                this.crtScore += 50 * this.snake.size();
+                this.crtScore += 50 * multiplier;
                 break;
             case Difficulty.HARD:
-                this.crtScore += 75 * this.snake.size();
+                this.crtScore += 75 * multiplier;
                 break;
         }
         scoreElem.textContent = `${this.crtScore}`;
     }
 
     addBlockScore() {
+        const multiplier = this.snake.size() - 1;
         switch (this.difficulty) {
             case Difficulty.EASY:
-                this.crtScore += 50 * this.snake.size();
+                this.crtScore += 50 * multiplier;
                 break;
             case Difficulty.MEDIUM:
-                this.crtScore += 100 * this.snake.size();
+                this.crtScore += 100 * multiplier;
                 break;
             case Difficulty.HARD:
-                this.crtScore += 200 * this.snake.size();
+                this.crtScore += 200 * multiplier;
                 break;
         }
         scoreElem.textContent = `${this.crtScore}`;
