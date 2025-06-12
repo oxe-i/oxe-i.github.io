@@ -41,7 +41,7 @@ class Ball {
         this.xVelocity += this.xAcceleration * timePerFrame;
         this.yVelocity += this.yAcceleration * timePerFrame;
         
-        const elasticity = 0.95;
+        const elasticity = 0.90;
         if (this.y + this.radius - canvas.height >= 0) {
             this.yVelocity *= -elasticity;
             this.y = canvas.height - this.radius;
