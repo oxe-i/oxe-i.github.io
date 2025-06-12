@@ -1,7 +1,7 @@
 :root {
     --background-color: #1B0F21;
     --medium-contrast-color: #33203d;
-    --ball-color: #F0EFF4;
+    --ball-color: rgb(240, 239, 244);
     --other: #9E829C;
 }
 

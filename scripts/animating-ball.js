@@ -3,6 +3,9 @@ const canvas = document.querySelector("#drawing-area");
 
 const context = canvas.getContext("2d", { alpha: false });
 const styles = getComputedStyle(document.documentElement);
+const ballColor = styles.getPropertyValue("--ball-color");
+
+const gravity =  1 / 10000;
 
 let timePerFrame = 1000 / 120;
 
@@ -20,32 +23,44 @@ class Ball {
         this.xVelocity = xVelocity;
         this.yVelocity = yVelocity;
         this.xAcceleration = 0;
-        this.yAcceleration = 1 / 10000;
+        this.yAcceleration = gravity;
     }
 
-    draw() {
-        drawBackGround();
+    draw(color = ballColor) {
         this.context.beginPath();
         this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
         this.context.closePath();
-        this.context.fillStyle = styles.getPropertyValue("--ball-color").trim();
+        this.context.fillStyle = color;
         this.context.fill();
     }
 
-    move() {
-        if (this.y + this.radius - canvas.height >= 0 || this.y <= this.radius) {
-            this.yVelocity *= -1;
-        }
-
-        if (this.x + this.radius - canvas.width >= 0 || this.x <= this.radius) {
-            this.xVelocity *= -1;
-        }
-        
+    move() {        
         this.x += this.xVelocity * timePerFrame + (this.xAcceleration * timePerFrame * timePerFrame / 2); 
         this.y += this.yVelocity * timePerFrame + (this.yAcceleration * timePerFrame * timePerFrame / 2); 
 
         this.xVelocity += this.xAcceleration * timePerFrame;
         this.yVelocity += this.yAcceleration * timePerFrame;
+
+        if (this.y + this.radius - canvas.height >= 0) {
+            this.yVelocity *= -0.8;
+            this.y = canvas.height - this.radius;
+        }
+        else if (this.y <= this.radius) {
+            this.yVelocity *= -0.8;
+            this.y = this.radius;
+        }
+
+        if (this.x + this.radius - canvas.width >= 0) {
+            this.xVelocity *= -0.8;
+            this.x = canvas.width - this.radius;
+        }
+        else if (this.x <= this.radius) {
+            this.xVelocity *= -0.8;
+            this.x = this.radius;
+        }
+
+        if (this.xVelocity) { this.xAcceleration = -this.xVelocity / 10000; }
+        if (this.yVelocity) { this.yAcceleration = gravity - (this.yVelocity / 10000); }
     }
 };
 
@@ -63,6 +78,62 @@ let initialX = 0;
 let initialY = 0;
 let initialTime = 0;
 
+const arrow = (() => {
+    const img = new Image();
+    img.src = "./assets/ball_arrow.svg";
+    return {
+        img: img,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+        angle: 0,
+        draw(color = ballColor) {
+            context.save();
+
+            context.translate(arrow.x, arrow.y);
+            context.rotate(arrow.angle);
+
+            const hypotenuse = Math.sqrt(arrow.width * arrow.width + arrow.height * arrow.height);            
+
+            context.fillStyle = color;
+            context.fillRect(0, 0, hypotenuse - 2, 4);
+
+            context.beginPath();
+            context.moveTo(hypotenuse, 2);
+            context.lineTo(hypotenuse - Math.min(10, 0.2 * hypotenuse), 4 + Math.min(10, 0.2 * hypotenuse));
+            context.lineTo(hypotenuse - Math.min(10, 0.2 * hypotenuse), 0 - Math.min(10, 0.2 * hypotenuse));
+            context.fill();
+
+            context.restore();
+        }
+    };
+})(); 
+
+function updateArrow(startX, startY) {
+    const opposite = Math.abs(startY - ball.y);
+    const adjacent = Math.abs(startX - ball.x);
+    const hypotenuse = Math.sqrt(opposite * opposite + adjacent * adjacent);
+    const angle = Math.acos(adjacent / hypotenuse); 
+    
+    arrow.x = startX;
+    arrow.y = startY;
+    arrow.width = Math.abs((hypotenuse - ball.radius) * Math.cos(angle));
+    arrow.height = Math.abs((hypotenuse - ball.radius) * Math.sin(angle));
+    
+    arrow.angle = (() => {
+        if (startX <= ball.x && startY <= ball.y) return angle;
+        if (startX <= ball.x) return -angle;
+        if (startY >= ball.y) return Math.PI + angle;
+        return -(Math.PI + angle);
+    })();    
+}
+
+function updateBall() {
+    ball.xVelocity = (ball.x - arrow.x) / 100;
+    ball.yVelocity = (ball.y - arrow.y) / 100;
+}
+
 function handlePointerDown(timestamp) {
     let deltaTime = remTime + timestamp - crtTime;
     while (deltaTime >= timePerFrame) {
@@ -75,33 +146,38 @@ function handlePointerDown(timestamp) {
 }
 
 canvas.addEventListener("pointerdown", (event) => { 
+    cancelAnimationFrame(raf);
     isHolding = true;
+    crtTime = 0;
+
     ball.x = event.clientX;
     ball.y = event.clientY;
+    ball.xVelocity = 0;
+    ball.yVelocity = 0;
+    
+    drawBackGround();
+    ball.draw();
 });
 
 canvas.addEventListener("pointermove", (event) => {
-    if (!isHolding) { return; }
-    
+    if (isHolding) { 
+        drawBackGround();
+        updateArrow(event.clientX, event.clientY);
+        updateBall();
+        arrow.draw();
+        ball.draw();
+    }    
 });
 
-canvas.addEventListener("pointerup", (event) => {
+canvas.addEventListener("pointerup", () => {
     isHolding = false;
 
-    const deltaX = ball.x - initialX;
-    const deltaY = ball.y - initialY;
-    const deltaTime = event.timeStamp - initialTime;
+    arrow.x = 0;
+    arrow.y = 0;
+    arrow.width = 0;
+    arrow.height = 0;
+    arrow.angle = 0;
 
-    ball.xVelocity = deltaX / deltaTime;
-    ball.yVelocity = deltaY / deltaTime;
-
-    isHolding = false;
-    initialX = 0;
-    initialY = 0;
-    initialTime = 0;
-    crtTime = event.timeStamp;
-
-    cancelAnimationFrame(raf);
     raf = requestAnimationFrame(gameLoop);
 });
 
@@ -127,6 +203,7 @@ function gameLoop(timestamp) {
     while (deltaTime >= timePerFrame) {
         deltaTime -= timePerFrame;
         ball.move();
+        drawBackGround();
         ball.draw();
     }
     crtTime = timestamp;

@@ -784,6 +784,8 @@ function gameLoop(timestamp) {
         }  
     }
 
+    console.log(getComputedStyle(document.querySelector("#page")).getPropertyValue("display"));
+
     game.remTime = deltaTime;
     game.timestamp = timestamp;
     
