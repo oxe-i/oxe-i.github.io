@@ -40,27 +40,28 @@ class Ball {
 
         this.xVelocity += this.xAcceleration * timePerFrame;
         this.yVelocity += this.yAcceleration * timePerFrame;
-
+        
+        const elasticity = 0.95;
         if (this.y + this.radius - canvas.height >= 0) {
-            this.yVelocity *= -0.8;
+            this.yVelocity *= -elasticity;
             this.y = canvas.height - this.radius;
         }
         else if (this.y <= this.radius) {
-            this.yVelocity *= -0.8;
+            this.yVelocity *= -elasticity;
             this.y = this.radius;
         }
 
         if (this.x + this.radius - canvas.width >= 0) {
-            this.xVelocity *= -0.8;
+            this.xVelocity *= -elasticity;
             this.x = canvas.width - this.radius;
         }
         else if (this.x <= this.radius) {
-            this.xVelocity *= -0.8;
+            this.xVelocity *= -elasticity;
             this.x = this.radius;
         }
 
-        if (this.xVelocity) { this.xAcceleration = -this.xVelocity / 10000; }
-        if (this.yVelocity) { this.yAcceleration = gravity - (this.yVelocity / 10000); }
+        if (this.xVelocity) { this.xAcceleration = -this.xVelocity / 100000; }
+        if (this.yVelocity) { this.yAcceleration = gravity - (this.yVelocity / 100000); }
     }
 };
 
