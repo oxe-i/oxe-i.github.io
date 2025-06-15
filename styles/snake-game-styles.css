@@ -1,291 +1,309 @@
 :root {
-    --canvas-width: 60vw;
-    --canvas-height: 90vh;
-    --before-canvas-width: 20vw;
-    --after-canvas-width: 20vw;
-    --game-canvas-margin: 5vh;
-    --directional-button-size: 10vh;
-    --difficulty-button-size: 12vh;
-    --gameflow-button-size: 20vh;
-    --canvas-color: rgb(214, 223, 138);
-    --background-color: #1B0F21;
-    --letter-color: #f0f3f9;
-    --low-contrast-color: #33203d;
-    --medium-contrast-color: #8044AD;
-    --piece-color: black;
-    --game-over-background-color: #1c0a0a;
-    --game-over-text-color: #7FE458;
-    --light-red-color: #FF4F4F;
-    --light-green-color: #7FE458;
-    --light-yellow-color: #f4f76f;
-    --head-text-size: 1.25vmax;
-    --common-text-size: 1vmax;
+  --canvas-width: 60vw;
+  --canvas-height: 90vh;
+  --before-canvas-width: 20vw;
+  --after-canvas-width: 20vw;
+  --game-canvas-margin: 5vh;
+  --directional-button-size: 10vh;
+  --difficulty-button-size: 12vh;
+  --gameflow-button-size: 20vh;
+  --canvas-color: rgb(214, 223, 138);
+  --background-color: #1b0f21;
+  --letter-color: #f0f3f9;
+  --low-contrast-color: #33203d;
+  --medium-contrast-color: #8044ad;
+  --piece-color: black;
+  --game-over-background-color: #1c0a0a;
+  --game-over-text-color: #7fe458;
+  --light-red-color: #ff4f4f;
+  --light-green-color: #7fe458;
+  --light-yellow-color: #f4f76f;
+  --head-text-size: 1.25vmax;
+  --common-text-size: 1vmax;
 }
 
 @font-face {
-    font-family: Atkinson;
-    src: url("./fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2"),
-         url("./fonts/AtkinsonHyperlegible-Regular.ttf") format("ttf");
-    font-weight: 400;
-    font-display: swap;
+  font-family: Atkinson;
+  src: url("./fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2"),
+    url("./fonts/AtkinsonHyperlegible-Regular.ttf") format("ttf");
+  font-weight: 400;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: Atkinson;
-    src: url("./fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2"),
-         url("./fonts/AtkinsonHyperlegible-Bold.ttf") format("ttf");
-    font-weight: 700;
-    font-display: swap;
+  font-family: Atkinson;
+  src: url("./fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2"),
+    url("./fonts/AtkinsonHyperlegible-Bold.ttf") format("ttf");
+  font-weight: 700;
+  font-display: swap;
 }
 
-* { 
-    box-sizing: border-box;
+* {
+  box-sizing: border-box;
 }
 
 #page {
-    background: var(--background-color);
-    display: flex;
-    font-family: Atkinson;
-    width: 100vw;
-    height: 100vh;
-    padding: 5vh 0;
+  background: var(--background-color);
+  display: flex;
+  font-family: Atkinson;
+  width: 100vw;
+  height: 100vh;
+  padding: 5vh 0;
 }
 
 h1 {
-    font-weight: 400;
+  font-weight: 400;
 }
 
 .button {
-    cursor: pointer;
-    color: var(--letter-color);            
-    padding: 1vmin;
-    background: var(--background-color);
-    border-radius: 5px;
-    border: 1px solid var(--background-color);
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  cursor: pointer;
+  color: var(--letter-color);
+  padding: 1vmin;
+  background: var(--background-color);
+  border-radius: 5px;
+  border: 1px solid var(--background-color);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#directional-buttons { display: none; }
+#directional-buttons {
+  display: none;
+}
 
-@media screen  and (pointer: coarse) {
-    #directional-buttons {
-        display: block;
-        min-width: var(--before-canvas-width);
-        position: relative;
+@media screen and (pointer: coarse) {
+  #directional-buttons {
+    display: block;
+    min-width: var(--before-canvas-width);
+    position: relative;
 
-        #up, #down, #left, #right {
-            border-radius: 0;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: var(--directional-button-size);
-            height: var(--directional-button-size);
-            background: var(--background-color);
-        }
-        
-        #up { transform: translate(-50%, -200%) rotate(-90deg); }
-
-        #down { transform: translate(-50%, 100%) rotate(90deg); }
-
-        #left { transform: translate(-200%, -50%) rotate(180deg); }
-
-        #right { transform: translate(100%, -50%); }
+    #up,
+    #down,
+    #left,
+    #right {
+      border-radius: 0;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: var(--directional-button-size);
+      height: var(--directional-button-size);
+      background: var(--background-color);
     }
+
+    #up {
+      transform: translate(-50%, -200%) rotate(-90deg);
+    }
+
+    #down {
+      transform: translate(-50%, 100%) rotate(90deg);
+    }
+
+    #left {
+      transform: translate(-200%, -50%) rotate(180deg);
+    }
+
+    #right {
+      transform: translate(100%, -50%);
+    }
+  }
 }
 
 dialog::backdrop {
-    background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.9);
 }
 
 body.game-over dialog::backdrop {
-    background: var(--game-over-background-color);
-    opacity: 95%;
+  background: var(--game-over-background-color);
+  opacity: 95%;
 }
 
 body.game-over #game-over {
-    border: 0;
-    background: none;    
+  border: 0;
+  background: none;
 
-    p {
-        text-align: center;
-        width: auto;
-        height: 6vw;
-        font-size: 6vw;
-        text-transform: uppercase;
-        color: var(--game-over-text-color);
+  p {
+    text-align: center;
+    width: auto;
+    height: 6vw;
+    font-size: 6vw;
+    text-transform: uppercase;
+    color: var(--game-over-text-color);
+  }
+
+  div {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+
+    button {
+      border: 0;
+      background: var(--game-over-background-color);
+      outline: 1px solid var(--game-over-text-color);
+      border-radius: 0.5vmin;
+      text-transform: uppercase;
+      line-height: 1.5;
+      font-size: 2vw;
+      padding: 0 1vw;
+      color: var(--game-over-text-color);
     }
-
-    div {
-        display: flex;
-        width: 100%;
-        justify-content: center;
-        align-items: center;
-
-        button {
-            border: 0;
-            background: var(--game-over-background-color);
-            outline: 1px solid var(--game-over-text-color);
-            border-radius: 0.5vmin;
-            text-transform: uppercase;
-            line-height: 1.5;
-            font-size: 2vw;
-            padding: 0 1vw;
-            color: var(--game-over-text-color);
-        }
-        
-    }
+  }
 }
 
-#alert-message, #tutorial-message {
-    background: var(--background-color);
-    color: var(--letter-color);
-    font-size: var(--common-text-size);
-    position: fixed;
-    border-radius: 10px;
-    border: 1px solid var(--letter-color);
+#alert-message,
+#tutorial-message {
+  background: var(--background-color);
+  color: var(--letter-color);
+  font-size: var(--common-text-size);
+  position: fixed;
+  border-radius: 10px;
+  border: 1px solid var(--letter-color);
 }
 
 #tutorial-message {
-    --button-width: calc(4 * var(--common-text-size));
+  --button-width: calc(4 * var(--common-text-size));
 
-    padding: 3vmin;
+  padding: 3vmin;
 
-    p {
-        font-size: var(--common-text-size);
-        text-align: justify;
-        line-height: 1.5;
-    }
-
-    div {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 5vh 0 0 0;
-    }
-
-    button {
-        width: var(--button-width);
-    }
-}
-
-#close-alert, #close-tutorial, #next-tutorial {
-    background: var(--letter-color);
-    color: var(--background-color);
-    font-weight: 400;
+  p {
     font-size: var(--common-text-size);
-    border-radius: 5px;
-}
+    text-align: justify;
+    line-height: 1.5;
+  }
 
-#game {
-    display: flex;
-    height: var(--canvas-height);
-    width: var(--canvas-width);
-}
-
-#game-canvas {
-    flex-grow: 1;
-    border: 0.5vmin solid black;
-    border-radius: 1vmin;    
-    image-rendering: crisp-edges;
-}
-
-#after-canvas {
-    height: var(--canvas-height);
-    min-width: var(--after-canvas-width);
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    gap: 5vh;
-}
-
-#game-stats {
-    display: flex;
-    flex-direction: column;
-    margin: 0 2vw;
-    gap: 5vh;
-}
-
-#game-stats h1 { 
-    margin: 0;
-    padding: 0;
-    text-transform: uppercase;
-}
-
-#game-stats h1, #score-board, #show-tutorial {
-    color: var(--letter-color);
-}
-
-#game-stats h1, #score-title, #score {
-    font-size: var(--head-text-size);
-    text-align: center;
-}
-
-#show-tutorial {
-    font-size: var(--common-text-size);
-}
-
-#difficulty-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin: 0;
-    padding: 0;
-}
-
-#easy, #medium, #hard { 
-    flex-basis: var(--difficulty-button-size);
-}
-
-#score-board {
-    display: flex;
-    justify-content: space-between;
-    text-transform: uppercase;
-    margin: 0 2vw;
-    padding: 0;
-    gap: 2vw;
-}
-
-#score-title {
-    margin: 0;
-    padding: 0;
-}
-
-#score {
-    text-align: center;
-    flex-grow: 1;
-    background: var(--low-contrast-color);
-    border-radius: 5px;
-    margin: 0;
-    padding: 0;
-}
-
-#control-panel {
-    display: flex;
-    margin: 0 2vw;
-}
-
-#show-tutorial {
-    flex-grow: 1;
-    background: var(--low-contrast-color); 
-    text-transform: capitalize;
-    border: 0; 
-}
-
-#game-flow-buttons {
-    flex-grow: 1;
+  div {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 2vw;
+    margin: 5vh 0 0 0;
+  }
+
+  button {
+    width: var(--button-width);
+  }
 }
 
-#start-pause, #stop { 
-    width: var(--gameflow-button-size);
-    aspect-ratio: 1;
+#close-alert,
+#close-tutorial,
+#next-tutorial {
+  background: var(--letter-color);
+  color: var(--background-color);
+  font-weight: 400;
+  font-size: var(--common-text-size);
+  border-radius: 5px;
 }
 
+#game {
+  display: flex;
+  height: var(--canvas-height);
+  width: var(--canvas-width);
+}
 
+#game-canvas {
+  flex-grow: 1;
+  border: 0.5vmin solid black;
+  border-radius: 1vmin;
+  image-rendering: crisp-edges;
+}
 
+#after-canvas {
+  height: var(--canvas-height);
+  min-width: var(--after-canvas-width);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 5vh;
+}
 
+#game-stats {
+  display: flex;
+  flex-direction: column;
+  margin: 0 2vw;
+  gap: 5vh;
+}
+
+#game-stats h1 {
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+}
+
+#game-stats h1,
+#score-board,
+#show-tutorial {
+  color: var(--letter-color);
+}
+
+#game-stats h1,
+#score-title,
+#score {
+  font-size: var(--head-text-size);
+  text-align: center;
+}
+
+#show-tutorial {
+  font-size: var(--common-text-size);
+}
+
+#difficulty-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0;
+}
+
+#easy,
+#medium,
+#hard {
+  flex-basis: var(--difficulty-button-size);
+}
+
+#score-board {
+  display: flex;
+  justify-content: space-between;
+  text-transform: uppercase;
+  margin: 0 2vw;
+  padding: 0;
+  gap: 2vw;
+}
+
+#score-title {
+  margin: 0;
+  padding: 0;
+}
+
+#score {
+  text-align: center;
+  flex-grow: 1;
+  background: var(--low-contrast-color);
+  border-radius: 5px;
+  margin: 0;
+  padding: 0;
+}
+
+#control-panel {
+  display: flex;
+  margin: 0 2vw;
+}
+
+#show-tutorial {
+  flex-grow: 1;
+  background: var(--low-contrast-color);
+  text-transform: capitalize;
+  border: 0;
+}
+
+#game-flow-buttons {
+  flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 2vw;
+}
+
+#start-pause,
+#stop {
+  width: var(--gameflow-button-size);
+  aspect-ratio: 1;
+}

@@ -1,83 +1,84 @@
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
-    --background-color: #1B0F21;
-    --text-color: #f0f3f9;
+  --background-color: #1b0f21;
+  --text-color: #f0f3f9;
 }
 
 @font-face {
-    font-family: Atkinson;
-    src: url("./fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2"),
-         url("./fonts/AtkinsonHyperlegible-Regular.ttf") format("ttf");
-    font-weight: 400;
-    font-display: swap;
+  font-family: Atkinson;
+  src: url("./fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2"),
+    url("./fonts/AtkinsonHyperlegible-Regular.ttf") format("ttf");
+  font-weight: 400;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: Atkinson;
-    src: url("./fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2"),
-         url("./fonts/AtkinsonHyperlegible-Bold.ttf") format("ttf");
-    font-weight: 700;
-    font-display: swap;
+  font-family: Atkinson;
+  src: url("./fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2"),
+    url("./fonts/AtkinsonHyperlegible-Bold.ttf") format("ttf");
+  font-weight: 700;
+  font-display: swap;
 }
 
-body, #title, #table-of-links, li {
-    justify-content: center;
-    text-align: center;
+body,
+#title,
+#table-of-links,
+li {
+  justify-content: center;
+  text-align: center;
 }
 
 body {
-    display: flex;
-    flex-direction: column;
-    background-color: var(--background-color);
-    font-family: Atkinson, sans-serif;
-    gap: 5vmin;
-    margin: 2vh 2vw;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color);
+  font-family: Atkinson, sans-serif;
+  gap: 5vmin;
+  margin: 2vh 2vw;
 
-    a {text-decoration: none;}
-    
+  a {
+    text-decoration: none;
+  }
 
-    #title {
-        font-size: 2vmax;
-        font-weight: 800;
-        color: var(--text-color);
+  #title {
+    font-size: 2vmax;
+    font-weight: 800;
+    color: var(--text-color);
+  }
+
+  nav {
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: 5vmin;
+
+      li {
+        list-style: none;
+        display: flex;
+        height: 3vmax;
+
+        a {
+          flex-grow: 1;
+          display: flex;
+          color: var(--text-color);
+          font-size: 1.5vmax;
+          font-weight: 600;
+          text-transform: capitalize;
+          gap: 3vmin;
+          margin: 0.5vmax 0;
+
+          img {
+            height: auto;
+            aspect-ratio: 1;
+            margin: 0.5vmax 0;
+          }
+        }
+      }
     }
-
-    nav {
-        
-        ul {
-            display: flex;
-            flex-direction: column;
-            gap: 5vmin;
-
-            li {
-                list-style: none;
-                display: flex;
-                height: 3vmax;
-
-                a {
-                    flex-grow: 1;
-                    display: flex;
-                    color: var(--text-color);
-                    font-size: 1.5vmax;
-                    font-weight: 600;
-                    text-transform: capitalize;                    
-                    gap: 3vmin;
-                    margin: 0.5vmax 0;
-
-                    img {
-                        height: auto;
-                        aspect-ratio: 1;
-                        margin: 0.5vmax 0;
-                    }
-                }
-            }
-        }       
-
-        
-    }
+  }
 }

@@ -1,96 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device.width, initial-scale=1.0">
-        <title>Slithery Snake</title>
-        <link rel="stylesheet" href="./styles/snake-game-styles.css">
-    </head>
-    <body id="page">
-        <dialog id="game-over">
-            <p>Game Over</p>
-            <div><button autofocus id="play-again" class="button">Play Again</button></div>
-        </dialog>
-        <dialog id="alert-message">
-            <p>The game is best experienced with the screen in landscape.</p>
-            <button autofocus id="close-alert" class="button">OK</button>
-        </dialog>
-        <dialog id="tutorial-message">
-            <p>Do you want to see the tutorial?</p>
-            <div>
-                <button autofocus id="next-tutorial" class="button">Next</button>
-                <button id="close-tutorial" class="button">Close</button>
-            </div>
-        </dialog>
-        <div id="directional-buttons">
-            <button class="button" id="up">
-                <img src="data:image/svg+xml;base64,
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device.width, initial-scale=1.0" />
+    <title>Slithery Snake</title>
+    <link rel="stylesheet" href="./styles/snake-game-styles.css" />
+  </head>
+  <body id="page">
+    <dialog id="game-over">
+      <p>Game Over</p>
+      <div>
+        <button autofocus id="play-again" class="button">Play Again</button>
+      </div>
+    </dialog>
+    <dialog id="alert-message">
+      <p>The game is best experienced with the screen in landscape.</p>
+      <button autofocus id="close-alert" class="button">OK</button>
+    </dialog>
+    <dialog id="tutorial-message">
+      <p>Do you want to see the tutorial?</p>
+      <div>
+        <button autofocus id="next-tutorial" class="button">Next</button>
+        <button id="close-tutorial" class="button">Close</button>
+      </div>
+    </dialog>
+    <div id="directional-buttons">
+      <button class="button" id="up">
+        <img
+          src="data:image/svg+xml;base64,
                 PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzM
                 CAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNS
-                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" 
-                alt="up" />
-            </button>
-            <button class="button" id="left">
-                <img src="data:image/svg+xml;base64,
+                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+"
+          alt="up"
+        />
+      </button>
+      <button class="button" id="left">
+        <img
+          src="data:image/svg+xml;base64,
                 PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzM
                 CAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNS
-                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" 
-                alt="left" />
-            </button>
-            <button class="button" id="down">
-                <img src="data:image/svg+xml;base64,
+                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+"
+          alt="left"
+        />
+      </button>
+      <button class="button" id="down">
+        <img
+          src="data:image/svg+xml;base64,
                 PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzM
                 CAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNS
-                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" 
-                alt="down" />
-            </button>
-            <button class="button" id="right">
-                <img src="data:image/svg+xml;base64,
+                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+"
+          alt="down"
+        />
+      </button>
+      <button class="button" id="right">
+        <img
+          src="data:image/svg+xml;base64,
                 PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzM
                 CAzMCI+CiAgICA8cGF0aCBkPSJNMCAwIEwwIDMgTDEyIDE1IEwwIDI3IEwwIDMwIEwxNSAxNS
-                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+" 
-                alt="right" />
-            </button>
+                BaIiBzdHJva2U9IiM3NjcwOWYiIHN0cm9rZS13aWR0aD0iMyIgLz4KPC9zdmc+"
+          alt="right"
+        />
+      </button>
+    </div>
+    <div id="game">
+      <canvas id="game-canvas"></canvas>
+    </div>
+    <div id="after-canvas">
+      <div id="game-stats">
+        <h1>difficulty:</h1>
+        <div id="difficulty-buttons">
+          <button class="button" id="easy">
+            <img src="./assets/easy.svg" alt="easy button" />
+          </button>
+          <button class="button" id="medium">
+            <img src="./assets/medium.svg" alt="medium button" />
+          </button>
+          <button class="button" id="hard">
+            <img src="./assets/hard.svg" alt="hard button" />
+          </button>
         </div>
-        <div id="game">
-            <canvas id="game-canvas"></canvas>
-        </div>    
-        <div id="after-canvas">
-            <div id="game-stats">
-                <h1>difficulty:</h1>
-                <div id="difficulty-buttons">
-                    <button class="button" id="easy">
-                        <img src="./assets/easy.svg" 
-                        alt="easy button" />
-                    </button>
-                    <button class="button" id="medium">
-                        <img src="./assets/medium.svg" 
-                        alt="medium button" />
-                    </button>
-                    <button class="button" id="hard">
-                        <img src="./assets/hard.svg" 
-                        alt="hard button" />
-                    </button>
-                </div>
-            </div>
-            <div id="score-board">
-                <h1 id="score-title">score:</h1>
-                <div id="score">0</div>
-            </div>
-            <div id="control-panel">
-                <button class="button" id="show-tutorial">Show Tutorial</button>
-            </div>
-            <div id="game-flow-buttons">
-                <button class="button" id="start-pause">
-                    <img src="./assets/play.svg" 
-                    alt="play button" />
-                </button>
-                <button class="button" id="stop">
-                    <img src="./assets/stop.svg" 
-                    alt="stop button" />
-                </button>
-            </div>  
-        </div>    
-        <script src="./scripts/snake-game-script.js"></script>
-    </body>
+      </div>
+      <div id="score-board">
+        <h1 id="score-title">score:</h1>
+        <div id="score">0</div>
+      </div>
+      <div id="control-panel">
+        <button class="button" id="show-tutorial">Show Tutorial</button>
+      </div>
+      <div id="game-flow-buttons">
+        <button class="button" id="start-pause">
+          <img src="./assets/play.svg" alt="play button" />
+        </button>
+        <button class="button" id="stop">
+          <img src="./assets/stop.svg" alt="stop button" />
+        </button>
+      </div>
+    </div>
+    <script src="./scripts/snake-game-script.js"></script>
+  </body>
 </html>

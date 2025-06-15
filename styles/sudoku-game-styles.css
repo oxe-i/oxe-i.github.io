@@ -1,55 +1,55 @@
 :root {
-    --grid-size: 81vmin;
-    --box-size: calc(var(--grid-size) / 3);
-    --cell-size: calc(var(--box-size) / 3);
+  --grid-size: 81vmin;
+  --box-size: calc(var(--grid-size) / 3);
+  --cell-size: calc(var(--box-size) / 3);
 }
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #page {
-    background-color: #71A9F7;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 100vh;
+  background-color: #71a9f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
 }
 
 #grid {
-    background-color: #E0FBFC;
+  background-color: #e0fbfc;
 
-    display: grid;
-    grid-template-areas:
-        "b1 b2 b3"
-        "b4 b5 b6"
-        "b7 b8 b9";
+  display: grid;
+  grid-template-areas:
+    "b1 b2 b3"
+    "b4 b5 b6"
+    "b7 b8 b9";
 
-    width: var(--grid-size);
-    aspect-ratio: 1;
+  width: var(--grid-size);
+  aspect-ratio: 1;
 
-    gap: 0;
-    border: 2px solid #4C1036;
+  gap: 0;
+  border: 2px solid #4c1036;
 }
 
 .box {
-    border-width: 2px;
-    border-style: solid;
-    border-color: #4C1036;
-    
-    display: grid;
-    grid-template-areas:
-        "c1 c2 c3"
-        "c4 c5 c6"
-        "c7 c8 c9";
+  border-width: 2px;
+  border-style: solid;
+  border-color: #4c1036;
+
+  display: grid;
+  grid-template-areas:
+    "c1 c2 c3"
+    "c4 c5 c6"
+    "c7 c8 c9";
 }
 
 .cell {
-    border: 1px solid #6B5CA5;
-    background-color: #C6D8FF;
-    width: 100%;
-    text-align: center;
-    font-size: 24px;
-    color: #4C1036;
+  border: 1px solid #6b5ca5;
+  background-color: #c6d8ff;
+  width: 100%;
+  text-align: center;
+  font-size: 24px;
+  color: #4c1036;
 }
