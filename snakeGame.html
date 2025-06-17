@@ -4,14 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device.width, initial-scale=1.0" />
     <title>Slithery Snake</title>
-    <link rel="stylesheet" href="./styles/snake-game-styles.css" />
+    <link rel="stylesheet" href="./styles/snake-style.css" />
   </head>
   <body id="page">
     <dialog id="game-over">
       <p>Game Over</p>
-      <div>
-        <button autofocus id="play-again" class="button">Play Again</button>
-      </div>
+      <button autofocus id="play-again" class="button">Play Again</button>
     </dialog>
     <dialog id="alert-message">
       <p>The game is best experienced with the screen in landscape.</p>
@@ -62,29 +60,25 @@
         />
       </button>
     </div>
-    <div id="game">
-      <canvas id="game-canvas"></canvas>
-    </div>
+    <div id="game"></div>
     <div id="after-canvas">
-      <div id="game-stats">
+      <div id="difficulty">
         <h1>difficulty:</h1>
-        <div id="difficulty-buttons">
-          <button class="button" id="easy">
-            <img src="./assets/easy.svg" alt="easy button" />
-          </button>
-          <button class="button" id="medium">
-            <img src="./assets/medium.svg" alt="medium button" />
-          </button>
-          <button class="button" id="hard">
-            <img src="./assets/hard.svg" alt="hard button" />
-          </button>
-        </div>
+        <button class="button" id="easy">
+          <img src="./assets/easy.svg" alt="easy button" />
+        </button>
+        <button class="button" id="medium">
+          <img src="./assets/medium.svg" alt="medium button" />
+        </button>
+        <button class="button" id="hard">
+          <img src="./assets/hard.svg" alt="hard button" />
+        </button>
       </div>
-      <div id="score-board">
+      <div id="game-stats">
         <h1 id="score-title">score:</h1>
-        <div id="score">0</div>
+        <p id="score">0</p>
       </div>
-      <div id="control-panel">
+      <div id="tutorial-container">
         <button class="button" id="show-tutorial">Show Tutorial</button>
       </div>
       <div id="game-flow-buttons">
@@ -96,6 +90,6 @@
         </button>
       </div>
     </div>
-    <script src="./scripts/snake-game-script.js"></script>
+    <script src="./scripts/snake-script.mjs"></script>
   </body>
 </html>

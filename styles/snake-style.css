@@ -22,19 +22,15 @@
   border: 0;
   border-radius: 1vmin;
   color: var(--letter-color);
+  font-size: var(--large-font-size);
+  font-weight: 500;
   text-align: center;
   line-height: 1.25;
 }
 
 h1,
 #score {
-  font-size: var(--large-font-size);
   text-transform: uppercase;
-  font-weight: 500;
-}
-
-#show-tutorial {
-  font-size: var(--normal-font-size);
 }
 
 button {
@@ -54,6 +50,12 @@ button {
 
 dialog {
   margin: auto;
+  padding: 5vmin;
+
+  button {
+    margin-top: 5vmin;
+    padding: 1vmin 5vmin;
+  }
 }
 
 dialog::backdrop {
@@ -61,18 +63,33 @@ dialog::backdrop {
   opacity: 95%;
 }
 
+#alert-message,
+#tutorial-message {
+  border: 1px solid var(--letter-color);
+  background: var(--background-color);
+}
+
+#tutorial-message p {
+  text-align: justify;
+  line-height: 1.5;
+}
+
+#tutorial-message div {
+  display: flex;
+  justify-content: space-between;
+  button {
+    background: var(--low-contrast-color);
+    width: calc(5vmin + 4rem);
+  }
+}
+
 #game-over {
   padding: 10vmin;
 
   p {
-    font-size: 10vmin;
+    font-size: 3rem;
     margin: 2vmin;
-  }  
-
-  button {
-    font-size: 5vmin;
-    padding: 1vmin 3vmin;
-    outline: 1px solid var(--letter-color);
+    text-transform: uppercase;
   }
 }
 
