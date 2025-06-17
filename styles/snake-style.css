@@ -12,6 +12,7 @@
   --light-yellow-color: #f4f76f;
   --large-font-size: 3vmin;
   --normal-font-size: 3vmin;
+  --piece-unit: round(down, 3.6vmin, 1px);
 }
 
 * {
@@ -104,8 +105,8 @@ dialog::backdrop {
   max-height: 100%;
   background: var(--canvas-color);
   display: grid;
-  grid-template-columns: repeat(auto-fill, 25px);
-  grid-template-rows: repeat(auto-fill, 25px);
+  grid-template-columns: repeat(auto-fill, var(--piece-unit));
+  grid-template-rows: repeat(auto-fill, var(--piece-unit));
 }
 
 #after-canvas {
@@ -174,8 +175,6 @@ dialog::backdrop {
 .piece {
   --row: 0;
   --col: 0;
-  width: 25px;
-  aspect-ratio: 1;
   background-color: var(--piece-color);
   border: 1px solid var(--canvas-color);
   border-radius: 0;

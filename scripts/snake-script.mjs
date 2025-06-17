@@ -122,6 +122,14 @@ class Piece {
     this._elem.style.setProperty("--col", `${value}`);
     this._updated = false;
   }
+
+  get width() {
+    return this._elem.getBoundingClientRect().width;
+  }
+
+  get height() {
+    return this._elem.getBoundingClientRect().height;
+  }
 }
 
 class Block extends Piece {
@@ -222,6 +230,8 @@ class Snake {
       piece.col = centerCol + idx;
     });
 
+    this._segments[0].direction = Direction.LEFT;
+
     this._segments[0].nextRow =
       this._segments[0].row + this._segments[0].direction[0];
     this._segments[0].nextCol =
@@ -232,6 +242,7 @@ class Snake {
 class Game {
   constructor() {
     this._bounds = gameArea.getBoundingClientRect();
+    this._pieceUnit = () => Math.floor(Math.min(window.innerHeight, window.innerWidth) / 100 * 3.6);
 
     this._snake = new Snake(this);
     this._block = new Block(this);
@@ -245,7 +256,7 @@ class Game {
   }
 
   get maxHeight() {
-    return this._bounds.height / 25;
+    return this._bounds.height / this._pieceUnit();
   }
 
   get minWidth() {
@@ -253,7 +264,7 @@ class Game {
   }
 
   get maxWidth() {
-    return this._bounds.width / 25;
+    return this._bounds.width / this._pieceUnit();
   }
 
   get score() {
@@ -363,22 +374,22 @@ document.addEventListener("keydown", (event) => {
     case "ArrowUp":
     case "W":
     case "w":
-      game.addDirection(Direction.UP);
+      if (game.isRunning) game.addDirection(Direction.UP);
       return;
     case "ArrowDown":
     case "S":
     case "s":
-      game.addDirection(Direction.DOWN);
+      if (game.isRunning) game.addDirection(Direction.DOWN);
       return;
     case "ArrowLeft":
     case "A":
     case "a":
-      game.addDirection(Direction.LEFT);
+      if (game.isRunning) game.addDirection(Direction.LEFT);
       return;
     case "ArrowRight":
     case "D":
     case "d":
-      game.addDirection(Direction.RIGHT);
+      if (game.isRunning) game.addDirection(Direction.RIGHT);
       return;
   }
 });
@@ -528,3 +539,7 @@ showTutorialButton.addEventListener("click", () => {
   tutorialMessage.focus();
   tutorialMessage.showModal();
 });
+
+/*****************************************
+ * TODO: reposition snake and block on window resize
+ */
