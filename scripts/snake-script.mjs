@@ -321,11 +321,11 @@ class Game {
     return this._bounds.width / this._pieceUnit;
   }
 
-  get score() {
+  get _score() {
     return Number(scoreText.textContent);
   }
 
-  set score(value) {
+  set _score(value) {
     scoreText.textContent = `${value}`;
   }
 
@@ -401,7 +401,7 @@ class Game {
         }
 
         if (this._snake.touchesBlock(this._block)) {
-          this.score += this._difficulty * this._snake.size();
+          this._score += this._difficulty * this._snake.size();
           this._snake.addSegment(this._block);
           this._block = new Block(this);
         }
@@ -436,6 +436,7 @@ class Game {
     this._snake.reset(this);
     this._block.reset(this);
     this._directionQueue = [];
+    this._score = 0;
     this._difficulty = Difficulty.MEDIUM;
     this._raf = null;
   }
