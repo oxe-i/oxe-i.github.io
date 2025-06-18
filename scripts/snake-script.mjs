@@ -1,6 +1,11 @@
 const rootStyle = getComputedStyle(document.documentElement);
 const gameArea = document.querySelector("#game");
 
+const dirUp = document.querySelector("#up");
+const dirDown = document.querySelector("#down");
+const dirLeft = document.querySelector("#left");
+const dirRight = document.querySelector("#right");
+
 const easyButton = document.querySelector("#easy");
 const mediumButton = document.querySelector("#medium");
 const hardButton = document.querySelector("#hard");
@@ -130,6 +135,15 @@ class Piece {
   get height() {
     return this._elem.getBoundingClientRect().height;
   }
+
+  resize(pWidth, pHeight, pSize, nWidth, nHeight, nSize) {
+    this.row = Math.round((this.row / (pHeight / pSize)) * (nHeight / nSize));
+    this.col = Math.round((this.col / (pWidth / pSize)) * (nWidth / nSize));
+  }
+
+  destructor() {
+    gameArea.removeChild(this._elem);
+  }
 }
 
 class Block extends Piece {
@@ -157,6 +171,11 @@ class Head extends Piece {
     this.nextCol = 0;
     this.direction = Direction.LEFT;
   }
+
+  updateNext() {
+    this.nextRow = this.row + this.direction[0];
+    this.nextCol = this.col + this.direction[1];
+  }
 }
 
 class Snake {
@@ -165,7 +184,32 @@ class Snake {
       Array.from({ length: 4 }, () => new Piece())
     );
 
-    this.reset(game);
+    this._initializeSegments(game);
+  }
+
+  resize(pWidth, pHeight, pSize, nWidth, nHeight, nSize) {
+    let pRow = this._segments[0].row;
+    let pCol = this._segments[0].col;
+
+    this._segments[0].resize(pWidth, pHeight, pSize, nWidth, nHeight, nSize);
+
+    for (let i = 1; i < this._segments.length; ++i) {
+      const crtRow = this._segments[i].row;
+      const crtCol = this._segments[i].col;
+
+      if (crtRow < pRow) this._segments[i].row = this._segments[i - 1].row - 1;
+      else if (crtRow > pRow) this._segments[i].row = this._segments[i - 1].row + 1;
+      else this._segments[i].row = this._segments[i - 1].row;
+
+      if (crtCol < pCol) this._segments[i].col = this._segments[i - 1].col - 1;
+      else if (crtCol > pCol) this._segments[i].col = this._segments[i - 1].col + 1;
+      else this._segments[i].col = this._segments[i - 1].col;
+
+      pRow = crtRow;
+      pCol = crtCol;
+    }
+
+    this._segments[0].updateNext();
   }
 
   overlaps(row, col) {
@@ -181,10 +225,7 @@ class Snake {
     this._segments[0].row = this._segments[0].nextRow;
     this._segments[0].col = this._segments[0].nextCol;
 
-    this._segments[0].nextRow =
-      this._segments[0].row + this._segments[0].direction[0];
-    this._segments[0].nextCol =
-      this._segments[0].col + this._segments[0].direction[1];
+    this._segments[0].updateNext();
   }
 
   updateDirection(newDirection) {
@@ -222,6 +263,16 @@ class Snake {
   }
 
   reset(game) {
+    for (let i = 5; i < this._segments.length; ++i) {
+      this._segments[i].destructor();
+    }
+
+    this._segments = this._segments.slice(0, 5);
+
+    this._initializeSegments(game);
+  }
+
+  _initializeSegments(game) {
     const centerRow = Math.floor((game.maxHeight - game.minHeight) / 2);
     const centerCol = Math.floor((game.maxWidth - game.minWidth) / 2);
 
@@ -231,32 +282,27 @@ class Snake {
     });
 
     this._segments[0].direction = Direction.LEFT;
-
-    this._segments[0].nextRow =
-      this._segments[0].row + this._segments[0].direction[0];
-    this._segments[0].nextCol =
-      this._segments[0].col + this._segments[0].direction[1];
+    this._segments[0].updateNext();
   }
 }
 
 class Game {
   constructor() {
     this._bounds = gameArea.getBoundingClientRect();
-    this._pieceUnit = () => Math.floor(Math.min(window.innerHeight, window.innerWidth) / 100 * 3.6);
-
+    this._pieceUnit = Math.floor((Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6);
     this._snake = new Snake(this);
     this._block = new Block(this);
     this._directionQueue = [];
     this._difficulty = Difficulty.MEDIUM;
     this._raf = null;
-  }
+  } 
 
   get minHeight() {
     return 1;
   }
 
   get maxHeight() {
-    return this._bounds.height / this._pieceUnit();
+    return this._bounds.height / this._pieceUnit;
   }
 
   get minWidth() {
@@ -264,7 +310,7 @@ class Game {
   }
 
   get maxWidth() {
-    return this._bounds.width / this._pieceUnit();
+    return this._bounds.width / this._pieceUnit;
   }
 
   get score() {
@@ -286,6 +332,33 @@ class Game {
     }
   }
 
+  resize() {
+    const prevSize = this._pieceUnit;
+    const prevWidth = this._bounds.width;
+    const prevHeight = this._bounds.height;
+
+    this._bounds = gameArea.getBoundingClientRect();
+    this._pieceUnit = Math.floor((Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6);
+
+    this._snake.resize(
+      prevWidth,
+      prevHeight,
+      prevSize,
+      this._bounds.width,
+      this._bounds.height,
+      this._pieceUnit
+    );
+
+    this._block.resize(
+      prevWidth,
+      prevHeight,
+      prevSize,
+      this._bounds.width,
+      this._bounds.height,
+      this._pieceUnit
+    );
+  }
+
   addDirection(newDirection) {
     this._directionQueue.push(newDirection);
   }
@@ -296,6 +369,7 @@ class Game {
 
   start() {
     if (this.isRunning) return;
+
     setIconToPause();
     buttonDifficultyTable.get(this._difficulty)();
 
@@ -403,6 +477,22 @@ stopButton.addEventListener("click", () => {
   game.pause();
   game.reset();
   resetDifficultyButtons();
+});
+
+dirUp.addEventListener("click", () => {
+  if (game.isRunning) game.addDirection(Direction.UP);
+});
+
+dirDown.addEventListener("click", () => {
+  if (game.isRunning) game.addDirection(Direction.DOWN);
+});
+
+dirLeft.addEventListener("click", () => {
+  if (game.isRunning) game.addDirection(Direction.LEFT);
+});
+
+dirRight.addEventListener("click", () => {
+  if (game.isRunning) game.addDirection(Direction.RIGHT);
 });
 
 playAgain.addEventListener("click", () => {
@@ -540,6 +630,7 @@ showTutorialButton.addEventListener("click", () => {
   tutorialMessage.showModal();
 });
 
-/*****************************************
- * TODO: reposition snake and block on window resize
- */
+window.addEventListener("resize", () => {
+  game.resize();
+});
+
