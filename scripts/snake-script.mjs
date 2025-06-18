@@ -341,26 +341,29 @@ class Game {
   }
 
   resize() {
-    const prevWidth = this.maxWidth - this.minWidth;
-    const prevHeight = this.maxHeight - this.minHeight;
+    const prevWidth = this.maxWidth - this.minWidth + 1;
+    const prevHeight = this.maxHeight - this.minHeight + 1;
 
     this._bounds = gameArea.getBoundingClientRect();
     this._pieceUnit = Math.floor(
       (Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6
     );
 
+    const newWidth = this.maxWidth - this.minWidth + 1;
+    const newHeight = this.maxHeight - this.minHeight + 1;
+
     this._snake.resize(
       prevWidth,
       prevHeight,
-      this.maxWidth - this.minWidth,
-      this.maxHeight - this.minHeight
+      newWidth,
+      newHeight
     );
 
     this._block.resize(
       prevWidth,
       prevHeight,
-      this.maxWidth - this.minWidth,
-      this.maxHeight - this.minHeight
+      newWidth,
+      newHeight
     );
   }
 
@@ -444,6 +447,22 @@ class Game {
 
 const game = new Game();
 
+window.addEventListener("resize", () => {
+  game.resize();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (
+    screen.orientation.type == "portrait-primary" ||
+    screen.orientation.type == "portrait-secundary"
+  ) {
+    alertMessage.showModal();
+  } else if (!skipTutorial) {
+    tutorialMessage.showModal();
+    nextTutorialButton.focus();
+  }
+});
+
 document.addEventListener("keydown", (event) => {
   switch (event.key) {
     case " ":
@@ -523,18 +542,6 @@ hardButton.addEventListener("click", () => {
   if (!game.isRunning) return;
   game._difficulty = Difficulty.HARD;
   setHardButton();
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (
-    screen.orientation.type == "portrait-primary" ||
-    screen.orientation.type == "portrait-secundary"
-  ) {
-    alertMessage.showModal();
-  } else if (!skipTutorial) {
-    tutorialMessage.showModal();
-    nextTutorialButton.focus();
-  }
 });
 
 alertButton.addEventListener("click", () => {
@@ -634,8 +641,4 @@ showTutorialButton.addEventListener("click", () => {
   closeTutorialButton.innerHTML = "Close";
   tutorialMessage.focus();
   tutorialMessage.showModal();
-});
-
-window.addEventListener("resize", () => {
-  game.resize();
 });
