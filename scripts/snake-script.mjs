@@ -39,9 +39,9 @@ class Direction {
 }
 
 class Difficulty {
-  static EASY = 50;
-  static MEDIUM = 100;
-  static HARD = 200;
+  static EASY = 10;
+  static MEDIUM = 20;
+  static HARD = 40;
 }
 
 function setIconToPlay() {
@@ -136,9 +136,9 @@ class Piece {
     return this._elem.getBoundingClientRect().height;
   }
 
-  resize(pWidth, pHeight, pSize, nWidth, nHeight, nSize) {
-    this.row = Math.round((this.row / (pHeight / pSize)) * (nHeight / nSize));
-    this.col = Math.round((this.col / (pWidth / pSize)) * (nWidth / nSize));
+  resize(pWidth, pHeight, nWidth, nHeight) {
+    this.row = Math.round((this.row / pHeight) * nHeight);
+    this.col = Math.round((this.col / pWidth) * nWidth);
   }
 
   destructor() {
@@ -187,22 +187,28 @@ class Snake {
     this._initializeSegments(game);
   }
 
-  resize(pWidth, pHeight, pSize, nWidth, nHeight, nSize) {
+  size() {
+    return this._segments.length;
+  }
+
+  resize(pWidth, pHeight, nWidth, nHeight) {
     let pRow = this._segments[0].row;
     let pCol = this._segments[0].col;
 
-    this._segments[0].resize(pWidth, pHeight, pSize, nWidth, nHeight, nSize);
+    this._segments[0].resize(pWidth, pHeight, nWidth, nHeight);
 
     for (let i = 1; i < this._segments.length; ++i) {
       const crtRow = this._segments[i].row;
       const crtCol = this._segments[i].col;
 
       if (crtRow < pRow) this._segments[i].row = this._segments[i - 1].row - 1;
-      else if (crtRow > pRow) this._segments[i].row = this._segments[i - 1].row + 1;
+      else if (crtRow > pRow)
+        this._segments[i].row = this._segments[i - 1].row + 1;
       else this._segments[i].row = this._segments[i - 1].row;
 
       if (crtCol < pCol) this._segments[i].col = this._segments[i - 1].col - 1;
-      else if (crtCol > pCol) this._segments[i].col = this._segments[i - 1].col + 1;
+      else if (crtCol > pCol)
+        this._segments[i].col = this._segments[i - 1].col + 1;
       else this._segments[i].col = this._segments[i - 1].col;
 
       pRow = crtRow;
@@ -289,13 +295,15 @@ class Snake {
 class Game {
   constructor() {
     this._bounds = gameArea.getBoundingClientRect();
-    this._pieceUnit = Math.floor((Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6);
+    this._pieceUnit = Math.floor(
+      (Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6
+    );
     this._snake = new Snake(this);
     this._block = new Block(this);
     this._directionQueue = [];
     this._difficulty = Difficulty.MEDIUM;
     this._raf = null;
-  } 
+  }
 
   get minHeight() {
     return 1;
@@ -333,34 +341,31 @@ class Game {
   }
 
   resize() {
-    const prevSize = this._pieceUnit;
-    const prevWidth = this._bounds.width;
-    const prevHeight = this._bounds.height;
+    const prevWidth = this.maxWidth - this.minWidth;
+    const prevHeight = this.maxHeight - this.minHeight;
 
     this._bounds = gameArea.getBoundingClientRect();
-    this._pieceUnit = Math.floor((Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6);
+    this._pieceUnit = Math.floor(
+      (Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6
+    );
 
     this._snake.resize(
       prevWidth,
       prevHeight,
-      prevSize,
-      this._bounds.width,
-      this._bounds.height,
-      this._pieceUnit
+      this.maxWidth - this.minWidth,
+      this.maxHeight - this.minHeight
     );
 
     this._block.resize(
       prevWidth,
       prevHeight,
-      prevSize,
-      this._bounds.width,
-      this._bounds.height,
-      this._pieceUnit
+      this.maxWidth - this.minWidth,
+      this.maxHeight - this.minHeight
     );
   }
 
   addDirection(newDirection) {
-    this._directionQueue.push(newDirection);
+    if (this.isRunning) this._directionQueue.push(newDirection);
   }
 
   overlapsWithSnake(row, col) {
@@ -391,8 +396,9 @@ class Game {
           this.end();
           return;
         }
+
         if (this._snake.touchesBlock(this._block)) {
-          this.score += this._difficulty;
+          this.score += this._difficulty * this._snake.size();
           this._snake.addSegment(this._block);
           this._block = new Block(this);
         }
@@ -448,22 +454,22 @@ document.addEventListener("keydown", (event) => {
     case "ArrowUp":
     case "W":
     case "w":
-      if (game.isRunning) game.addDirection(Direction.UP);
+      game.addDirection(Direction.UP);
       return;
     case "ArrowDown":
     case "S":
     case "s":
-      if (game.isRunning) game.addDirection(Direction.DOWN);
+      game.addDirection(Direction.DOWN);
       return;
     case "ArrowLeft":
     case "A":
     case "a":
-      if (game.isRunning) game.addDirection(Direction.LEFT);
+      game.addDirection(Direction.LEFT);
       return;
     case "ArrowRight":
     case "D":
     case "d":
-      if (game.isRunning) game.addDirection(Direction.RIGHT);
+      game.addDirection(Direction.RIGHT);
       return;
   }
 });
@@ -480,19 +486,19 @@ stopButton.addEventListener("click", () => {
 });
 
 dirUp.addEventListener("click", () => {
-  if (game.isRunning) game.addDirection(Direction.UP);
+  game.addDirection(Direction.UP);
 });
 
 dirDown.addEventListener("click", () => {
-  if (game.isRunning) game.addDirection(Direction.DOWN);
+  game.addDirection(Direction.DOWN);
 });
 
 dirLeft.addEventListener("click", () => {
-  if (game.isRunning) game.addDirection(Direction.LEFT);
+  game.addDirection(Direction.LEFT);
 });
 
 dirRight.addEventListener("click", () => {
-  if (game.isRunning) game.addDirection(Direction.RIGHT);
+  game.addDirection(Direction.RIGHT);
 });
 
 playAgain.addEventListener("click", () => {
@@ -633,4 +639,3 @@ showTutorialButton.addEventListener("click", () => {
 window.addEventListener("resize", () => {
   game.resize();
 });
-

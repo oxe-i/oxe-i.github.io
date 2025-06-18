@@ -112,56 +112,49 @@ dialog::backdrop {
 #after-canvas {
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 100%;
   height: 100%;
   gap: 5vh;
 }
 
 #difficulty {
-  width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: [title] 100% [buttons] 100%;
+  grid-template-areas:
+    "title title title"
+    "btn1  btn2  btn3 ";
   row-gap: 5vh;
   column-gap: 1vw;
   place-items: center;
 
   h1 {
-    grid-row: title;
-    grid-column: 1 / 4;
+    grid-area: title;
   }
 
   button {
     width: 10vmin;
     aspect-ratio: 1;
-    grid-row: buttons;
   }
 }
 
 #game-stats {
+  flex: initial;
   display: flex;
-  width: 100%;
-  gap: 2vw;
+  gap: 1vw;
 
   p {
     background: var(--low-contrast-color);
-    flex-grow: 1;
+    flex: auto;
   }
 }
 
-#tutorial-container {
+#show-tutorial {
   background: var(--low-contrast-color);
-  width: 100%;
-  text-transform: capitalize;
+  flex: initial;
   padding: 1vh 0;
-  display: grid;
-  place-items: center;
 }
 
 #game-flow-buttons {
-  height: 100%;
-  width: 100%;
+  flex: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
