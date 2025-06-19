@@ -1,0 +1,98 @@
+* {
+  box-sizing: border-box;
+}
+
+#screen {
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  display: grid;
+  place-items: center;
+}
+
+#game-area {
+  width: 80vmin;
+  aspect-ratio: 1;
+  background: black;
+  position: fixed;
+  padding-bottom: 5px;
+}
+
+.brick {
+  border-radius: 5px;
+  width: 12.5%;
+  height: 3.5%;
+  position: absolute;
+
+  left: var(--left);
+  bottom: var(--bottom);
+}
+
+.b0 {
+  --left: 10%;
+}
+
+.b1 {
+  --left: 23.5%;
+}
+
+.b2 {
+  --left: 37%;
+}
+
+.b3 {
+  --left: 50.5%;
+}
+
+.b4 {
+  --left: 64%;
+}
+
+.b5 {
+  --left: 77.5%;
+}
+
+.red {
+  --bottom: 84%;
+  background: red;
+}
+
+.purple {
+  --bottom: 79%;
+  background: rebeccapurple;
+}
+
+.pink {
+  --bottom: 74%;
+  background: hotpink;
+}
+
+#paddle,
+#ball {
+  position: absolute;
+  background: white;
+}
+
+#paddle {
+  --bottom: 0%;
+  --left: 50%;
+
+  width: 20%;
+  height: 3%;
+  bottom: calc(5px + var(--bottom));
+  left: var(--left);
+  border-radius: 10px;
+  transform: translateX(-50%);
+}
+
+#ball {
+  --bottom: 5%;
+  --left: 50%;
+
+  width: 4%;
+  aspect-ratio: 1;
+  bottom: calc(5px + var(--bottom));
+  left: var(--left);
+  border-radius: 50%;
+  transform: translate(-50%, 50%);
+}
