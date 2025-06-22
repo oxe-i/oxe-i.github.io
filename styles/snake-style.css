@@ -4,7 +4,8 @@
   --letter-color: #f0f3f9;
   --low-contrast-color: #33203d;
   --medium-contrast-color: #8044ad;
-  --piece-color: black;
+  --snake-segment-color: black;
+  --block-color: var(--medium-contrast-color);
   --game-over-background-color: #1c0a0a;
   --game-over-text-color: #7fe458;
   --light-red-color: #ff4f4f;
@@ -13,6 +14,7 @@
   --large-font-size: 3vmin;
   --normal-font-size: 3vmin;
   --piece-unit: round(down, 3.6vmin, 1px);
+  --ingestion-time: 0;
 }
 
 * {
@@ -61,7 +63,7 @@ dialog {
 
 dialog::backdrop {
   background: var(--background-color);
-  opacity: 95%;
+  opacity: 98%;
 }
 
 #alert-message,
@@ -87,11 +89,27 @@ dialog::backdrop {
 #game-over {
   padding: 10vmin;
 
-  p {
+  h1 {
     font-size: 3rem;
-    margin: 2vmin;
-    text-transform: uppercase;
+    margin: 2vmin;    
   }
+
+  p {
+    font-size: 1rem;
+    margin: 2vmin;
+  }
+
+  button {
+    background-color: var(--low-contrast-color);
+  }
+}
+
+#final-score span {
+  color: var(--light-red-color);
+}
+
+#best-score span {
+  text-decoration: underline;
 }
 
 #directional-buttons {
@@ -168,11 +186,23 @@ dialog::backdrop {
 .piece {
   --row: 0;
   --col: 0;
-  background-color: var(--piece-color);
-  border: 1px solid var(--canvas-color);
-  border-radius: 0;
+  
   grid-column: var(--col);
   grid-row: var(--row);
+  
+  transition: all var(--ingestion-time) linear;
+}
+
+.piece.block {
+  background-color: var(--block-color);
+  border: 0;
+  border-radius: 50%;
+}
+
+.piece.snake-segment {
+  background-color: var(--snake-segment-color);
+  border: 1px solid var(--canvas-color);
+  border-radius: 0;
 }
 
 @media (pointer: coarse) {

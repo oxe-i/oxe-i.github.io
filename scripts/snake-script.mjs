@@ -1,49 +1,79 @@
+/**
+ * DOM elements
+ */
 const rootStyle = getComputedStyle(document.documentElement);
 const gameArea = document.querySelector("#game");
 
+//directional buttons
 const dirUp = document.querySelector("#up");
 const dirDown = document.querySelector("#down");
 const dirLeft = document.querySelector("#left");
 const dirRight = document.querySelector("#right");
 
+//difficulty buttons
 const easyButton = document.querySelector("#easy");
 const mediumButton = document.querySelector("#medium");
 const hardButton = document.querySelector("#hard");
 
+//current score text
 const scoreText = document.querySelector("#score");
 
+//gameflow buttons
 const startPause = document.querySelector("#start-pause");
 const stopButton = document.querySelector("#stop");
 
+//gameover dialog and its button
 const gameOver = document.querySelector("#game-over");
+const finalScore = gameOver.querySelector("#final-score span");
+const bestScore = gameOver.querySelector("#best-score span");
 const playAgain = gameOver.querySelector("#play-again");
 
+//"move to landscape" alert dialog and its button
 const alertMessage = document.querySelector("#alert-message");
 const alertButton = alertMessage.querySelector("button");
 
+//tutorial dialog, its text content and buttons
 const tutorialMessage = document.querySelector("#tutorial-message");
 const tutorialText = tutorialMessage.querySelector("p");
 const nextTutorialButton = tutorialMessage.querySelector("#next-tutorial");
 const closeTutorialButton = tutorialMessage.querySelector("#close-tutorial");
+
+//button to show tutorial
 const showTutorialButton = document.querySelector("#show-tutorial");
 
-const skipTutorial = localStorage.getItem("skipTutorial");
-
+//global constants
 const SPEED = 1;
 
+//enum-like class to represent direction of movement for the snake
 class Direction {
-  static LEFT = [0, -SPEED];
-  static RIGHT = [0, SPEED];
-  static UP = [-SPEED, 0];
-  static DOWN = [SPEED, 0];
+  static get LEFT() {
+    return [0, -SPEED];
+  }
+  static get RIGHT() {
+    return [0, SPEED];
+  }
+  static get UP() {
+    return [-SPEED, 0];
+  }
+  static get DOWN() {
+    return [SPEED, 0];
+  }
 }
 
+//enum-like class that doubles as a map from difficulty of the game to score modifiers
 class Difficulty {
-  static EASY = 10;
-  static MEDIUM = 20;
-  static HARD = 40;
+  static get EASY() {
+    return 10;
+  }
+  static get MEDIUM() {
+    return 20;
+  }
+  static get HARD() {
+    return 40;
+  }
 }
 
+//helpers to set icons to gameflow buttons
 function setIconToPlay() {
   startPause.querySelector("img").src = `./assets/play.svg`;
   startPause.querySelector("img").alt = "play button";
@@ -54,12 +84,14 @@ function setIconToPause() {
   startPause.querySelector("img").alt = "pause button";
 }
 
+//dispatch table mapping difficulties to a helper for the corresponding button
 const buttonDifficultyTable = new Map([
   [Difficulty.EASY, setEasyButton],
   [Difficulty.MEDIUM, setMediumButton],
   [Difficulty.HARD, setHardButton],
 ]);
 
+//helpers to set outline for the currently selected difficulty button
 function resetDifficultyButtons() {
   easyButton.style.outline = "";
   mediumButton.style.outline = "";
@@ -90,10 +122,12 @@ function setHardButton() {
   )}`;
 }
 
+//helper to check if the device is touchscreen
 function isTouchDevice() {
   return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
 
+//a class to represent an uniform interface for elements in the game
 class Piece {
   constructor() {
     this._elem = document.createElement("div");
@@ -101,9 +135,33 @@ class Piece {
     gameArea.appendChild(this._elem);
 
     this._style = getComputedStyle(this._elem);
-    this._updated = true;
+    this._updated = true; // flag for computing styles lazily
   }
 
+  reset() {
+    gameArea.removeChild(this._elem);
+  }
+
+  /**
+   *
+   * @param {string} className
+   */
+  addClass(className) {
+    this._elem.classList.add(className);
+  }
+
+  /**
+   *
+   * @param {string} className
+   */
+  removeClass(className) {
+    this._elem.classList.remove(className);
+  }
+
+  /**
+   * both getters return the current CSS property value converted to a number
+   * CSS works with PERCENTAGES
+   */
   get row() {
     if (!this._updated) {
       this._style = getComputedStyle(this._elem);
@@ -118,6 +176,10 @@ class Piece {
     return Number(this._style.getPropertyValue("--col"));
   }
 
+  /**
+   * both setters update the CSS directly, avoiding duplication and mismatches
+   * CSS works with PERCENTAGES
+   */
   set row(value) {
     this._elem.style.setProperty("--row", `${value}`);
     this._updated = false;
@@ -128,6 +190,7 @@ class Piece {
     this._updated = false;
   }
 
+  //bounds getters
   get width() {
     return this._elem.getBoundingClientRect().width;
   }
@@ -136,23 +199,36 @@ class Piece {
     return this._elem.getBoundingClientRect().height;
   }
 
+  /**
+   * called on window resizing to scale the piece
+   * @param {number} pWidth
+   * @param {number} pHeight
+   * @param {number} nWidth
+   * @param {number} nHeight
+   */
   resize(pWidth, pHeight, nWidth, nHeight) {
     this.row = Math.round((this.row / pHeight) * nHeight);
     this.col = Math.round((this.col / pWidth) * nWidth);
   }
-
-  destructor() {
-    gameArea.removeChild(this._elem);
-  }
 }
 
+//class to represent the collectable block
 class Block extends Piece {
+  /**
+   *
+   * @param {Game} game
+   */
   constructor(game) {
     super();
-    this.reset(game);
+    this.addClass("block");
+    this.getPosition(game);
   }
 
-  reset(game) {
+  /**
+   * randomizes position of the block
+   * @param {Game} game
+   */
+  getPosition(game) {
     do {
       this.row =
         game.minHeight +
@@ -160,37 +236,61 @@ class Block extends Piece {
       this.col =
         game.minWidth +
         Math.floor(Math.random() * (game.maxWidth - game.minWidth + 1));
-    } while (game && game.overlapsWithSnake(this.row, this.col));
+    } while (game?.overlapsWithSnake(this.row, this.col));
+  }
+
+  ingested() {
+    this.removeClass("block");
+    this.addClass("snake-segment");
   }
 }
 
+//class to represent the head of the snake, with a direction and memory of next position
 class Head extends Piece {
   constructor() {
     super();
+    this.addClass("snake-segment");
     this.nextRow = 0;
     this.nextCol = 0;
     this.direction = Direction.LEFT;
   }
 
+  //updates memory of next position
   updateNext() {
     this.nextRow = this.row + this.direction[0];
     this.nextCol = this.col + this.direction[1];
   }
 }
 
+//class to represent the snake, with a Head and a tail with four pieces
 class Snake {
+  /**
+   *
+   * @param {Game} game
+   */
   constructor(game) {
     this._segments = [new Head()].concat(
-      Array.from({ length: 4 }, () => new Piece())
+      Array.from({ length: 4 }, () => {
+        const segment = new Piece();
+        segment.addClass("snake-segment");
+        return segment;
+      })
     );
 
     this._initializeSegments(game);
   }
 
-  size() {
+  get size() {
     return this._segments.length;
   }
 
+  /**
+   * called on window resizing, to scale the snake
+   * @param {number} pWidth
+   * @param {number} pHeight
+   * @param {number} nWidth
+   * @param {number} nHeight
+   */
   resize(pWidth, pHeight, nWidth, nHeight) {
     let pRow = this._segments[0].row;
     let pCol = this._segments[0].col;
@@ -218,6 +318,12 @@ class Snake {
     this._segments[0].updateNext();
   }
 
+  /**
+   * checks if a position overlaps with any snake segment
+   * @param {number} row
+   * @param {number} col
+   * @returns
+   */
   overlaps(row, col) {
     return this._segments.some((piece) => piece.row == row && piece.col == col);
   }
@@ -234,10 +340,19 @@ class Snake {
     this._segments[0].updateNext();
   }
 
+  /**
+   *
+   * @param {Direction} newDirection
+   */
   updateDirection(newDirection) {
     this._segments[0].direction = newDirection ?? this._segments[0].direction;
   }
 
+  /**
+   *
+   * @param {Game} game
+   * @returns
+   */
   touchesGrid(game) {
     return (
       this._segments[0].nextRow < game.minHeight ||
@@ -257,6 +372,11 @@ class Snake {
       );
   }
 
+  /**
+   *
+   * @param {Block} block
+   * @returns
+   */
   touchesBlock(block) {
     return (
       this._segments[0].nextRow == block.row &&
@@ -264,20 +384,41 @@ class Snake {
     );
   }
 
+  /**
+   *
+   * @param {Block} block
+   * @returns
+   */
+  eatsBlock(block) {
+    return (
+      this._segments.at(-1).row == block.row &&
+      this._segments.at(-1).col == block.col
+    );
+  }
+
+  /**
+   *
+   * @param {Piece} newSegment
+   */
   addSegment(newSegment) {
     this._segments.push(newSegment);
   }
 
-  reset(game) {
-    for (let i = 5; i < this._segments.length; ++i) {
-      this._segments[i].destructor();
+  /**
+   *
+   * @param {Game} game
+   */
+  reset() {
+    for (let i = 0; i < this._segments.length; ++i) {
+      this._segments[i].reset();
     }
-
-    this._segments = this._segments.slice(0, 5);
-
-    this._initializeSegments(game);
+    this._segments = null;
   }
 
+  /**
+   *
+   * @param {Game} game
+   */
   _initializeSegments(game) {
     const centerRow = Math.floor((game.maxHeight - game.minHeight) / 2);
     const centerCol = Math.floor((game.maxWidth - game.minWidth) / 2);
@@ -292,6 +433,7 @@ class Snake {
   }
 }
 
+//class to represent the game itself, handling interaction between its parts and gameflow
 class Game {
   constructor() {
     this._bounds = gameArea.getBoundingClientRect();
@@ -300,6 +442,7 @@ class Game {
     );
     this._snake = new Snake(this);
     this._block = new Block(this);
+    this._ingestingBlock = null;
     this._directionQueue = [];
     this._difficulty = Difficulty.MEDIUM;
     this._raf = null;
@@ -329,6 +472,8 @@ class Game {
     scoreText.textContent = `${value}`;
   }
 
+  //time per frame depends on difficulty
+  //TODO: move magic numbers to global constants
   get _timePerFrame() {
     switch (this._difficulty) {
       case Difficulty.EASY:
@@ -352,29 +497,34 @@ class Game {
     const newWidth = this.maxWidth - this.minWidth + 1;
     const newHeight = this.maxHeight - this.minHeight + 1;
 
-    this._snake.resize(
-      prevWidth,
-      prevHeight,
-      newWidth,
-      newHeight
-    );
+    this._snake.resize(prevWidth, prevHeight, newWidth, newHeight);
 
-    this._block.resize(
-      prevWidth,
-      prevHeight,
-      newWidth,
-      newHeight
-    );
+    this._block.resize(prevWidth, prevHeight, newWidth, newHeight);
   }
 
+  /**
+   *
+   * @param {Direction} newDirection
+   */
   addDirection(newDirection) {
     if (this.isRunning) this._directionQueue.push(newDirection);
   }
 
+  /**
+   *
+   * @param {number} row
+   * @param {number} col
+   * @returns
+   */
   overlapsWithSnake(row, col) {
     return this._snake.overlaps(row, col);
   }
 
+  /**
+   * method to handle the gameLoop
+   * it encapsulates all variables related to passage of time
+   * those variables are automatically reset after the game stops
+   */
   start() {
     if (this.isRunning) return;
 
@@ -384,6 +534,11 @@ class Game {
     let crtTime = 0;
     let remTime = 0;
 
+    /**
+     *
+     * @param {number} timestamp
+     * @returns
+     */
     const gameLoop = (timestamp) => {
       if (!crtTime) {
         crtTime = timestamp;
@@ -395,19 +550,33 @@ class Game {
       while (deltaTime >= this._timePerFrame) {
         deltaTime -= this._timePerFrame;
 
+        //game over
         if (this._snake.touchesGrid(this) || this._snake.touchesTail()) {
-          this.end();
+          this.over();
           return;
         }
 
         if (this._snake.touchesBlock(this._block)) {
-          this._score += this._difficulty * this._snake.size();
-          this._snake.addSegment(this._block);
+          document.documentElement.style.setProperty(
+            "--ingestion-time",
+            `${this._timePerFrame * this._snake.size}ms`
+          );
+          this._ingestingBlock = this._block;
+          this._ingestingBlock.ingested();
           this._block = new Block(this);
         }
 
-        this._snake.move();
+        if (
+          this._ingestingBlock &&
+          this._snake.eatsBlock(this._ingestingBlock)
+        ) {
+          this._score += this._difficulty * this._snake.size;
+          this._snake.addSegment(this._ingestingBlock);
+          this._ingestingBlock = null;
+        }
+
         this._snake.updateDirection(this._directionQueue.shift());
+        this._snake.move();
       }
 
       crtTime = timestamp;
@@ -426,15 +595,30 @@ class Game {
     this._raf = null;
   }
 
-  end() {
+  over() {
     this.pause();
+    finalScore.innerHTML = `${this._score}`;
+    const prevScore = localStorage.getItem("bestScore");
+    const crtBest = prevScore ? Math.max(prevScore, this._score) : this._score;
+    localStorage.setItem("bestScore", `${crtBest}`);
+    bestScore.innerHTML = `${crtBest}`;
+    finalScore.style.color =
+      crtBest > this._score
+        ? "var(--light-red-color)"
+        : "var(--light-green-color)";
     gameOver.showModal();
     playAgain.focus();
   }
 
   reset() {
-    this._snake.reset(this);
-    this._block.reset(this);
+    this._snake.reset();
+    this._block.reset();
+    this._ingestingBlock?.reset();
+
+    this._snake = new Snake(this);
+    this._block = new Block(this);
+    this._ingestingBlock = null;
+
     this._directionQueue = [];
     this._score = 0;
     this._difficulty = Difficulty.MEDIUM;
@@ -448,6 +632,7 @@ class Game {
 
 const game = new Game();
 
+//listeners
 window.addEventListener("resize", () => {
   game.resize();
 });
@@ -458,7 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
     screen.orientation.type == "portrait-secundary"
   ) {
     alertMessage.showModal();
-  } else if (!skipTutorial) {
+  } else if (!localStorage.getItem("skipTutorial")) {
     tutorialMessage.showModal();
     nextTutorialButton.focus();
   }
@@ -549,6 +734,7 @@ alertButton.addEventListener("click", () => {
   alertMessage.close();
 });
 
+//helpers for handling current tutorial state
 let tutorialStep = 0;
 let endTutorial = false;
 

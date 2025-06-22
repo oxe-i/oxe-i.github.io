@@ -332,6 +332,19 @@ class Game {
         this._ball.move();
         this._paddle.move();
 
+        //game win
+        if (!this._bricks.length) {
+          this.win();
+          return;
+        }
+
+        //game over
+        if (this._ball.hasFloorCollision()) {
+          this._ball.adjustPositionOnFloor();
+          this.over();
+          return;
+        }
+
         if (this._ball.hasWallCollision()) {
           this._ball.adjustPositionOnWalls();
           this._ball.xVelocity *= -1;
@@ -342,13 +355,6 @@ class Game {
           this._ball.adjustPositionOnTop();
           this._ball.yVelocity *= -1;
           continue;
-        }
-
-        //game over
-        if (this._ball.hasFloorCollision()) {
-          this._ball.adjustPositionOnFloor();
-          this.over();
-          return;
         }
 
         if (this._ball.hasPaddleCollision(this._paddle.x, this._paddle.y)) {
@@ -401,12 +407,6 @@ class Game {
         }
 
         partitionedBricks.true.forEach((brick) => brick.break());
-
-        //game win
-        if (!this._bricks.length) {
-          this.win();
-          return;
-        }
       }
 
       crtTime = timestamp;
@@ -444,3 +444,4 @@ document.addEventListener("pointermove", (event) => {
 });
 
 game.start();
+
