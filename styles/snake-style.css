@@ -4,7 +4,7 @@
   --letter-color: #f0f3f9;
   --low-contrast-color: #33203d;
   --medium-contrast-color: #8044ad;
-  --snake-segment-color: black;
+  --snake-segment-color: #0A0908;
   --block-color: var(--medium-contrast-color);
   --game-over-background-color: #1c0a0a;
   --game-over-text-color: #7fe458;
@@ -191,6 +191,7 @@ dialog::backdrop {
   grid-row: var(--row);
   
   transition: all var(--ingestion-time) linear;
+  box-shadow: 5px 5px 10px rgb(10, 9, 8, 0.5);
 }
 
 .piece.block {
@@ -199,10 +200,104 @@ dialog::backdrop {
   border-radius: 50%;
 }
 
+.piece.head {
+  --direction: LEFT;
+  background-color: var(--snake-segment-color);
+  clip-path: ellipse(100% 50% at 100% 50%);
+  border-radius: 0;
+  transition: 0;
+}
+
+.piece.head.animate {
+  --start-rotation: 0deg;
+  --end-rotation: 0deg;
+  --animation-value: 0;
+  animation: var(--animation-value);
+}
+
 .piece.snake-segment {
   background-color: var(--snake-segment-color);
-  border: 1px solid var(--canvas-color);
   border-radius: 0;
+}
+
+@keyframes LEFT-UP {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes LEFT-DOWN {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-90deg);
+  }
+}
+
+@keyframes RIGHT-UP {
+  from {
+    transform: rotate(180deg);
+  }
+
+  to {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes RIGHT-DOWN {
+  from {
+    transform: rotate(180deg);
+  }
+
+  to {
+    transform: rotate(270deg);
+  }
+}
+
+@keyframes UP-LEFT {
+  from {
+    transform: rotate(90deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes UP-RIGHT {
+  from {
+    transform: rotate(90deg);
+  }
+
+  to {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes DOWN-LEFT {
+  from {
+    transform: rotate(-90deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes DOWN-RIGHT {
+  from {
+    transform: rotate(270deg);
+  }
+
+  to {
+    transform: rotate(180deg);
+  }
 }
 
 @media (pointer: coarse) {

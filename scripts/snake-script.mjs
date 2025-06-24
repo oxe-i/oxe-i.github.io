@@ -45,7 +45,7 @@ const showTutorialButton = document.querySelector("#show-tutorial");
 const SPEED = 1;
 
 //enum-like class to represent direction of movement for the snake
-class Direction {
+class DirectionSpeed {
   static get LEFT() {
     return [0, -SPEED];
   }
@@ -159,6 +159,28 @@ class Piece {
   }
 
   /**
+   *
+   * @param {string} property
+   * @param {string} value
+   */
+  addStyle(property, value) {
+    this._elem.style.setProperty(`${property}`, `${value}`);
+    this._updated = false;
+  }
+
+  /**
+   *
+   * @param {string} property
+   * @returns
+   */
+  getStyle(property) {
+    if (!this._updated) {
+      this._style = getComputedStyle(this._elem);
+    }
+    return this._style.getPropertyValue(`${property}`);
+  }
+
+  /**
    * both getters return the current CSS property value converted to a number
    * CSS works with PERCENTAGES
    */
@@ -249,16 +271,37 @@ class Block extends Piece {
 class Head extends Piece {
   constructor() {
     super();
-    this.addClass("snake-segment");
+    this.addClass("head");
+    this.addClass("animate");
     this.nextRow = 0;
     this.nextCol = 0;
-    this.direction = Direction.LEFT;
+  }
+
+  get direction() {
+    if (!this._updated) {
+      this._style = getComputedStyle(this._elem);
+      this._updated = true;
+    }
+    return this._style.getPropertyValue("--direction");
+  }
+
+  set direction(value) {
+    if (value == this.direction) return;
+    this._prevDirection = this.direction;
+    this._elem.style.setProperty("--direction", `${value}`);
   }
 
   //updates memory of next position
   updateNext() {
-    this.nextRow = this.row + this.direction[0];
-    this.nextCol = this.col + this.direction[1];
+    const [rowSpeed, colSpeed] = DirectionSpeed[this.direction];
+    this.nextRow = this.row + rowSpeed;
+    this.nextCol = this.col + colSpeed;
+  }
+
+  adjustFacingDirection() {
+    if (this._prevDirection == this.direction) return;
+    this.addStyle("animation", `200ms ease 1 forwards ${this._prevDirection}-${this.direction}`);
+    this._prevDirection = this.direction;
   }
 }
 
@@ -273,6 +316,7 @@ class Snake {
       Array.from({ length: 4 }, () => {
         const segment = new Piece();
         segment.addClass("snake-segment");
+        segment.addStyle("border-left", "1px solid var(--canvas-color)");
         return segment;
       })
     );
@@ -328,6 +372,29 @@ class Snake {
     return this._segments.some((piece) => piece.row == row && piece.col == col);
   }
 
+  _setBorderOnIdx(border, idx) {
+    this._segments[idx].addStyle("border-top", "0");
+    this._segments[idx].addStyle("border-bottom", "0");
+    this._segments[idx].addStyle("border-left", "0");
+    this._segments[idx].addStyle("border-right", "0");
+    this._segments[idx].addStyle(
+      `border-${border}`,
+      "1px solid var(--canvas-color)"
+    );
+  }
+
+  _setBorder() {
+    for (let i = 1; i < this._segments.length; ++i) {
+      if (this._segments[i - 1].row < this._segments[i].row)
+        this._setBorderOnIdx("top", i);
+      else if (this._segments[i - 1].row > this._segments[i].row)
+        this._setBorderOnIdx("bottom", i);
+      else if (this._segments[i - 1].col < this._segments[i].col)
+        this._setBorderOnIdx("left", i);
+      else this._setBorderOnIdx("right", i);
+    }
+  }
+
   move() {
     for (let i = this._segments.length - 1; i > 0; --i) {
       this._segments[i].row = this._segments[i - 1].row;
@@ -338,6 +405,8 @@ class Snake {
     this._segments[0].col = this._segments[0].nextCol;
 
     this._segments[0].updateNext();
+    this._setBorder();
+    this._segments[0].adjustFacingDirection();
   }
 
   /**
@@ -428,7 +497,6 @@ class Snake {
       piece.col = centerCol + idx;
     });
 
-    this._segments[0].direction = Direction.LEFT;
     this._segments[0].updateNext();
   }
 }
@@ -597,6 +665,7 @@ class Game {
 
   over() {
     this.pause();
+
     finalScore.innerHTML = `${this._score}`;
     const prevScore = localStorage.getItem("bestScore");
     const crtBest = prevScore ? Math.max(prevScore, this._score) : this._score;
@@ -606,6 +675,7 @@ class Game {
       crtBest > this._score
         ? "var(--light-red-color)"
         : "var(--light-green-color)";
+
     gameOver.showModal();
     playAgain.focus();
   }
@@ -659,22 +729,22 @@ document.addEventListener("keydown", (event) => {
     case "ArrowUp":
     case "W":
     case "w":
-      game.addDirection(Direction.UP);
+      game.addDirection("UP");
       return;
     case "ArrowDown":
     case "S":
     case "s":
-      game.addDirection(Direction.DOWN);
+      game.addDirection("DOWN");
       return;
     case "ArrowLeft":
     case "A":
     case "a":
-      game.addDirection(Direction.LEFT);
+      game.addDirection("LEFT");
       return;
     case "ArrowRight":
     case "D":
     case "d":
-      game.addDirection(Direction.RIGHT);
+      game.addDirection("RIGHT");
       return;
   }
 });
@@ -691,19 +761,19 @@ stopButton.addEventListener("click", () => {
 });
 
 dirUp.addEventListener("click", () => {
-  game.addDirection(Direction.UP);
+  game.addDirection("UP");
 });
 
 dirDown.addEventListener("click", () => {
-  game.addDirection(Direction.DOWN);
+  game.addDirection("DOWN");
 });
 
 dirLeft.addEventListener("click", () => {
-  game.addDirection(Direction.LEFT);
+  game.addDirection("LEFT");
 });
 
 dirRight.addEventListener("click", () => {
-  game.addDirection(Direction.RIGHT);
+  game.addDirection("RIGHT");
 });
 
 playAgain.addEventListener("click", () => {
