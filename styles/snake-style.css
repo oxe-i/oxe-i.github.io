@@ -4,7 +4,7 @@
   --letter-color: #f0f3f9;
   --low-contrast-color: #33203d;
   --medium-contrast-color: #8044ad;
-  --snake-segment-color: #0A0908;
+  --snake-segment-color: #011508;
   --block-color: var(--medium-contrast-color);
   --game-over-background-color: #1c0a0a;
   --game-over-text-color: #7fe458;
@@ -190,8 +190,7 @@ dialog::backdrop {
   grid-column: var(--col);
   grid-row: var(--row);
   
-  transition: all var(--ingestion-time) linear;
-  box-shadow: 5px 5px 10px rgb(10, 9, 8, 0.5);
+  box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);
 }
 
 .piece.block {
@@ -203,21 +202,16 @@ dialog::backdrop {
 .piece.head {
   --direction: LEFT;
   background-color: var(--snake-segment-color);
-  clip-path: ellipse(100% 50% at 100% 50%);
+  background-image: url("../assets/snake-eyes.svg");
+  clip-path: ellipse(90% 50% at 100% 50%);
   border-radius: 0;
-  transition: 0;
-}
-
-.piece.head.animate {
-  --start-rotation: 0deg;
-  --end-rotation: 0deg;
-  --animation-value: 0;
-  animation: var(--animation-value);
 }
 
 .piece.snake-segment {
   background-color: var(--snake-segment-color);
   border-radius: 0;
+  border-left: 1px solid var(--canvas-color);
+  transition: all var(--ingestion-time) linear;
 }
 
 @keyframes LEFT-UP {
