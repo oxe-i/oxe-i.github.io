@@ -158,6 +158,10 @@ class Piece {
     this._elem.classList.remove(className);
   }
 
+  resetClasses() {
+    this._elem.className = "piece";
+  }
+
   /**
    *
    * @param {string} property
@@ -242,15 +246,15 @@ class Block extends Piece {
    */
   constructor(game) {
     super();
-    this.addClass("block");
-    this.getPosition(game);
+    this._getPosition(game);
+    this._getProperties();
   }
 
   /**
    * randomizes position of the block
    * @param {Game} game
    */
-  getPosition(game) {
+  _getPosition(game) {
     do {
       this.row =
         game.minHeight +
@@ -261,8 +265,20 @@ class Block extends Piece {
     } while (game?.overlapsWithSnake(this.row, this.col));
   }
 
+  _getProperties() {
+    switch (Math.floor(Math.random() * 3)) {
+      case 0:
+        this.addClass("frog");
+        return;
+      default:
+        this.addClass("flower");
+        this.addStyle("filter", `invert(0.2) sepia(1) hue-rotate(${Math.floor(Math.random() * 360)}deg) saturate(5)  brightness(2)`);
+        return;
+    }
+  }
+
   ingested() {
-    this.removeClass("block");
+    this.resetClasses();
     this.addClass("snake-segment");
   }
 }
@@ -272,7 +288,6 @@ class Head extends Piece {
   constructor() {
     super();
     this.addClass("head");
-    this.addClass("animate");
     this.nextRow = 0;
     this.nextCol = 0;
   }
@@ -300,7 +315,10 @@ class Head extends Piece {
 
   adjustFacingDirection() {
     if (this._prevDirection == this.direction) return;
-    this.addStyle("animation", `200ms ease 1 forwards ${this._prevDirection}-${this.direction}`);
+    this.addStyle(
+      "animation",
+      `200ms ease 1 forwards ${this._prevDirection}-${this.direction}`
+    );
     this._prevDirection = this.direction;
   }
 }
@@ -316,7 +334,6 @@ class Snake {
       Array.from({ length: 4 }, () => {
         const segment = new Piece();
         segment.addClass("snake-segment");
-        segment.addStyle("border-left", "1px solid var(--canvas-color)");
         return segment;
       })
     );

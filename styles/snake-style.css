@@ -1,6 +1,6 @@
 :root {
   --canvas-color: #ccec90;
-  --background-color: #1b0f21;
+  --background-color: #130a18;
   --letter-color: #f0f3f9;
   --low-contrast-color: #33203d;
   --medium-contrast-color: #8044ad;
@@ -11,10 +11,13 @@
   --light-red-color: #ff4f4f;
   --light-green-color: #7fe458;
   --light-yellow-color: #f4f76f;
+  --frog-color: #257141;
+  --seed-color: #8a0f53;
   --large-font-size: 3vmin;
   --normal-font-size: 3vmin;
   --piece-unit: round(down, 3.6vmin, 1px);
   --ingestion-time: 0;
+  --frog-clip-path: none;
 }
 
 * {
@@ -91,7 +94,7 @@ dialog::backdrop {
 
   h1 {
     font-size: 3rem;
-    margin: 2vmin;    
+    margin: 2vmin;
   }
 
   p {
@@ -186,17 +189,25 @@ dialog::backdrop {
 .piece {
   --row: 0;
   --col: 0;
-  
+
   grid-column: var(--col);
   grid-row: var(--row);
-  
-  box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);
 }
 
-.piece.block {
-  background-color: var(--block-color);
-  border: 0;
+.piece.frog {
+  background-color: var(--frog-color);
   border-radius: 50%;
+  background-image: url("../assets/frog-face.svg");
+}
+
+.piece.seed {
+  background-color: var(--seed-color);
+  clip-path: ellipse(40% 30% at 50% 50%);
+}
+
+.piece.flower {
+  background-image: url("../assets/flower.svg");
+  filter: invert(0.3) sepia(1) hue-rotate(240deg) saturate(5)  brightness(2);
 }
 
 .piece.head {
@@ -212,6 +223,7 @@ dialog::backdrop {
   border-radius: 0;
   border-left: 1px solid var(--canvas-color);
   transition: all var(--ingestion-time) linear;
+  box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);
 }
 
 @keyframes LEFT-UP {
