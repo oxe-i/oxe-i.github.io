@@ -140,6 +140,7 @@ class Piece {
 
   reset() {
     gameArea.removeChild(this._elem);
+    this._elem = null;
   }
 
   /**
@@ -269,12 +270,19 @@ class Block extends Piece {
     switch (Math.floor(Math.random() * 3)) {
       case 0:
         this.addClass("frog");
-        return;
+        break;
       default:
         this.addClass("flower");
-        this.addStyle("filter", `invert(0.2) sepia(1) hue-rotate(${Math.floor(Math.random() * 360)}deg) saturate(5)  brightness(2)`);
-        return;
+        break;
     }
+    this.addStyle(
+      "filter",
+      `invert(${0.1 + Math.random() * 0.1}) sepia(${
+        0.6 + Math.random() * 0.4
+      }) hue-rotate(${Math.random() * 360}deg) saturate(${
+        2 + Math.random()
+      })  brightness(2)`
+    );
   }
 
   ingested() {
@@ -477,8 +485,8 @@ class Snake {
    */
   eatsBlock(block) {
     return (
-      this._segments.at(-1).row == block.row &&
-      this._segments.at(-1).col == block.col
+      this._segments.at(-1).row === block?.row &&
+      this._segments.at(-1).col === block?.col
     );
   }
 
@@ -527,7 +535,7 @@ class Game {
     );
     this._snake = new Snake(this);
     this._block = new Block(this);
-    this._ingestingBlock = null;
+    this._ingestingBlock = [];
     this._directionQueue = [];
     this._difficulty = Difficulty.MEDIUM;
     this._raf = null;
@@ -630,8 +638,9 @@ class Game {
         this._raf = requestAnimationFrame(gameLoop);
         return;
       }
-
+      
       let deltaTime = timestamp - crtTime + remTime;
+
       while (deltaTime >= this._timePerFrame) {
         deltaTime -= this._timePerFrame;
 
@@ -646,18 +655,14 @@ class Game {
             "--ingestion-time",
             `${this._timePerFrame * this._snake.size}ms`
           );
-          this._ingestingBlock = this._block;
-          this._ingestingBlock.ingested();
+          this._block.ingested();
+          this._ingestingBlock.push(this._block);
           this._block = new Block(this);
         }
 
-        if (
-          this._ingestingBlock &&
-          this._snake.eatsBlock(this._ingestingBlock)
-        ) {
+        if (this._snake.eatsBlock(this._ingestingBlock?.[0])) {
           this._score += this._difficulty * this._snake.size;
-          this._snake.addSegment(this._ingestingBlock);
-          this._ingestingBlock = null;
+          this._snake.addSegment(this._ingestingBlock.shift());
         }
 
         this._snake.updateDirection(this._directionQueue.shift());
@@ -700,14 +705,15 @@ class Game {
   reset() {
     this._snake.reset();
     this._block.reset();
-    this._ingestingBlock?.reset();
+    this._ingestingBlock.forEach(block => block.reset());
 
     this._snake = new Snake(this);
     this._block = new Block(this);
-    this._ingestingBlock = null;
 
+    this._ingestingBlock = [];
     this._directionQueue = [];
     this._score = 0;
+
     this._difficulty = Difficulty.MEDIUM;
     this._raf = null;
   }
