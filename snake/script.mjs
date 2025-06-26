@@ -127,6 +127,13 @@ function isTouchDevice() {
   return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
 
+//helper to generate a random float between 0 and 1
+function randomNum() {
+  const randomBuffer = new Uint32Array(1);
+  window.crypto.getRandomValues(randomBuffer);
+  return randomBuffer[0] / (0xffffffff + 1);
+}
+
 //a class to represent an uniform interface for elements in the game
 class Piece {
   constructor() {
@@ -142,18 +149,13 @@ class Piece {
   randomizeColor() {
     const colorValues =
       "rgb(" +
-      [...new Array(3).keys()]
-        .map((idx) => this._getRandomNum() * Math.abs(80 + 200 * (idx - 1)))
+      Array(3)
+        .fill(140)
+        .map((multiplier) => randomNum() * multiplier)
         .join(", ") +
       ")";
     console.log(colorValues);
     this.addStyle("background-color", colorValues);
-  }
-
-  _getRandomNum() {
-    const randomBuffer = new Uint32Array(1);
-    window.crypto.getRandomValues(randomBuffer);
-    return randomBuffer[0] / (0xffffffff + 1);
   }
 
   reset() {
@@ -302,7 +304,7 @@ class Block extends Piece {
   }
 
   _getProperties() {
-    switch (Math.floor(this._getRandomNum() * 2)) {
+    switch (Math.floor(randomNum() * 2)) {
       case 0:
         this.addClass("smiley");
         break;
