@@ -1,0 +1,345 @@
+:root {
+  --canvas-color: #ccec90;
+  --background-color: #130a18;
+  --letter-color: #f0f3f9;
+  --low-contrast-color: #33203d;
+  --medium-contrast-color: #8044ad;
+  --snake-segment-color: #011508;
+  --block-color: var(--medium-contrast-color);
+  --game-over-background-color: #1c0a0a;
+  --game-over-text-color: #7fe458;
+  --light-red-color: #ff4f4f;
+  --light-green-color: #7fe458;
+  --light-yellow-color: #f4f76f;
+  --large-font-size: 3vmin;
+  --normal-font-size: 3vmin;
+  --piece-unit: round(down, 3.6vmin, 1px);
+  --ingestion-time: 0;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 0;
+  border-radius: 1vmin;
+  color: var(--letter-color);
+  font-size: var(--large-font-size);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.25;
+}
+
+h1,
+#score {
+  text-transform: uppercase;
+}
+
+button {
+  cursor: pointer;
+}
+
+#page {
+  width: 100vw;
+  height: 100vh;
+  background: var(--background-color);
+  padding: 5vh 2vw;
+  gap: 2vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+dialog {
+  margin: auto;
+  padding: 5vmin;
+
+  button {
+    margin-top: 5vmin;
+    padding: 1vmin 5vmin;
+  }
+}
+
+dialog::backdrop {
+  background: var(--background-color);
+  opacity: 98%;
+}
+
+#alert-message,
+#tutorial-message {
+  border: 1px solid var(--letter-color);
+  background: var(--background-color);
+}
+
+#tutorial-message p {
+  text-align: justify;
+  line-height: 1.5;
+}
+
+#tutorial-message div {
+  display: flex;
+  justify-content: space-between;
+  button {
+    background: var(--low-contrast-color);
+    width: calc(5vmin + 4rem);
+  }
+}
+
+#game-over {
+  padding: 10vmin;
+
+  h1 {
+    font-size: 3rem;
+    margin: 2vmin;
+  }
+
+  p {
+    font-size: 1rem;
+    margin: 2vmin;
+  }
+
+  button {
+    background-color: var(--low-contrast-color);
+  }
+}
+
+#final-score span {
+  color: var(--light-red-color);
+}
+
+#best-score span {
+  text-decoration: underline;
+}
+
+#directional-buttons {
+  display: none;
+}
+
+#game {
+  border: 0;
+  border-radius: 0;
+  max-width: calc(100% - 40vmin);
+  max-height: 100%;
+  background: var(--canvas-color);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--piece-unit));
+  grid-template-rows: repeat(auto-fill, var(--piece-unit));
+}
+
+#after-canvas {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 5vh;
+}
+
+#difficulty {
+  display: grid;
+  grid-template-areas:
+    "title title title"
+    "btn1  btn2  btn3 ";
+  row-gap: 5vh;
+  column-gap: 1vw;
+  place-items: center;
+
+  h1 {
+    grid-area: title;
+  }
+
+  button {
+    width: 10vmin;
+    aspect-ratio: 1;
+  }
+}
+
+#game-stats {
+  flex: initial;
+  display: flex;
+  gap: 1vw;
+
+  p {
+    background: var(--low-contrast-color);
+    flex: auto;
+  }
+}
+
+#show-tutorial {
+  background: var(--low-contrast-color);
+  flex: initial;
+  padding: 1vh 0;
+}
+
+#game-flow-buttons {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  button {
+    width: 15vmin;
+    aspect-ratio: 1;
+  }
+}
+
+.piece {
+  --row: 0;
+  --col: 0;
+
+  background-color: transparent;
+  grid-column: var(--col);
+  grid-row: var(--row);
+}
+
+.piece.smiley {
+  border-radius: 50%;
+  background-image: url("../assets/smile.svg"), url("../assets/eyes.svg");
+}
+
+.piece.block {
+  background-image: url("../assets/eyes.svg"), url("../assets/angry.svg");
+}
+
+.piece.seed {
+  clip-path: ellipse(40% 30% at 50% 50%);
+}
+
+.piece.flower {
+  background-image: url("../assets/flower.svg");
+}
+
+.piece.head {
+  --direction: LEFT;
+  background-image: url("../assets/snake-eyes.svg");
+  background-color: var(--snake-segment-color);
+
+  border-bottom-left-radius: 40%;
+  border-top-left-radius: 40%;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.piece.snake-segment {
+  border-radius: 0;
+  border-left: 1px solid var(--canvas-color);
+  transition: all var(--ingestion-time) linear;
+  box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);
+}
+
+@keyframes LEFT-UP {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes LEFT-DOWN {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-90deg);
+  }
+}
+
+@keyframes RIGHT-UP {
+  from {
+    transform: rotate(180deg);
+  }
+
+  to {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes RIGHT-DOWN {
+  from {
+    transform: rotate(180deg);
+  }
+
+  to {
+    transform: rotate(270deg);
+  }
+}
+
+@keyframes UP-LEFT {
+  from {
+    transform: rotate(90deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes UP-RIGHT {
+  from {
+    transform: rotate(90deg);
+  }
+
+  to {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes DOWN-LEFT {
+  from {
+    transform: rotate(-90deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes DOWN-RIGHT {
+  from {
+    transform: rotate(270deg);
+  }
+
+  to {
+    transform: rotate(180deg);
+  }
+}
+
+@media (pointer: coarse) {
+  #game {
+    max-width: calc(100% - 80vmin);
+  }
+
+  #directional-buttons {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: grid;
+    place-items: center;
+
+    button {
+      width: 10vmin;
+      aspect-ratio: 1;
+      position: absolute;
+      transform-origin: center;
+    }
+  }
+
+  #up {
+    transform: translateY(-150%) rotate(-90deg);
+  }
+
+  #left {
+    transform: translateX(-150%) rotate(180deg);
+  }
+
+  #down {
+    transform: translateY(150%) rotate(90deg);
+  }
+
+  #right {
+    transform: translateX(150%);
+  }
+}
