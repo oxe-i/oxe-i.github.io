@@ -127,15 +127,6 @@ function isTouchDevice() {
   return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
 
-//math helper to shuffle the elements in an array
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
 //a class to represent an uniform interface for elements in the game
 class Piece {
   constructor() {
@@ -151,8 +142,8 @@ class Piece {
   randomizeColor() {
     const colorValues =
       "rgb(" +
-      shuffleArray([...new Array(3).keys()].map((idx) => 120 * idx))
-        .map((multiplier) => this._getRandomNum() * multiplier)
+      [...new Array(3).keys()]
+        .map((idx) => this._getRandomNum() * Math.abs(80 + 200 * (idx - 1)))
         .join(", ") +
       ")";
     console.log(colorValues);
