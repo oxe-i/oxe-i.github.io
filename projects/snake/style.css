@@ -72,17 +72,23 @@ dialog::backdrop {
   background: var(--background-color);
 }
 
+#tutorial-message {
+  max-width: 80vmin;
+}
+
 #tutorial-message p {
   text-align: justify;
   line-height: 1.5;
+  overflow: auto;
 }
 
 #tutorial-message div {
   display: flex;
   justify-content: space-between;
+  gap: 15vmin;
   button {
     background: var(--low-contrast-color);
-    width: calc(5vmin + 4rem);
+    flex: 1;
   }
 }
 

@@ -623,6 +623,35 @@ class Game {
     scoreText.textContent = `${value}`;
   }
 
+  setEasyDifficulty() {
+    if (!game.isRunning) return;
+    game.difficulty = Difficulty.EASY;
+    setEasyButton();
+  }
+
+  setMediumDifficulty() {
+    if (!game.isRunning) return;
+    game.difficulty = Difficulty.MEDIUM;
+    setMediumButton();
+  }
+
+  setHardDifficulty() {
+    if (!game.isRunning) return;
+    game.difficulty = Difficulty.HARD;
+    setHardButton();
+  }
+
+  get difficulty() {
+    return this._difficulty;
+  }
+
+  /**
+   * @param {number} value
+   */
+  set difficulty(value) {
+    game._difficulty = value;
+  }
+
   //time per frame depends on difficulty
   //TODO: move magic numbers to global constants
   get timePerFrame() {
@@ -655,10 +684,12 @@ class Game {
     this._snake.resize(prevWidth, prevHeight, newWidth, newHeight);
 
     this._ingestingBlock.forEach((block, idx) => {
-      const containingSegment = this._snake.segmentAt(ingestingSnakeIndexes[idx]);
+      const containingSegment = this._snake.segmentAt(
+        ingestingSnakeIndexes[idx]
+      );
       block.row = containingSegment.row;
       block.col = containingSegment.col;
-    })
+    });
 
     this._block.resize(prevWidth, prevHeight, newWidth, newHeight);
   }
@@ -837,6 +868,32 @@ document.addEventListener("keydown", (event) => {
     case "d":
       game.addDirection("RIGHT");
       return;
+    case "+":
+    case "NumpadAdd":
+      if (!game.isRunning) return;
+      switch (game.difficulty) {
+        case Difficulty.EASY:
+          game.setMediumDifficulty();
+          break;
+        case Difficulty.MEDIUM:
+        case Difficulty.HARD:
+          game.setHardDifficulty();
+          break;
+      }
+      return;
+    case "-":
+    case "NumpadSubtract":
+      if (!game.isRunning) return;
+      switch (game.difficulty) {
+        case Difficulty.HARD:
+          game.setMediumDifficulty();
+          break;
+        case Difficulty.MEDIUM:
+        case Difficulty.EASY:
+          game.setEasyDifficulty();
+          break;
+      }
+      return;
   }
 });
 
@@ -873,26 +930,21 @@ playAgain.addEventListener("click", () => {
   game.start();
 });
 
-easyButton.addEventListener("click", () => {
-  if (!game.isRunning) return;
-  game._difficulty = Difficulty.EASY;
-  setEasyButton();
+easyButton.addEventListener("click", () => { 
+  game.setEasyDifficulty(); 
 });
 
-mediumButton.addEventListener("click", () => {
-  if (!game.isRunning) return;
-  game._difficulty = Difficulty.MEDIUM;
-  setMediumButton();
+mediumButton.addEventListener("click", () => { 
+  game.setMediumDifficulty(); 
 });
 
-hardButton.addEventListener("click", () => {
-  if (!game.isRunning) return;
-  game._difficulty = Difficulty.HARD;
-  setHardButton();
+hardButton.addEventListener("click", () => { 
+  game.setHardDifficulty(); 
 });
 
 alertButton.addEventListener("click", () => {
   alertMessage.close();
+  tutorialMessage.showModal();
 });
 
 //helpers for handling current tutorial state
@@ -908,31 +960,31 @@ nextTutorialButton.addEventListener("click", () => {
 
   switch (tutorialStep) {
     case 0:
-      tutorialText.innerHTML = `In this game, you move a snake around to catch as many blocks as you can.<br>
-        Once the snake touches a block, the block is added to its head and the snake grows.<br>
+      tutorialText.innerHTML = `In this game, you move a snake around to catch as many blocks of food as you can.
+        Once the snake eats a block, the block is added to its tail and the snake grows.
         If the snake touches the grid or its body, however, the game ends.`;
       break;
     case 1:
       if (isTouchDevice()) {
-        tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right.<br>
+        tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right.
           The snake moves faster on harder difficulties.`;
       } else {
-        tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right.<br>
-          It's also possible to increase or reduce the difficulty pressing + and -, respectively. <br>
+        tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right.
+          It's also possible to increase or reduce the difficulty pressing + and -, respectively. 
           The snake moves faster on harder difficulties.`;
       }
       break;
     case 2:
-      tutorialText.innerHTML = `There's a score counter below the difficulty buttons. You gain points whenever you catch a block.<br>
+      tutorialText.innerHTML = `There's a score counter below the difficulty buttons. You gain points whenever you catch a block.
         The greater the snake and the harder the game, the more points you gain.`;
       break;
     case 3:
       if (isTouchDevice()) {
-        tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game. <br>
+        tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game.
           Once the game starts, you can pause it too.`;
       } else {
-        tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game. <br>
-          Once the game starts, you can pause it too. <br>
+        tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game.
+          Once the game starts, you can pause it too.
           You can also start, pause or continue the game pressing spacebar.`;
       }
       break;
@@ -941,7 +993,7 @@ nextTutorialButton.addEventListener("click", () => {
         tutorialText.innerHTML =
           "You can move the snake with the directional pad on the left.";
       } else {
-        tutorialText.innerHTML = `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br> 
+        tutorialText.innerHTML = `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.
           W moves up, S moves down, A moves left and D moves right.`;
       }
       break;
