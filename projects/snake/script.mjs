@@ -930,16 +930,16 @@ playAgain.addEventListener("click", () => {
   game.start();
 });
 
-easyButton.addEventListener("click", () => { 
-  game.setEasyDifficulty(); 
+easyButton.addEventListener("click", () => {
+  game.setEasyDifficulty();
 });
 
-mediumButton.addEventListener("click", () => { 
-  game.setMediumDifficulty(); 
+mediumButton.addEventListener("click", () => {
+  game.setMediumDifficulty();
 });
 
-hardButton.addEventListener("click", () => { 
-  game.setHardDifficulty(); 
+hardButton.addEventListener("click", () => {
+  game.setHardDifficulty();
 });
 
 alertButton.addEventListener("click", () => {
@@ -947,7 +947,7 @@ alertButton.addEventListener("click", () => {
   tutorialMessage.showModal();
 });
 
-//helpers for handling current tutorial state
+//helpers for handling current state of the tutorial
 let tutorialStep = 0;
 let endTutorial = false;
 
@@ -958,74 +958,64 @@ nextTutorialButton.addEventListener("click", () => {
     return;
   }
 
-  switch (tutorialStep) {
-    case 0:
-      tutorialText.innerHTML = `In this game, you move a snake around to catch as many blocks of food as you can.
+  const tutorialTextMessages = {
+    true: {
+      0: `In this game, you move a snake around to catch as many blocks of food as you can.
         Once the snake eats a block, the block is added to its tail and the snake grows.
-        If the snake touches the grid or its body, however, the game ends.`;
-      break;
-    case 1:
-      if (isTouchDevice()) {
-        tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right.
-          The snake moves faster on harder difficulties.`;
-      } else {
-        tutorialText.innerHTML = `You can choose the difficulty of the game using the icon buttons on the top right.
-          It's also possible to increase or reduce the difficulty pressing + and -, respectively. 
-          The snake moves faster on harder difficulties.`;
-      }
-      break;
-    case 2:
-      tutorialText.innerHTML = `There's a score counter below the difficulty buttons. You gain points whenever you catch a block.
-        The greater the snake and the harder the game, the more points you gain.`;
-      break;
-    case 3:
-      if (isTouchDevice()) {
-        tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game.
-          Once the game starts, you can pause it too.`;
-      } else {
-        tutorialText.innerHTML = `On the right of the grid, below the score, there are buttons for starting and restarting the game.
-          Once the game starts, you can pause it too.
-          You can also start, pause or continue the game pressing spacebar.`;
-      }
-      break;
-    case 4:
-      if (isTouchDevice()) {
-        tutorialText.innerHTML =
-          "You can move the snake with the directional pad on the left.";
-      } else {
-        tutorialText.innerHTML = `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.
-          W moves up, S moves down, A moves left and D moves right.`;
-      }
-      break;
-    case 5:
-      tutorialText.innerHTML = "That's it! Do you want me to repeat?";
-      nextTutorialButton.innerHTML = "Yes";
-      closeTutorialButton.innerHTML = "No";
-      closeTutorialButton.focus();
-      break;
-    default:
-      nextTutorialButton.innerHTML = "Next";
-      closeTutorialButton.innerHTML = "Close";
-      nextTutorialButton.focus();
-      tutorialStep = 0;
-      tutorialText.innerHTML =
-        "In this game, you move a snake around to catch as many blocks as you can.";
-      break;
+        If the snake touches the grid or its body, however, the game ends.`,
+      1: `You can choose the difficulty of the game using the icon buttons on the top right.
+        The snake moves faster on harder difficulties.`,
+      2: `There's a score counter below the difficulty buttons. You gain points whenever you catch a block.
+        The greater the snake and the harder the game, the more points you gain.`,
+      3: `On the right of the grid, below the score, there are buttons for starting and restarting the game.
+        Once the game starts, you can pause it too.`,
+      4: "You can move the snake with the directional pad on the left.",
+      5: "That's it! Do you want me to repeat?",
+    },
+    false: {
+      0: `In this game, you move a snake around to catch as many blocks of food as you can.
+        Once the snake eats a block, the block is added to its tail and the snake grows.
+        If the snake touches the grid or its body, however, the game ends.`,
+      1: `You can choose the difficulty of the game using the icon buttons on the top right.
+        It's also possible to increase or reduce the difficulty pressing + and -, respectively. 
+        The snake moves faster on harder difficulties.`,
+      2: `There's a score counter below the difficulty buttons. You gain points whenever you catch a block.
+        The greater the snake and the harder the game, the more points you gain.`,
+      3: `On the right of the grid, below the score, there are buttons for starting and restarting the game.
+        Once the game starts, you can pause it too.
+        You can also start, pause or continue the game pressing spacebar.`,
+      4: `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.
+        W moves up, S moves down, A moves left and D moves right.`,
+      5: "That's it! Do you want me to repeat?",
+    },
+  };
+
+  tutorialText.innerHTML = tutorialTextMessages[isTouchDevice()][tutorialStep];
+
+  if (tutorialStep == 5) {
+    nextTutorialButton.innerHTML = "Yes";
+    closeTutorialButton.innerHTML = "No";
+    closeTutorialButton.focus();
+  } else {
+    nextTutorialButton.innerHTML = "Next";
+    closeTutorialButton.innerHTML = "Close";
+    nextTutorialButton.focus();
   }
+
   tutorialStep++;
+  tutorialStep %= 6;
 });
 
 closeTutorialButton.addEventListener("click", () => {
-  if (!endTutorial) {
-    endTutorial = true;
-    tutorialText.innerHTML = "Do you want to skip this tutorial in the future?";
-    nextTutorialButton.innerHTML = "Yes";
-    closeTutorialButton.innerHTML = "No";
-    nextTutorialButton.focus();
-    return;
-  } else {
+  if (endTutorial) {
     tutorialMessage.close();
+    return;
   }
+  endTutorial = true;
+  tutorialText.innerHTML = "Do you want to skip this tutorial in the future?";
+  nextTutorialButton.innerHTML = "Yes";
+  closeTutorialButton.innerHTML = "No";
+  nextTutorialButton.focus();
 });
 
 showTutorialButton.addEventListener("click", () => {
@@ -1039,6 +1029,5 @@ showTutorialButton.addEventListener("click", () => {
   tutorialText.innerHTML = "Do you want to see the tutorial?";
   nextTutorialButton.innerHTML = "Next";
   closeTutorialButton.innerHTML = "Close";
-  tutorialMessage.focus();
   tutorialMessage.showModal();
 });
