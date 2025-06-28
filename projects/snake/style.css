@@ -213,7 +213,7 @@ dialog::backdrop {
   --direction: LEFT;
   background-image: url("../assets/snake-eyes.svg");
   background-color: var(--snake-segment-color);
-
+  
   border-bottom-left-radius: 40%;
   border-top-left-radius: 40%;
   border-top-right-radius: 0;

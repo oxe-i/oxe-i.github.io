@@ -134,14 +134,17 @@ function randomNum() {
   return randomBuffer[0] / (0xffffffff + 1);
 }
 
-//a class to represent an uniform interface for elements in the game
+//class to represent an uniform interface for elements in the game
 class Piece {
   constructor() {
     this._elem = document.createElement("div");
     this._elem.className = "piece";
-    this.randomizeColor();
     gameArea.appendChild(this._elem);
+    this.randomizeColor();
+    this._updateComputedStyle();
+  }
 
+  _updateComputedStyle() {
     this._style = getComputedStyle(this._elem);
     this._updated = true; // flag for computing styles lazily
   }
@@ -208,9 +211,7 @@ class Piece {
    * @returns
    */
   getStyle(property) {
-    if (!this._updated) {
-      this._style = getComputedStyle(this._elem);
-    }
+    if (!this._updated) this._updateComputedStyle();
     return this._style.getPropertyValue(`${property}`);
   }
 
@@ -219,16 +220,12 @@ class Piece {
    * CSS works with PERCENTAGES
    */
   get row() {
-    if (!this._updated) {
-      this._style = getComputedStyle(this._elem);
-    }
+    if (!this._updated) this._updateComputedStyle();
     return Number(this._style.getPropertyValue("--row"));
   }
 
   get col() {
-    if (!this._updated) {
-      this._style = getComputedStyle(this._elem);
-    }
+    if (!this._updated) this._updateComputedStyle();
     return Number(this._style.getPropertyValue("--col"));
   }
 
@@ -575,6 +572,16 @@ class Snake {
 
     this._segments[0].updateNext();
   }
+
+  getSegmentIndex(row, col) {
+    return this._segments.findIndex(
+      (segment) => segment.row == row && segment.col == col
+    );
+  }
+
+  segmentAt(idx) {
+    return this._segments.at(idx);
+  }
 }
 
 //class to represent the game itself, handling interaction between its parts and gameflow
@@ -641,7 +648,17 @@ class Game {
     const newWidth = this.maxWidth - this.minWidth + 1;
     const newHeight = this.maxHeight - this.minHeight + 1;
 
+    const ingestingSnakeIndexes = this._ingestingBlock.map((block) =>
+      this._snake.getSegmentIndex(block.row, block.col)
+    );
+
     this._snake.resize(prevWidth, prevHeight, newWidth, newHeight);
+
+    this._ingestingBlock.forEach((block, idx) => {
+      const containingSegment = this._snake.segmentAt(ingestingSnakeIndexes[idx]);
+      block.row = containingSegment.row;
+      block.col = containingSegment.col;
+    })
 
     this._block.resize(prevWidth, prevHeight, newWidth, newHeight);
   }
