@@ -1,7 +1,7 @@
 /**
  * DOM elements
  */
-const rootStyle = getComputedStyle(document.documentElement);
+//const rootStyle = getComputedStyle(document.documentElement);
 const gameArea = document.querySelector("#game");
 
 //directional buttons
@@ -99,27 +99,15 @@ function resetDifficultyButtons() {
 }
 
 function setEasyButton() {
-  easyButton.style.outline = `2px solid ${rootStyle.getPropertyValue(
-    "--light-green-color"
-  )}`;
-  mediumButton.style.outline = "";
-  hardButton.style.outline = "";
+  easyButton.focus();
 }
 
 function setMediumButton() {
-  easyButton.style.outline = "";
-  mediumButton.style.outline = `2px solid ${rootStyle.getPropertyValue(
-    "--light-yellow-color"
-  )}`;
-  hardButton.style.outline = "";
+  mediumButton.focus();
 }
 
 function setHardButton() {
-  easyButton.style.outline = "";
-  mediumButton.style.outline = "";
-  hardButton.style.outline = `2px solid ${rootStyle.getPropertyValue(
-    "--light-red-color"
-  )}`;
+  hardButton.focus();
 }
 
 //helper to check if the device is touchscreen
@@ -595,7 +583,7 @@ class Game {
     this._block = new Block(this);
     this._ingestingBlock = [];
     this._directionQueue = [];
-    this._difficulty = Difficulty.MEDIUM;
+    this.difficulty = Difficulty.MEDIUM;
     this._raf = null;
   }
 
@@ -625,37 +613,26 @@ class Game {
 
   setEasyDifficulty() {
     if (!game.isRunning) return;
-    game.difficulty = Difficulty.EASY;
+    this.difficulty = Difficulty.EASY;
     setEasyButton();
   }
 
   setMediumDifficulty() {
     if (!game.isRunning) return;
-    game.difficulty = Difficulty.MEDIUM;
+    this.difficulty = Difficulty.MEDIUM;
     setMediumButton();
   }
 
   setHardDifficulty() {
     if (!game.isRunning) return;
-    game.difficulty = Difficulty.HARD;
+    this.difficulty = Difficulty.HARD;
     setHardButton();
-  }
-
-  get difficulty() {
-    return this._difficulty;
-  }
-
-  /**
-   * @param {number} value
-   */
-  set difficulty(value) {
-    game._difficulty = value;
   }
 
   //time per frame depends on difficulty
   //TODO: move magic numbers to global constants
   get timePerFrame() {
-    switch (this._difficulty) {
+    switch (this.difficulty) {
       case Difficulty.EASY:
         return 400;
       case Difficulty.MEDIUM:
@@ -721,7 +698,7 @@ class Game {
     if (this.isRunning) return;
 
     setIconToPause();
-    buttonDifficultyTable.get(this._difficulty)();
+    buttonDifficultyTable.get(this.difficulty)();
 
     let crtTime = 0;
     let remTime = 0;
@@ -760,7 +737,7 @@ class Game {
         }
 
         if (this._snake.eatsBlock(this._ingestingBlock?.[0])) {
-          this._score += this._difficulty * this._snake.size;
+          this._score += this.difficulty * this._snake.size;
           this._snake.addSegment(this._ingestingBlock.shift());
         }
 
@@ -782,6 +759,7 @@ class Game {
     setIconToPlay();
     cancelAnimationFrame(this._raf);
     this._raf = null;
+    startPause.focus();
   }
 
   over() {
@@ -813,7 +791,7 @@ class Game {
     this._directionQueue = [];
     this._score = 0;
 
-    this._difficulty = Difficulty.MEDIUM;
+    this.difficulty = Difficulty.MEDIUM;
     this._raf = null;
   }
 
@@ -838,6 +816,8 @@ document.addEventListener("DOMContentLoaded", () => {
   } else if (!localStorage.getItem("skipTutorial")) {
     tutorialMessage.showModal();
     nextTutorialButton.focus();
+  } else {
+    startPause.focus();
   }
 });
 
@@ -894,6 +874,25 @@ document.addEventListener("keydown", (event) => {
           break;
       }
       return;
+    case "Tab":
+      event.preventDefault();
+      switch (document.activeElement) {
+        case startPause:
+          stopButton.focus();
+          return;
+        case stopButton:
+          startPause.focus();
+          return;
+        case easyButton:
+          game.setMediumDifficulty();
+          return;
+        case mediumButton:
+          game.setHardDifficulty();
+          return;
+        case hardButton:
+          game.setEasyDifficulty();
+          return;
+      }
   }
 });
 
@@ -961,31 +960,33 @@ nextTutorialButton.addEventListener("click", () => {
   const tutorialTextMessages = {
     true: {
       0: `In this game, you move a snake around to catch as many blocks of food as you can.
-        Once the snake eats a block, the block is added to its tail and the snake grows.
-        If the snake touches the grid or its body, however, the game ends.`,
+          Once the snake eats a block, the block is added to its tail and the snake grows.
+          If the snake touches the grid or its body, however, the game ends.`,
       1: `You can choose the difficulty of the game using the icon buttons on the top right.
-        The snake moves faster on harder difficulties.`,
-      2: `There's a score counter below the difficulty buttons. You gain points whenever you catch a block.
-        The greater the snake and the harder the game, the more points you gain.`,
+          The snake moves faster on harder difficulties.`,
+      2: `There's a score counter below the difficulty buttons. 
+          You gain points whenever the snake finishes eating a block.
+          The greater the snake and the harder the game, the more points you gain.`,
       3: `On the right of the grid, below the score, there are buttons for starting and restarting the game.
-        Once the game starts, you can pause it too.`,
+          Once the game starts, you can pause it too.`,
       4: "You can move the snake with the directional pad on the left.",
       5: "That's it! Do you want me to repeat?",
     },
     false: {
       0: `In this game, you move a snake around to catch as many blocks of food as you can.
-        Once the snake eats a block, the block is added to its tail and the snake grows.
-        If the snake touches the grid or its body, however, the game ends.`,
+          Once the snake eats a block, the block is added to its tail and the snake grows.
+          If the snake touches the grid or its body, however, the game ends.`,
       1: `You can choose the difficulty of the game using the icon buttons on the top right.
-        It's also possible to increase or reduce the difficulty pressing + and -, respectively. 
-        The snake moves faster on harder difficulties.`,
-      2: `There's a score counter below the difficulty buttons. You gain points whenever you catch a block.
-        The greater the snake and the harder the game, the more points you gain.`,
+          It's also possible to increase or reduce the difficulty pressing + and -, respectively.
+          The snake moves faster on harder difficulties.`,
+      2: `There's a score counter below the difficulty buttons. 
+          You gain points whenever the snake finishes eating a block.
+          The greater the snake and the harder the game, the more points you gain.`,
       3: `On the right of the grid, below the score, there are buttons for starting and restarting the game.
-        Once the game starts, you can pause it too.
-        You can also start, pause or continue the game pressing spacebar.`,
+          Once the game starts, you can pause it too.
+          You can also start, pause or continue the game pressing spacebar.`,
       4: `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.
-        W moves up, S moves down, A moves left and D moves right.`,
+          W moves up, S moves down, A moves left and D moves right.`,
       5: "That's it! Do you want me to repeat?",
     },
   };
@@ -1009,6 +1010,7 @@ nextTutorialButton.addEventListener("click", () => {
 closeTutorialButton.addEventListener("click", () => {
   if (endTutorial) {
     tutorialMessage.close();
+    startPause.focus();
     return;
   }
   endTutorial = true;

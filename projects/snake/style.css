@@ -40,6 +40,10 @@ button {
   cursor: pointer;
 }
 
+button:focus {
+  outline: 1px solid var(--letter-color);
+}
+
 #page {
   width: 100vw;
   height: 100vh;
@@ -85,10 +89,9 @@ dialog::backdrop {
 #tutorial-message div {
   display: flex;
   justify-content: space-between;
-  gap: 15vmin;
   button {
     background: var(--low-contrast-color);
-    flex: 1;
+    max-width: 30vmin;
   }
 }
 
@@ -158,6 +161,18 @@ dialog::backdrop {
     width: 10vmin;
     aspect-ratio: 1;
   }
+}
+
+#easy:focus {
+  outline: 2px solid var(--light-green-color);
+}
+
+#medium:focus {
+  outline: 2px solid var(--light-yellow-color);
+}
+
+#hard:focus {
+  outline: 2px solid var(--light-red-color);
 }
 
 #game-stats {
