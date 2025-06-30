@@ -75,12 +75,12 @@ class Difficulty {
 
 //helpers to set icons to gameflow buttons
 function setIconToPlay() {
-  startPause.querySelector("img").src = `../assets/play.svg`;
+  startPause.querySelector("img").src = `../../assets/play.svg`;
   startPause.querySelector("img").alt = "play button";
 }
 
 function setIconToPause() {
-  startPause.querySelector("img").src = `../assets/pause.svg`;
+  startPause.querySelector("img").src = `../../assets/pause.svg`;
   startPause.querySelector("img").alt = "pause button";
 }
 

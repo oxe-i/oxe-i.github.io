@@ -215,11 +215,11 @@ dialog::backdrop {
 
 .piece.smiley {
   border-radius: 50%;
-  background-image: url("../assets/smile.svg"), url("../assets/eyes.svg");
+  background-image: url("../../assets/smile.svg"), url("../../assets/eyes.svg");
 }
 
 .piece.block {
-  background-image: url("../assets/eyes.svg"), url("../assets/angry.svg");
+  background-image: url("../../assets/eyes.svg"), url("../../assets/angry.svg");
 }
 
 .piece.seed {
@@ -227,12 +227,12 @@ dialog::backdrop {
 }
 
 .piece.flower {
-  background-image: url("../assets/flower.svg");
+  background-image: url("../../assets/flower.svg");
 }
 
 .piece.head {
   --direction: LEFT;
-  background-image: url("../assets/snake-eyes.svg");
+  background-image: url("../../assets/snake-eyes.svg");
   background-color: var(--snake-segment-color);
   
   border-bottom-left-radius: 40%;

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device.width, initial-scale=1.0" />
+    <title>Space Pictures</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body id="page">
+    <dialog id="no-result">
+      <h1>
+        The cosmic object you were looking for has disappeared beyond the event
+        horizon!
+      </h1>
+      <button id="search-again">Search Again!</button>
+    </dialog>
+    <div id="main-content">
+      <form action="" id="search-container">
+        <input
+          type="search"
+          name="search-bar"
+          id="search-bar"
+          placeholder="e.g. Andromeda"
+          required
+        />
+        <button id="search-submit"><p>Search</p></button>
+      </form>
+      <div id="title">
+        <h1 id="fst-title"></h1>
+      </div>
+      <div id="description">
+        <p id="fst-description"></p>
+      </div>
+      <div id="buttons-container">
+        <button id="previous-result"><p>Previous Result</p></button>
+        <button id="next-result"><p>Next Result</p></button>
+      </div>
+      <div id="img-container">
+        <img id="fst-img" />
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

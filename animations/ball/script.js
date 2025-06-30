@@ -182,8 +182,8 @@ canvas.addEventListener("pointerup", () => {
 });
 
 function getCanvasSize() {
-  const usableWidth = window.innerWidth - (window.innerWidth % 8);
-  const usableHeight = window.innerHeight - (window.innerHeight % 8);
+  const usableWidth = window.innerWidth;
+  const usableHeight = window.innerHeight;
   return [usableWidth, usableHeight];
 }
 
