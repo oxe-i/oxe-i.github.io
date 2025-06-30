@@ -5,6 +5,10 @@ const context = canvas.getContext("2d", { alpha: false });
 const styles = getComputedStyle(document.documentElement);
 const ballColor = styles.getPropertyValue("--ball-color");
 
+const tutorial = document.querySelector("#tutorial");
+const tutorialText = tutorial.querySelector("p");
+const closeTutorial = tutorial.querySelector("button");
+
 const gravity = 1 / 10000;
 
 let timePerFrame = 1000 / 120;
@@ -76,6 +80,11 @@ const ball = new Ball(context, canvas.width / 2, 16, 16, 0, 0);
 document.addEventListener("DOMContentLoaded", () => {
   drawBackGround();
   ball.draw();
+  tutorial.showModal();
+});
+
+closeTutorial.addEventListener("click", () => {
+  tutorial.close();
   raf = requestAnimationFrame(gameLoop);
 });
 

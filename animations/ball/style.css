@@ -1,12 +1,11 @@
 :root {
-  --background-color: #1b0f21;
+  --background-color: rgb(27, 15, 33);
   --medium-contrast-color: #33203d;
   --ball-color: rgb(240, 239, 244);
   --other: #9e829c;
 }
 
 #page {
-  background-color: var(--black-olive);
   width: 100vw;
   height: 100vh;
   margin: 0;
@@ -15,4 +14,39 @@
 
 #drawing-area {
   image-rendering: crisp-edges;
+}
+
+dialog::backdrop {
+  background: rgba(27, 15, 33, 0.9);
+}
+
+dialog {
+  background: none;
+  border: 0;
+  width: 80vmin;
+  
+  line-height: 1.5;
+  text-align: justify;
+
+  p {
+    color: var(--ball-color);
+    line-height: 1.5;
+    font-size: 24px;
+    text-align: justify;
+  }
+
+  button {
+    width: 10vmin;
+    background-color: var(--medium-contrast-color);
+    border: 0;
+    color: var(--ball-color);
+    font-size: 24px;
+    margin: 5vmin 35vmin;
+    padding: 1vmin 1vmin;
+    border-radius: 1vmin;
+  }
+}
+
+button:focus {
+  outline: 1px solid var(--ball-color);
 }
