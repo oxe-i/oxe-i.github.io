@@ -6,7 +6,6 @@ const styles = getComputedStyle(document.documentElement);
 const ballColor = styles.getPropertyValue("--ball-color");
 
 const tutorial = document.querySelector("#tutorial");
-const tutorialText = tutorial.querySelector("p");
 const closeTutorial = tutorial.querySelector("button");
 
 const gravity = 1 / 10000;
