@@ -62,7 +62,11 @@
         />
       </button>
     </div>
-    <div id="game"></div>
+    <div id="game">
+      <div id="canvas">
+        <div id="tile"></div>
+      </div>
+    </div>
     <div id="after-canvas">
       <div id="difficulty">
         <h1>difficulty:</h1>
@@ -81,6 +85,10 @@
         <p id="score">0</p>
       </div>
       <button class="button" id="show-tutorial">Show Tutorial</button>
+      <div id="color-selectors">
+        <label for="background-color">Background Color: </label>
+        <input type="color" id="background-color" name="background-color" value="#e0fda9" />
+      </div>
       <div id="game-flow-buttons">
         <button class="button" id="start-pause">
           <img src="../../assets/play.svg" alt="play button" />

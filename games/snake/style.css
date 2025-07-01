@@ -130,10 +130,30 @@ dialog::backdrop {
   border-radius: 0;
   max-width: calc(100% - 40vmin);
   max-height: 100%;
-  background: var(--canvas-color);
   display: grid;
   grid-template-columns: repeat(auto-fill, var(--piece-unit));
   grid-template-rows: repeat(auto-fill, var(--piece-unit));
+  background-color: var(--canvas-color);
+  position: relative;
+}
+
+#canvas {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  display: none;
+  grid-template-columns: repeat(auto-fill, var(--piece-unit));
+  grid-template-rows: repeat(auto-fill, var(--piece-unit));
+  background-image: url(../../assets/grass-tile.svg);
+  background-repeat: repeat;
+  background-size: var(--piece-unit);
+}
+
+#tile {
+  display: none;
 }
 
 #after-canvas {
@@ -149,7 +169,7 @@ dialog::backdrop {
   grid-template-areas:
     "title title title"
     "btn1  btn2  btn3 ";
-  row-gap: 5vh;
+  row-gap: 3vh;
   column-gap: 1vw;
   place-items: center;
 
@@ -192,15 +212,31 @@ dialog::backdrop {
   padding: 1vh 0;
 }
 
+#color-selectors {
+  display: flex;
+  justify-content: space-between;
+  height: auto;
+
+  label {
+    font-size: 3vmin;
+  }
+
+  input {
+    height: 100%;
+    border-radius: 0.5vmin;
+  }
+}
+
 #game-flow-buttons {
   flex: 1;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-content: space-around;
 
   button {
     width: 15vmin;
-    aspect-ratio: 1;
+    height: 15vmin;
+    align-self: center;
   }
 }
 
@@ -211,6 +247,7 @@ dialog::backdrop {
   background-color: transparent;
   grid-column: var(--col);
   grid-row: var(--row);
+  display: none;
 }
 
 .piece.smiley {
@@ -244,7 +281,7 @@ dialog::backdrop {
 .piece.snake-segment {
   border-radius: 0;
   border-left: 1px solid var(--canvas-color);
-  transition: all var(--ingestion-time) linear;
+  transition: border-radius var(--ingestion-time) linear;
   box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);
 }
 

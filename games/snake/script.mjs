@@ -41,6 +41,9 @@ const closeTutorialButton = tutorialMessage.querySelector("#close-tutorial");
 //button to show tutorial
 const showTutorialButton = document.querySelector("#show-tutorial");
 
+//input for background color
+const backgroundColorInput = document.querySelector("#background-color");
+
 //global constants
 const SPEED = 1;
 
@@ -91,6 +94,12 @@ const buttonDifficultyTable = new Map([
   [Difficulty.HARD, setHardButton],
 ]);
 
+const timeFrameDifficultyTable = new Map([
+  [Difficulty.EASY, 400],
+  [Difficulty.MEDIUM, 300],
+  [Difficulty.HARD, 200],
+]);
+
 //helpers to set outline for the currently selected difficulty button
 function resetDifficultyButtons() {
   easyButton.style.outline = "";
@@ -122,6 +131,29 @@ function randomNum() {
   return randomBuffer[0] / (0xffffffff + 1);
 }
 
+//helpers for working with colors
+function colorHexToRGB(hexColor) {
+  const red = parseInt(hexColor.slice(1, 3), 16);
+  const green = parseInt(hexColor.slice(3, 5), 16);
+  const blue = parseInt(hexColor.slice(5, 7), 16);
+  return [red, green, blue];
+}
+
+function getLuminance(components) {
+  return (
+    components[0] * 0.2126 + components[1] * 0.7152 + components[2] * 0.0722
+  );
+}
+
+function getHexColor([red, green, blue]) {
+  return (
+    "#" +
+    `${red.toString(16).padStart(2, "0")}${green
+      .toString(16)
+      .padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`
+  );
+}
+
 //class to represent an uniform interface for elements in the game
 class Piece {
   #elem;
@@ -141,15 +173,34 @@ class Piece {
     this.#updated = true; // flag for computing styles lazily
   }
 
+  addFilter() {
+    const canvasColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--canvas-color");
+    const currentColor = this.getStyle("background-color");
+
+    const canvasLuminance = getLuminance(colorHexToRGB(canvasColor));
+    const currentLuminance = getLuminance(colorHexToRGB(currentColor));
+
+    if (canvasLuminance <= currentLuminance) {
+      const factor =
+        1 + (currentLuminance - canvasLuminance) / currentLuminance;
+      this.addStyle("filter", `brightness(${factor}) contrast(${factor + 0.5})`);
+    } else {
+      const factor =
+        1 + (canvasLuminance - currentLuminance) / canvasLuminance;
+      this.addStyle("filter", `brightness(${factor}) contrast(${factor + 0.5})`);
+    }
+  }
+
   randomizeColor() {
-    const colorValues =
-      "rgb(" +
+    const colorValue = getHexColor(
       Array(3)
-        .fill(140)
-        .map((multiplier) => randomNum() * multiplier)
-        .join(", ") +
-      ")";
-    this.addStyle("background-color", colorValues);
+        .fill(127)
+        .map((multiplier) => Math.floor(randomNum() * multiplier))
+    );
+
+    this.addStyle("background-color", colorValue);
   }
 
   reset() {
@@ -253,6 +304,16 @@ class Piece {
   resize(pWidth, pHeight, nWidth, nHeight) {
     this.row = Math.round((this.row / pHeight) * nHeight);
     this.col = Math.round((this.col / pWidth) * nWidth);
+  }
+
+  show(display = "block") {
+    if (this.getStyle("display") !== "none") return;
+    this.addStyle("display", display);
+  }
+
+  hide() {
+    if (this.getStyle("display") === "none") return;
+    this.addStyle("display", "none");
   }
 }
 
@@ -573,6 +634,18 @@ class Snake {
   segmentAt(idx) {
     return this.#segments.at(idx);
   }
+
+  show() {
+    this.#segments.forEach((segment) => {
+      segment.show();
+    });
+  }
+
+  addFilter() {
+    this.#segments.forEach((segment) => {
+      segment.addFilter();
+    });
+  }
 }
 
 //class to represent the game itself, handling interaction between its parts and gameflow
@@ -595,7 +668,7 @@ class Game {
     this.#ingestingBlocks = [];
     this.#directionQueue = [];
     this.difficulty = Difficulty.MEDIUM;
-    this.#raf = null;
+    this.#raf = undefined;
   }
 
   get minHeight() {
@@ -622,6 +695,22 @@ class Game {
     scoreText.textContent = `${value}`;
   }
 
+  show() {
+    this.#snake.show();
+    this.#block.show();
+    this.#ingestingBlocks.forEach((block) => {
+      block.show();
+    });
+  }
+
+  hide() {
+    this.#snake.hide();
+    this.#block.hide();
+    this.#ingestingBlocks.forEach((block) => {
+      block.hide();
+    });
+  }
+
   setEasyDifficulty() {
     if (!game.isRunning) return;
     this.difficulty = Difficulty.EASY;
@@ -641,16 +730,8 @@ class Game {
   }
 
   //time per frame depends on difficulty
-  //TODO: move magic numbers to global constants
   get timePerFrame() {
-    switch (this.difficulty) {
-      case Difficulty.EASY:
-        return 400;
-      case Difficulty.MEDIUM:
-        return 300;
-      default:
-        return 200;
-    }
+    return timeFrameDifficultyTable.get(this.difficulty);
   }
 
   resize() {
@@ -708,6 +789,7 @@ class Game {
   start() {
     if (this.isRunning) return;
 
+    this.show();
     setIconToPause();
     buttonDifficultyTable.get(this.difficulty)();
 
@@ -745,6 +827,7 @@ class Game {
           this.#block.ingested();
           this.#ingestingBlocks.push(this.#block);
           this.#block = new Block(this);
+          this.#block.show();
         }
 
         if (this.#snake.eatsBlock(this.#ingestingBlocks?.[0])) {
@@ -804,6 +887,14 @@ class Game {
 
     this.difficulty = Difficulty.MEDIUM;
     this.#raf = undefined;
+
+    backgroundColorInput.value = "#e0fda9";
+  }
+
+  adjustColors() {
+    this.#snake.addFilter();
+    this.#block.addFilter();
+    this.#ingestingBlocks.forEach((block) => block.addFilter());
   }
 
   get isRunning() {
@@ -830,6 +921,8 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     startPause.focus();
   }
+
+  backgroundColorInput.value = "#e0fda9";
 });
 
 document.addEventListener("keydown", (event) => {
@@ -1049,4 +1142,12 @@ showTutorialButton.addEventListener("click", () => {
   nextTutorialButton.innerHTML = "Next";
   closeTutorialButton.innerHTML = "Close";
   tutorialMessage.showModal();
+});
+
+backgroundColorInput.addEventListener("input", (event) => {
+  document.documentElement.style.setProperty(
+    "--canvas-color",
+    event.target.value
+  );
+  game.adjustColors();
 });
