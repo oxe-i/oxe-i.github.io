@@ -124,17 +124,21 @@ function randomNum() {
 
 //class to represent an uniform interface for elements in the game
 class Piece {
+  #elem;
+  #style;
+  #updated;
+
   constructor() {
-    this._elem = document.createElement("div");
-    this._elem.className = "piece";
-    gameArea.appendChild(this._elem);
+    this.#elem = document.createElement("div");
+    this.#elem.className = "piece";
+    gameArea.appendChild(this.#elem);
     this.randomizeColor();
-    this._updateComputedStyle();
+    this.#updateComputedStyle();
   }
 
-  _updateComputedStyle() {
-    this._style = getComputedStyle(this._elem);
-    this._updated = true; // flag for computing styles lazily
+  #updateComputedStyle() {
+    this.#style = getComputedStyle(this.#elem);
+    this.#updated = true; // flag for computing styles lazily
   }
 
   randomizeColor() {
@@ -145,13 +149,12 @@ class Piece {
         .map((multiplier) => randomNum() * multiplier)
         .join(", ") +
       ")";
-    console.log(colorValues);
     this.addStyle("background-color", colorValues);
   }
 
   reset() {
-    gameArea.removeChild(this._elem);
-    this._elem = null;
+    gameArea.removeChild(this.#elem);
+    this.#elem = undefined;
   }
 
   /**
@@ -159,7 +162,7 @@ class Piece {
    * @param {string} className
    */
   addClass(className) {
-    this._elem.classList.add(className);
+    this.#elem.classList.add(className);
   }
 
   /**
@@ -167,7 +170,7 @@ class Piece {
    * @param {string} className
    */
   removeClass(className) {
-    this._elem.classList.remove(className);
+    this.#elem.classList.remove(className);
   }
 
   /**
@@ -176,11 +179,11 @@ class Piece {
    * @returns {boolean}
    */
   checkClass(className) {
-    return this._elem.classList.contains(className);
+    return this.#elem.classList.contains(className);
   }
 
   resetClasses() {
-    this._elem.className = "piece";
+    this.#elem.className = "piece";
   }
 
   /**
@@ -189,8 +192,8 @@ class Piece {
    * @param {string} value
    */
   addStyle(property, value) {
-    this._elem.style.setProperty(`${property}`, `${value}`);
-    this._updated = false;
+    this.#elem.style.setProperty(`${property}`, `${value}`);
+    this.#updated = false;
   }
 
   /**
@@ -199,8 +202,8 @@ class Piece {
    * @returns
    */
   getStyle(property) {
-    if (!this._updated) this._updateComputedStyle();
-    return this._style.getPropertyValue(`${property}`);
+    if (!this.#updated) this.#updateComputedStyle();
+    return this.#style.getPropertyValue(`${property}`);
   }
 
   /**
@@ -208,13 +211,13 @@ class Piece {
    * CSS works with PERCENTAGES
    */
   get row() {
-    if (!this._updated) this._updateComputedStyle();
-    return Number(this._style.getPropertyValue("--row"));
+    if (!this.#updated) this.#updateComputedStyle();
+    return Number(this.#style.getPropertyValue("--row"));
   }
 
   get col() {
-    if (!this._updated) this._updateComputedStyle();
-    return Number(this._style.getPropertyValue("--col"));
+    if (!this.#updated) this.#updateComputedStyle();
+    return Number(this.#style.getPropertyValue("--col"));
   }
 
   /**
@@ -222,22 +225,22 @@ class Piece {
    * CSS works with PERCENTAGES
    */
   set row(value) {
-    this._elem.style.setProperty("--row", `${value}`);
-    this._updated = false;
+    this.#elem.style.setProperty("--row", `${value}`);
+    this.#updated = false;
   }
 
   set col(value) {
-    this._elem.style.setProperty("--col", `${value}`);
-    this._updated = false;
+    this.#elem.style.setProperty("--col", `${value}`);
+    this.#updated = false;
   }
 
   //bounds getters
   get width() {
-    return this._elem.getBoundingClientRect().width;
+    return this.#elem.getBoundingClientRect().width;
   }
 
   get height() {
-    return this._elem.getBoundingClientRect().height;
+    return this.#elem.getBoundingClientRect().height;
   }
 
   /**
@@ -261,15 +264,15 @@ class Block extends Piece {
    */
   constructor(game) {
     super();
-    this._getPosition(game);
-    this._getProperties();
+    this.#getPosition(game);
+    this.#getProperties();
   }
 
-  _getFilter() {
+  #getFilter() {
     return `invert(${
-      0.15 + this._getRandomNum() * 0.1
-    }) sepia(${this._getRandomNum()}) brightness(${1.3}) contrast(${1.5}) hue-rotate(${
-      this._getRandomNum() * 360
+      0.15 + randomNum() * 0.1
+    }) sepia(${randomNum()}) brightness(${1.3}) contrast(${1.5}) hue-rotate(${
+      randomNum() * 360
     }deg) `;
   }
 
@@ -277,7 +280,7 @@ class Block extends Piece {
    * randomizes position of the block
    * @param {Game} game
    */
-  _getPosition(game) {
+  #getPosition(game) {
     do {
       this.row =
         game.minHeight +
@@ -288,7 +291,7 @@ class Block extends Piece {
     } while (game?.overlapsWithSnake(this.row, this.col));
   }
 
-  _getProperties() {
+  #getProperties() {
     switch (Math.floor(randomNum() * 2)) {
       case 0:
         this.addClass("smiley");
@@ -298,7 +301,7 @@ class Block extends Piece {
         break;
       default:
         this.addClass("flower");
-        this.addStyle("filter", this._getFilter());
+        this.addStyle("filter", this.#getFilter());
         break;
     }
   }
@@ -311,6 +314,8 @@ class Block extends Piece {
 
 //class to represent the head of the snake, with a direction and memory of next position
 class Head extends Piece {
+  #prevDirection;
+
   constructor() {
     super();
     this.addClass("head");
@@ -319,17 +324,11 @@ class Head extends Piece {
   }
 
   get direction() {
-    if (!this._updated) {
-      this._style = getComputedStyle(this._elem);
-      this._updated = true;
-    }
-    return this._style.getPropertyValue("--direction");
+    return this.getStyle("--direction");
   }
 
   set direction(value) {
-    if (value == this.direction) return;
-    this._prevDirection = this.direction;
-    this._elem.style.setProperty("--direction", `${value}`);
+    this.addStyle("--direction", `${value}`);
   }
 
   //updates memory of next position
@@ -345,23 +344,27 @@ class Head extends Piece {
    * @returns
    */
   adjustFacingDirection(game) {
-    if (this._prevDirection == this.direction) return;
+    if (this.#prevDirection == this.direction) return;
     this.addStyle(
       "animation",
-      `${game.timePerFrame}ms ease 1 forwards ${this._prevDirection}-${this.direction}`
+      `${game.timePerFrame}ms ease 1 forwards ${this.#prevDirection}-${
+        this.direction
+      }`
     );
-    this._prevDirection = this.direction;
+    this.#prevDirection = this.direction;
   }
 }
 
 //class to represent the snake, with a Head and a tail with four pieces
 class Snake {
+  #segments;
+
   /**
    *
    * @param {Game} game
    */
   constructor(game) {
-    this._segments = [new Head()].concat(
+    this.#segments = [new Head()].concat(
       Array.from({ length: 4 }, () => {
         const segment = new Piece();
         segment.addClass("snake-segment");
@@ -369,11 +372,11 @@ class Snake {
       })
     );
 
-    this._initializeSegments(game);
+    this.#initializeSegments(game);
   }
 
   get size() {
-    return this._segments.length;
+    return this.#segments.length;
   }
 
   /**
@@ -384,30 +387,30 @@ class Snake {
    * @param {number} nHeight
    */
   resize(pWidth, pHeight, nWidth, nHeight) {
-    let pRow = this._segments[0].row;
-    let pCol = this._segments[0].col;
+    let pRow = this.#segments[0].row;
+    let pCol = this.#segments[0].col;
 
-    this._segments[0].resize(pWidth, pHeight, nWidth, nHeight);
+    this.#segments[0].resize(pWidth, pHeight, nWidth, nHeight);
 
-    for (let i = 1; i < this._segments.length; ++i) {
-      const crtRow = this._segments[i].row;
-      const crtCol = this._segments[i].col;
+    for (let i = 1; i < this.#segments.length; ++i) {
+      const crtRow = this.#segments[i].row;
+      const crtCol = this.#segments[i].col;
 
-      if (crtRow < pRow) this._segments[i].row = this._segments[i - 1].row - 1;
+      if (crtRow < pRow) this.#segments[i].row = this.#segments[i - 1].row - 1;
       else if (crtRow > pRow)
-        this._segments[i].row = this._segments[i - 1].row + 1;
-      else this._segments[i].row = this._segments[i - 1].row;
+        this.#segments[i].row = this.#segments[i - 1].row + 1;
+      else this.#segments[i].row = this.#segments[i - 1].row;
 
-      if (crtCol < pCol) this._segments[i].col = this._segments[i - 1].col - 1;
+      if (crtCol < pCol) this.#segments[i].col = this.#segments[i - 1].col - 1;
       else if (crtCol > pCol)
-        this._segments[i].col = this._segments[i - 1].col + 1;
-      else this._segments[i].col = this._segments[i - 1].col;
+        this.#segments[i].col = this.#segments[i - 1].col + 1;
+      else this.#segments[i].col = this.#segments[i - 1].col;
 
       pRow = crtRow;
       pCol = crtCol;
     }
 
-    this._segments[0].updateNext();
+    this.#segments[0].updateNext();
   }
 
   /**
@@ -417,7 +420,7 @@ class Snake {
    * @returns {boolean}
    */
   overlaps(row, col) {
-    return this._segments.some((piece) => piece.row == row && piece.col == col);
+    return this.#segments.some((piece) => piece.row == row && piece.col == col);
   }
 
   /**
@@ -425,26 +428,26 @@ class Snake {
    * @param {string} border
    * @param {number} idx
    */
-  _setBorderOnIdx(border, idx) {
-    this._segments[idx].addStyle("border-top", "0");
-    this._segments[idx].addStyle("border-bottom", "0");
-    this._segments[idx].addStyle("border-left", "0");
-    this._segments[idx].addStyle("border-right", "0");
-    this._segments[idx].addStyle(
+  #setBorderOnIdx(border, idx) {
+    this.#segments[idx].addStyle("border-top", "0");
+    this.#segments[idx].addStyle("border-bottom", "0");
+    this.#segments[idx].addStyle("border-left", "0");
+    this.#segments[idx].addStyle("border-right", "0");
+    this.#segments[idx].addStyle(
       `border-${border}`,
       "1px solid var(--canvas-color)"
     );
   }
 
-  _setBorder() {
-    for (let i = 1; i < this._segments.length; ++i) {
-      if (this._segments[i - 1].row < this._segments[i].row)
-        this._setBorderOnIdx("top", i);
-      else if (this._segments[i - 1].row > this._segments[i].row)
-        this._setBorderOnIdx("bottom", i);
-      else if (this._segments[i - 1].col < this._segments[i].col)
-        this._setBorderOnIdx("left", i);
-      else this._setBorderOnIdx("right", i);
+  #setBorder() {
+    for (let i = 1; i < this.#segments.length; ++i) {
+      if (this.#segments[i - 1].row < this.#segments[i].row)
+        this.#setBorderOnIdx("top", i);
+      else if (this.#segments[i - 1].row > this.#segments[i].row)
+        this.#setBorderOnIdx("bottom", i);
+      else if (this.#segments[i - 1].col < this.#segments[i].col)
+        this.#setBorderOnIdx("left", i);
+      else this.#setBorderOnIdx("right", i);
     }
   }
 
@@ -453,17 +456,17 @@ class Snake {
    * @param {Game} game
    */
   move(game) {
-    for (let i = this._segments.length - 1; i > 0; --i) {
-      this._segments[i].row = this._segments[i - 1].row;
-      this._segments[i].col = this._segments[i - 1].col;
+    for (let i = this.#segments.length - 1; i > 0; --i) {
+      this.#segments[i].row = this.#segments[i - 1].row;
+      this.#segments[i].col = this.#segments[i - 1].col;
     }
 
-    this._segments[0].row = this._segments[0].nextRow;
-    this._segments[0].col = this._segments[0].nextCol;
+    this.#segments[0].row = this.#segments[0].nextRow;
+    this.#segments[0].col = this.#segments[0].nextCol;
 
-    this._segments[0].updateNext();
-    this._setBorder();
-    this._segments[0].adjustFacingDirection(game);
+    this.#segments[0].updateNext();
+    this.#setBorder();
+    this.#segments[0].adjustFacingDirection(game);
   }
 
   /**
@@ -471,7 +474,7 @@ class Snake {
    * @param {Direction} newDirection
    */
   updateDirection(newDirection) {
-    this._segments[0].direction = newDirection ?? this._segments[0].direction;
+    this.#segments[0].direction = newDirection ?? this.#segments[0].direction;
   }
 
   /**
@@ -481,10 +484,10 @@ class Snake {
    */
   touchesGrid(game) {
     return (
-      this._segments[0].nextRow < game.minHeight ||
-      this._segments[0].nextRow > game.maxHeight ||
-      this._segments[0].nextCol < game.minWidth ||
-      this._segments[0].nextCol > game.maxWidth
+      this.#segments[0].nextRow < game.minHeight ||
+      this.#segments[0].nextRow > game.maxHeight ||
+      this.#segments[0].nextCol < game.minWidth ||
+      this.#segments[0].nextCol > game.maxWidth
     );
   }
 
@@ -493,12 +496,12 @@ class Snake {
    * @returns {boolean}
    */
   touchesTail() {
-    return this._segments
+    return this.#segments
       .slice(1)
       .some(
         (segment) =>
-          segment.row == this._segments[0].nextRow &&
-          segment.col == this._segments[0].nextCol
+          segment.row == this.#segments[0].nextRow &&
+          segment.col == this.#segments[0].nextCol
       );
   }
 
@@ -509,8 +512,8 @@ class Snake {
    */
   touchesBlock(block) {
     return (
-      this._segments[0].nextRow == block.row &&
-      this._segments[0].nextCol == block.col
+      this.#segments[0].nextRow == block.row &&
+      this.#segments[0].nextCol == block.col
     );
   }
 
@@ -521,8 +524,8 @@ class Snake {
    */
   eatsBlock(block) {
     return (
-      this._segments.at(-1).row === block?.row &&
-      this._segments.at(-1).col === block?.col
+      this.#segments.at(-1).row === block?.row &&
+      this.#segments.at(-1).col === block?.col
     );
   }
 
@@ -531,7 +534,7 @@ class Snake {
    * @param {Piece} newSegment
    */
   addSegment(newSegment) {
-    this._segments.push(newSegment);
+    this.#segments.push(newSegment);
   }
 
   /**
@@ -539,52 +542,60 @@ class Snake {
    * @param {Game} game
    */
   reset() {
-    for (let i = 0; i < this._segments.length; ++i) {
-      this._segments[i].reset();
+    for (let i = 0; i < this.#segments.length; ++i) {
+      this.#segments[i].reset();
     }
-    this._segments = null;
+    this.#segments = null;
   }
 
   /**
    *
    * @param {Game} game
    */
-  _initializeSegments(game) {
+  #initializeSegments(game) {
     const centerRow = Math.floor((game.maxHeight - game.minHeight) / 2);
     const centerCol = Math.floor((game.maxWidth - game.minWidth) / 2);
 
-    this._segments.forEach((piece, idx) => {
+    this.#segments.forEach((piece, idx) => {
       piece.row = centerRow;
       piece.col = centerCol + idx;
     });
 
-    this._segments[0].updateNext();
+    this.#segments[0].updateNext();
   }
 
   getSegmentIndex(row, col) {
-    return this._segments.findIndex(
+    return this.#segments.findIndex(
       (segment) => segment.row == row && segment.col == col
     );
   }
 
   segmentAt(idx) {
-    return this._segments.at(idx);
+    return this.#segments.at(idx);
   }
 }
 
 //class to represent the game itself, handling interaction between its parts and gameflow
 class Game {
+  #bounds;
+  #pieceUnit;
+  #snake;
+  #block;
+  #ingestingBlocks;
+  #directionQueue;
+  #raf;
+
   constructor() {
-    this._bounds = gameArea.getBoundingClientRect();
-    this._pieceUnit = Math.floor(
+    this.#bounds = gameArea.getBoundingClientRect();
+    this.#pieceUnit = Math.floor(
       (Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6
     );
-    this._snake = new Snake(this);
-    this._block = new Block(this);
-    this._ingestingBlock = [];
-    this._directionQueue = [];
+    this.#snake = new Snake(this);
+    this.#block = new Block(this);
+    this.#ingestingBlocks = [];
+    this.#directionQueue = [];
     this.difficulty = Difficulty.MEDIUM;
-    this._raf = null;
+    this.#raf = null;
   }
 
   get minHeight() {
@@ -592,7 +603,7 @@ class Game {
   }
 
   get maxHeight() {
-    return this._bounds.height / this._pieceUnit;
+    return this.#bounds.height / this.#pieceUnit;
   }
 
   get minWidth() {
@@ -600,14 +611,14 @@ class Game {
   }
 
   get maxWidth() {
-    return this._bounds.width / this._pieceUnit;
+    return this.#bounds.width / this.#pieceUnit;
   }
 
-  get _score() {
+  get #score() {
     return Number(scoreText.textContent);
   }
 
-  set _score(value) {
+  set #score(value) {
     scoreText.textContent = `${value}`;
   }
 
@@ -646,29 +657,29 @@ class Game {
     const prevWidth = this.maxWidth - this.minWidth + 1;
     const prevHeight = this.maxHeight - this.minHeight + 1;
 
-    this._bounds = gameArea.getBoundingClientRect();
-    this._pieceUnit = Math.floor(
+    this.#bounds = gameArea.getBoundingClientRect();
+    this.#pieceUnit = Math.floor(
       (Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6
     );
 
     const newWidth = this.maxWidth - this.minWidth + 1;
     const newHeight = this.maxHeight - this.minHeight + 1;
 
-    const ingestingSnakeIndexes = this._ingestingBlock.map((block) =>
-      this._snake.getSegmentIndex(block.row, block.col)
+    const ingestingSnakeIndexes = this.#ingestingBlocks.map((block) =>
+      this.#snake.getSegmentIndex(block.row, block.col)
     );
 
-    this._snake.resize(prevWidth, prevHeight, newWidth, newHeight);
+    this.#snake.resize(prevWidth, prevHeight, newWidth, newHeight);
 
-    this._ingestingBlock.forEach((block, idx) => {
-      const containingSegment = this._snake.segmentAt(
+    this.#ingestingBlocks.forEach((block, idx) => {
+      const containingSegment = this.#snake.segmentAt(
         ingestingSnakeIndexes[idx]
       );
       block.row = containingSegment.row;
       block.col = containingSegment.col;
     });
 
-    this._block.resize(prevWidth, prevHeight, newWidth, newHeight);
+    this.#block.resize(prevWidth, prevHeight, newWidth, newHeight);
   }
 
   /**
@@ -676,7 +687,7 @@ class Game {
    * @param {Direction} newDirection
    */
   addDirection(newDirection) {
-    if (this.isRunning) this._directionQueue.push(newDirection);
+    if (this.isRunning) this.#directionQueue.push(newDirection);
   }
 
   /**
@@ -686,7 +697,7 @@ class Game {
    * @returns {boolean}
    */
   overlapsWithSnake(row, col) {
-    return this._snake.overlaps(row, col);
+    return this.#snake.overlaps(row, col);
   }
 
   /**
@@ -711,7 +722,7 @@ class Game {
     const gameLoop = (timestamp) => {
       if (!crtTime) {
         crtTime = timestamp;
-        this._raf = requestAnimationFrame(gameLoop);
+        this.#raf = requestAnimationFrame(gameLoop);
         return;
       }
 
@@ -721,57 +732,57 @@ class Game {
         deltaTime -= this.timePerFrame;
 
         //game over
-        if (this._snake.touchesGrid(this) || this._snake.touchesTail()) {
+        if (this.#snake.touchesGrid(this) || this.#snake.touchesTail()) {
           this.over();
           return;
         }
 
-        if (this._snake.touchesBlock(this._block)) {
+        if (this.#snake.touchesBlock(this.#block)) {
           document.documentElement.style.setProperty(
             "--ingestion-time",
-            `${this.timePerFrame * this._snake.size}ms`
+            `${this.timePerFrame * this.#snake.size}ms`
           );
-          this._block.ingested();
-          this._ingestingBlock.push(this._block);
-          this._block = new Block(this);
+          this.#block.ingested();
+          this.#ingestingBlocks.push(this.#block);
+          this.#block = new Block(this);
         }
 
-        if (this._snake.eatsBlock(this._ingestingBlock?.[0])) {
-          this._score += this.difficulty * this._snake.size;
-          this._snake.addSegment(this._ingestingBlock.shift());
+        if (this.#snake.eatsBlock(this.#ingestingBlocks?.[0])) {
+          this.#score += this.difficulty * this.#snake.size;
+          this.#snake.addSegment(this.#ingestingBlocks.shift());
         }
 
-        this._snake.updateDirection(this._directionQueue.shift());
-        this._snake.move(this);
+        this.#snake.updateDirection(this.#directionQueue.shift());
+        this.#snake.move(this);
       }
 
       crtTime = timestamp;
       remTime = deltaTime;
 
-      this._raf = requestAnimationFrame(gameLoop);
+      this.#raf = requestAnimationFrame(gameLoop);
     };
 
-    this._raf = requestAnimationFrame(gameLoop);
+    this.#raf = requestAnimationFrame(gameLoop);
   }
 
   pause() {
     if (!this.isRunning) return;
     setIconToPlay();
-    cancelAnimationFrame(this._raf);
-    this._raf = null;
+    cancelAnimationFrame(this.#raf);
+    this.#raf = undefined;
     startPause.focus();
   }
 
   over() {
     this.pause();
 
-    finalScore.innerHTML = `${this._score}`;
+    finalScore.innerHTML = `${this.#score}`;
     const prevScore = localStorage.getItem("bestScore");
-    const crtBest = prevScore ? Math.max(prevScore, this._score) : this._score;
+    const crtBest = prevScore ? Math.max(prevScore, this.#score) : this.#score;
     localStorage.setItem("bestScore", `${crtBest}`);
     bestScore.innerHTML = `${crtBest}`;
     finalScore.style.color =
-      crtBest > this._score
+      crtBest > this.#score
         ? "var(--light-red-color)"
         : "var(--light-green-color)";
 
@@ -780,23 +791,23 @@ class Game {
   }
 
   reset() {
-    this._snake.reset();
-    this._block.reset();
-    this._ingestingBlock.forEach((block) => block.reset());
+    this.#snake.reset();
+    this.#block.reset();
+    this.#ingestingBlocks.forEach((block) => block.reset());
 
-    this._snake = new Snake(this);
-    this._block = new Block(this);
+    this.#snake = new Snake(this);
+    this.#block = new Block(this);
 
-    this._ingestingBlock = [];
-    this._directionQueue = [];
-    this._score = 0;
+    this.#ingestingBlocks = [];
+    this.#directionQueue = [];
+    this.#score = 0;
 
     this.difficulty = Difficulty.MEDIUM;
-    this._raf = null;
+    this.#raf = undefined;
   }
 
   get isRunning() {
-    return this._raf !== null;
+    return this.#raf !== undefined;
   }
 }
 
@@ -923,6 +934,12 @@ dirRight.addEventListener("click", () => {
   game.addDirection("RIGHT");
 });
 
+[dirUp, dirDown, dirLeft, dirRight].forEach((dirButton) => {
+  dirButton.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+  });
+});
+
 playAgain.addEventListener("click", () => {
   gameOver.close();
   game.reset();
@@ -943,7 +960,7 @@ hardButton.addEventListener("click", () => {
 
 alertButton.addEventListener("click", () => {
   alertMessage.close();
-  tutorialMessage.showModal();
+  if (!localStorage.getItem("skipTutorial")) tutorialMessage.showModal();
 });
 
 //helpers for handling current state of the tutorial
@@ -959,13 +976,13 @@ nextTutorialButton.addEventListener("click", () => {
 
   const tutorialTextMessages = {
     true: {
-      0: `In this game, you move a snake around to catch as many blocks of food as you can.
-          Once the snake eats a block, the block is added to its tail and the snake grows.
+      0: `In this game, you move a snake around to catch as many blocks as you can.
+          Once the snake fully moves over a block, the block is added to its tail and the snake grows.
           If the snake touches the grid or its body, however, the game ends.`,
       1: `You can choose the difficulty of the game using the icon buttons on the top right.
           The snake moves faster on harder difficulties.`,
       2: `There's a score counter below the difficulty buttons. 
-          You gain points whenever the snake finishes eating a block.
+          You gain points whenever the snake finishes moving over a block.
           The greater the snake and the harder the game, the more points you gain.`,
       3: `On the right of the grid, below the score, there are buttons for starting and restarting the game.
           Once the game starts, you can pause it too.`,
@@ -973,14 +990,14 @@ nextTutorialButton.addEventListener("click", () => {
       5: "That's it! Do you want me to repeat?",
     },
     false: {
-      0: `In this game, you move a snake around to catch as many blocks of food as you can.
-          Once the snake eats a block, the block is added to its tail and the snake grows.
+      0: `In this game, you move a snake around to catch as many blocks as you can.
+          Once the snake fully moves over a block, the block is added to its tail and the snake grows.
           If the snake touches the grid or its body, however, the game ends.`,
       1: `You can choose the difficulty of the game using the icon buttons on the top right.
           It's also possible to increase or reduce the difficulty pressing + and -, respectively.
           The snake moves faster on harder difficulties.`,
       2: `There's a score counter below the difficulty buttons. 
-          You gain points whenever the snake finishes eating a block.
+          You gain points whenever the snake finishes moving over a block.
           The greater the snake and the harder the game, the more points you gain.`,
       3: `On the right of the grid, below the score, there are buttons for starting and restarting the game.
           Once the game starts, you can pause it too.
