@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <circle cx="60" cy="30" r="6" fill="white" />
-    <circle cx="60" cy="70" r="6" fill="white" />
+    <circle class="eye" cx="60" cy="30" r="6" fill="white" />
+    <circle class="eye" cx="60" cy="70" r="6" fill="white" />
 </svg>

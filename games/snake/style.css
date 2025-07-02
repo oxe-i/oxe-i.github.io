@@ -15,6 +15,10 @@
   --normal-font-size: 3vmin;
   --piece-unit: round(down, 3.6vmin, 1px);
   --ingestion-time: 0;
+  --snake-eyes-img: url("../../assets/snake-eyes.svg");
+  --smile-img: url("../../assets/smile.svg");
+  --angry-img: url("../../assets/angry.svg");
+  --eyes-img: url("../../assets/eyes.svg");
 }
 
 * {
@@ -247,11 +251,11 @@ dialog::backdrop {
 
 .piece.smiley {
   border-radius: 50%;
-  background-image: url("../../assets/smile.svg"), url("../../assets/eyes.svg");
+  background-image: var(--smile-img), var(--eyes-img);
 }
 
 .piece.block {
-  background-image: url("../../assets/eyes.svg"), url("../../assets/angry.svg");
+  background-image: var(--eyes-img), var(--angry-img);
 }
 
 .piece.seed {
@@ -264,7 +268,7 @@ dialog::backdrop {
 
 .piece.head {
   --direction: LEFT;
-  background-image: url("../../assets/snake-eyes.svg");
+  background-image: var(--snake-eyes-img);
   background-color: var(--snake-segment-color);
 
   border-bottom-left-radius: 40%;

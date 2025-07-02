@@ -45,8 +45,43 @@ const showTutorialButton = document.querySelector("#show-tutorial");
 const backgroundColorInput = document.querySelector("#background-color");
 const randomizeColors = document.querySelector("#randomize-colors");
 
+//imgs templates
+const snakeEyes = (color) => {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <defs>
+                    <g id="snake-eyes" fill="${color}">
+                        <circle cx="60" cy="30" r="6" />
+                        <circle cx="60" cy="70" r="6" />
+                    </g>
+                </defs>
+                <use href="#snake-eyes" x="0" y="0" />
+            </svg>`;
+};
+
+const smile = (color) => {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <path d="M25 60 Q50 90, 75 60" fill="transparent" stroke="${color}" stroke-width="4" />
+          </svg>`;
+};
+
+const eyes = (color) => {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <circle cx="35" cy="35" r="5" fill="${color}" />
+    <circle cx="65" cy="35" r="5" fill="${color}" />
+</svg>`;
+};
+
+const angry = (color) => {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <path d="M30 20 H40 V15 H30 Z" fill="${color}" transform="rotate(30, 35, 15)" />
+    <path d="M30 20 H40 V15 H30 Z" fill="${color}" transform="translate(30, 0) rotate(-30, 35, 15)" />
+    <path d="M30 60 H70 V70 H30 Z" fill="${color}" />
+</svg>`;
+};
+
 //global constants
 const SPEED = 1;
+const MIN_CONTRAST = 4.5; //AAA Level of contrast, as per https://www.w3.org/TR/WCAG20/
 
 //enum-like class to represent direction of movement for the snake
 class DirectionSpeed {
@@ -132,8 +167,15 @@ function randomNum() {
   return randomBuffer[0] / (0xffffffff + 1);
 }
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 //helpers for working with colors
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function colorHexToRGB(hexColor) {
   if (hexColor.startsWith("rgb")) {
     return hexColor
@@ -147,11 +189,17 @@ function colorHexToRGB(hexColor) {
   return [red, green, blue];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+//luminance formula as per https://www.w3.org/TR/WCAG20/#relativeluminancedef
 function getLuminance(components) {
-  return (
-    components[0] * 0.2126 + components[1] * 0.7152 + components[2] * 0.0722
-  );
+  const [R, G, B] = components
+    .map((component) => component / 255)
+    .map((component) => {
+      if (component <= 0.03928) {
+        return component / 12.92;
+      }
+      return ((component + 0.055) / 1.055) ** 2.4;
+    });
+  return R * 0.2126 + G * 0.7152 + B * 0.0722;
 }
 
 function getHexColor([red, green, blue]) {
@@ -161,6 +209,12 @@ function getHexColor([red, green, blue]) {
       .toString(16)
       .padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`
   );
+}
+
+//contrast ratio formula as per https://www.w3.org/TR/WCAG20/#contrast-ratiodef
+function validContrast(lum1, lum2) {
+  const [smaller, greater] = lum1 <= lum2 ? [lum1, lum2] : [lum2, lum1];
+  return (greater + 0.05) / (smaller + 0.05) >= MIN_CONTRAST;
 }
 
 //class to represent an uniform interface for elements in the game
@@ -182,64 +236,37 @@ class Piece {
     this.#updated = true; // flag for computing styles lazily
   }
 
-  addFilter() {
-    /*
-    const currentCanvasColor = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue("--canvas-color");
-    const currentCanvasLuminance = getLuminance(
-      colorHexToRGB(currentCanvasColor)
-    );
+  randomizeColor(
+    canvasColor = getComputedStyle(document.documentElement).getPropertyValue(
+      "--canvas-color"
+    ),
+    canvasLum = getLuminance(colorHexToRGB(canvasColor))
+  ) {
+    let color;
+    let colorComponents;
+    let lum;
 
-    const validContrast = (luminance1, luminance2) => {
-      if (luminance1 <= luminance2) {
-        return (luminance2 + 0.05) / (luminance1 + 0.05) >= 2.5;
-      }
-      return (luminance1 + 0.05) / (luminance2 + 0.05) >= 2.5;
-    };
-
-    const currentPieceColor = this.getStyle("background-color");
-    const basePieceLuminance = getLuminance(colorHexToRGB(currentPieceColor));
-    const currentLuminanceMod =
-      this.getStyle("filter")
-        ?.split(" ")
-        ?.filter((properties) => properties.startsWith("brightness"))
-        ?.map((brightness) => Number(brightness.replaceAll(/[^\d.]/g, "")))
-        ?.at(0) ?? 1;
-
-    if (
-      !validContrast(
-        basePieceLuminance * currentLuminanceMod,
-        currentCanvasLuminance
-      )
-    ) {
-      if (basePieceLuminance > currentCanvasLuminance) {
-        const factor =
-          (3 * (currentCanvasLuminance + 0.05) - 0.05) / basePieceLuminance;
-        this.addStyle(
-          "filter",
-          `brightness(${factor}) saturate(${2 + factor}) contrast(${1 + factor})`
-        );
-        console.log(this.getStyle("filter"));
-        return;
-      }
-      this.addStyle(
-        "filter",
-        "none"
+    do {
+      color = getHexColor(
+        shuffleArray([255, 255, 255]).map((multiplier) =>
+          Math.floor(randomNum() * multiplier)
+        )
       );
-    }
-      */
+      colorComponents = colorHexToRGB(color);
+      lum = getLuminance(colorComponents);
+    } while (!validContrast(canvasLum, lum));
+
+    this.addStyle("background-color", color);
   }
 
-  randomizeColor() {
-    const colorValue = getHexColor(
-      Array(3)
-        .fill(127)
-        .map((multiplier) => Math.floor(randomNum() * multiplier))
-    );
+  adjustColorForContrast() {
+    const canvasColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--canvas-color");
 
-    this.addStyle("background-color", colorValue);
-    this.addFilter();
+    const canvasLum = getLuminance(colorHexToRGB(canvasColor));
+
+    this.randomizeColor(canvasColor, canvasLum);
   }
 
   reset() {
@@ -680,9 +707,9 @@ class Snake {
     });
   }
 
-  addFilter() {
+  adjustColorForContrast() {
     this.#segments.forEach((segment) => {
-      segment.addFilter();
+      segment.adjustColorForContrast();
     });
   }
 
@@ -939,12 +966,13 @@ class Game {
     this.#raf = undefined;
 
     backgroundColorInput.value = "#e0fda9";
+    document.documentElement.style.setProperty("--canvas-color", "#e0fda9");
   }
 
   adjustColors() {
-    this.#snake.addFilter();
-    this.#block.addFilter();
-    this.#ingestingBlocks.forEach((block) => block.addFilter());
+    this.#snake.adjustColorForContrast();
+    this.#block.adjustColorForContrast();
+    this.#ingestingBlocks.forEach((block) => block.adjustColorForContrast());
   }
 
   randomizeColors() {
@@ -966,6 +994,9 @@ window.addEventListener("resize", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  backgroundColorInput.value = "#e0fda9";
+  document.documentElement.style.setProperty("--canvas-color", "#e0fda9");
+
   if (!isTouchDevice()) {
     tutorialText.innerHTML = `Do you want to see the tutorial?<br><br>
                               By the way, you can always advance on the tutorial by pressing N and close it by pressing X.`;
@@ -1277,14 +1308,50 @@ showTutorialButton.addEventListener("click", () => {
 let isCrtRunning = false;
 backgroundColorInput.addEventListener("click", () => {
   isCrtRunning = game.isRunning;
-  game.pause();
+  if (game.isRunning) game.pause();
 });
 
 backgroundColorInput.addEventListener("input", (event) => {
-  document.documentElement.style.setProperty(
-    "--canvas-color",
-    event.target.value
+  const color = event.target.value;
+
+  document.documentElement.style.setProperty("--canvas-color", color);
+
+  const svgTemplates = [
+    snakeEyes(color),
+    smile(color),
+    angry(color),
+    eyes(color),
+  ];
+
+  const parser = new DOMParser();
+  const svgDocs = svgTemplates.map((template) =>
+    parser.parseFromString(template, "image/svg+xml")
   );
+  const svgElems = svgDocs.map((svgDoc) => svgDoc.documentElement);
+
+  const serializer = new XMLSerializer();
+  const svgStrings = svgElems.map((svgElem) =>
+    serializer.serializeToString(svgElem)
+  );
+  const encodedData = svgStrings.map((svgString) =>
+    encodeURIComponent(svgString)
+  );
+  const dataURIs = encodedData.map(
+    (data) => `data:image/svg+xml;charset=utf-8,${data}`
+  );
+  const properties = [
+    "--snake-eyes-img",
+    "--smile-img",
+    "--angry-img",
+    "--eyes-img",
+  ];
+  dataURIs.forEach((dataURI, idx) => {
+    document.documentElement.style.setProperty(
+      `${properties.at(idx)}`,
+      `url("${dataURI}")`
+    );
+  });
+
   game.adjustColors();
   if (isCrtRunning) {
     game.start();
