@@ -133,6 +133,7 @@ function randomNum() {
 }
 
 //helpers for working with colors
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function colorHexToRGB(hexColor) {
   if (hexColor.startsWith("rgb")) {
     return hexColor
@@ -146,6 +147,7 @@ function colorHexToRGB(hexColor) {
   return [red, green, blue];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getLuminance(components) {
   return (
     components[0] * 0.2126 + components[1] * 0.7152 + components[2] * 0.0722
@@ -172,7 +174,6 @@ class Piece {
     this.#elem.className = "piece";
     gameArea.appendChild(this.#elem);
     this.randomizeColor();
-    this.addFilter();
     this.#updateComputedStyle();
   }
 
@@ -182,6 +183,7 @@ class Piece {
   }
 
   addFilter() {
+    /*
     const currentCanvasColor = getComputedStyle(
       document.documentElement
     ).getPropertyValue("--canvas-color");
@@ -191,37 +193,42 @@ class Piece {
 
     const validContrast = (luminance1, luminance2) => {
       if (luminance1 <= luminance2) {
-        return (luminance2 + 0.05) / (luminance1 + 0.05) >= 3;
+        return (luminance2 + 0.05) / (luminance1 + 0.05) >= 2.5;
       }
-      return (luminance1 + 0.05) / (luminance2 + 0.05) >= 3;
+      return (luminance1 + 0.05) / (luminance2 + 0.05) >= 2.5;
     };
 
     const currentPieceColor = this.getStyle("background-color");
-    const currentPieceLuminance =
-      getLuminance(colorHexToRGB(currentPieceColor)) *
-      (this.getStyle("filter")
-        .split(" ")
-        .filter((properties) => properties.startsWith("brightness"))
-        .map((brightness) => Number(brightness.replaceAll(/[^\d.]/g, "")))
-        .at(0) ?? 1);
+    const basePieceLuminance = getLuminance(colorHexToRGB(currentPieceColor));
+    const currentLuminanceMod =
+      this.getStyle("filter")
+        ?.split(" ")
+        ?.filter((properties) => properties.startsWith("brightness"))
+        ?.map((brightness) => Number(brightness.replaceAll(/[^\d.]/g, "")))
+        ?.at(0) ?? 1;
 
-    if (!validContrast(currentPieceLuminance, currentCanvasLuminance)) {
-      if (currentPieceLuminance > currentCanvasLuminance) {
+    if (
+      !validContrast(
+        basePieceLuminance * currentLuminanceMod,
+        currentCanvasLuminance
+      )
+    ) {
+      if (basePieceLuminance > currentCanvasLuminance) {
         const factor =
-          (3 * (currentCanvasLuminance + 0.05) - 0.05) / currentPieceLuminance;
+          (3 * (currentCanvasLuminance + 0.05) - 0.05) / basePieceLuminance;
         this.addStyle(
           "filter",
-          `brightness(${factor}) saturation(${factor}) contrast(${factor})`
+          `brightness(${factor}) saturate(${2 + factor}) contrast(${1 + factor})`
         );
+        console.log(this.getStyle("filter"));
         return;
       }
-      const factor =
-        ((currentCanvasLuminance + 0.05) / 3 - 0.05) / currentPieceLuminance;
       this.addStyle(
         "filter",
-        `brightness(${factor}) saturation(${factor}) contrast(${factor})`
+        "none"
       );
     }
+      */
   }
 
   randomizeColor() {
@@ -232,6 +239,7 @@ class Piece {
     );
 
     this.addStyle("background-color", colorValue);
+    this.addFilter();
   }
 
   reset() {
@@ -1286,5 +1294,4 @@ backgroundColorInput.addEventListener("input", (event) => {
 
 randomizeColors.addEventListener("click", () => {
   game.randomizeColors();
-  game.adjustColors();
 });
