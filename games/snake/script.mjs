@@ -43,6 +43,7 @@ const showTutorialButton = document.querySelector("#show-tutorial");
 
 //input for background color
 const backgroundColorInput = document.querySelector("#background-color");
+const randomizeColors = document.querySelector("#randomize-colors");
 
 //global constants
 const SPEED = 1;
@@ -133,6 +134,12 @@ function randomNum() {
 
 //helpers for working with colors
 function colorHexToRGB(hexColor) {
+  if (hexColor.startsWith("rgb")) {
+    return hexColor
+      .replaceAll(/[^\d,]/g, "")
+      .split(",")
+      .map((str) => Number(str));
+  }
   const red = parseInt(hexColor.slice(1, 3), 16);
   const green = parseInt(hexColor.slice(3, 5), 16);
   const blue = parseInt(hexColor.slice(5, 7), 16);
@@ -165,6 +172,7 @@ class Piece {
     this.#elem.className = "piece";
     gameArea.appendChild(this.#elem);
     this.randomizeColor();
+    this.addFilter();
     this.#updateComputedStyle();
   }
 
@@ -174,22 +182,45 @@ class Piece {
   }
 
   addFilter() {
-    const canvasColor = getComputedStyle(
+    const currentCanvasColor = getComputedStyle(
       document.documentElement
     ).getPropertyValue("--canvas-color");
-    const currentColor = this.getStyle("background-color");
+    const currentCanvasLuminance = getLuminance(
+      colorHexToRGB(currentCanvasColor)
+    );
 
-    const canvasLuminance = getLuminance(colorHexToRGB(canvasColor));
-    const currentLuminance = getLuminance(colorHexToRGB(currentColor));
+    const validContrast = (luminance1, luminance2) => {
+      if (luminance1 <= luminance2) {
+        return (luminance2 + 0.05) / (luminance1 + 0.05) >= 3;
+      }
+      return (luminance1 + 0.05) / (luminance2 + 0.05) >= 3;
+    };
 
-    if (canvasLuminance <= currentLuminance) {
+    const currentPieceColor = this.getStyle("background-color");
+    const currentPieceLuminance =
+      getLuminance(colorHexToRGB(currentPieceColor)) *
+      (this.getStyle("filter")
+        .split(" ")
+        .filter((properties) => properties.startsWith("brightness"))
+        .map((brightness) => Number(brightness.replaceAll(/[^\d.]/g, "")))
+        .at(0) ?? 1);
+
+    if (!validContrast(currentPieceLuminance, currentCanvasLuminance)) {
+      if (currentPieceLuminance > currentCanvasLuminance) {
+        const factor =
+          (3 * (currentCanvasLuminance + 0.05) - 0.05) / currentPieceLuminance;
+        this.addStyle(
+          "filter",
+          `brightness(${factor}) saturation(${factor}) contrast(${factor})`
+        );
+        return;
+      }
       const factor =
-        1 + (currentLuminance - canvasLuminance) / currentLuminance;
-      this.addStyle("filter", `brightness(${factor}) contrast(${factor + 0.5})`);
-    } else {
-      const factor =
-        1 + (canvasLuminance - currentLuminance) / canvasLuminance;
-      this.addStyle("filter", `brightness(${factor}) contrast(${factor + 0.5})`);
+        ((currentCanvasLuminance + 0.05) / 3 - 0.05) / currentPieceLuminance;
+      this.addStyle(
+        "filter",
+        `brightness(${factor}) saturation(${factor}) contrast(${factor})`
+      );
     }
   }
 
@@ -250,7 +281,7 @@ class Piece {
   /**
    *
    * @param {string} property
-   * @returns
+   * @returns {string}
    */
   getStyle(property) {
     if (!this.#updated) this.#updateComputedStyle();
@@ -646,6 +677,12 @@ class Snake {
       segment.addFilter();
     });
   }
+
+  randomizeColors() {
+    this.#segments.forEach((segment) => {
+      segment.randomizeColor();
+    });
+  }
 }
 
 //class to represent the game itself, handling interaction between its parts and gameflow
@@ -787,7 +824,13 @@ class Game {
    * those variables are automatically reset after the game stops
    */
   start() {
-    if (this.isRunning) return;
+    if (
+      this.isRunning ||
+      tutorialMessage.open ||
+      alertMessage.open ||
+      gameOver.open
+    )
+      return;
 
     this.show();
     setIconToPause();
@@ -853,7 +896,6 @@ class Game {
     setIconToPlay();
     cancelAnimationFrame(this.#raf);
     this.#raf = undefined;
-    startPause.focus();
   }
 
   over() {
@@ -897,6 +939,12 @@ class Game {
     this.#ingestingBlocks.forEach((block) => block.addFilter());
   }
 
+  randomizeColors() {
+    this.#snake.randomizeColors();
+    this.#block.randomizeColor();
+    this.#ingestingBlocks.forEach((block) => block.randomizeColor());
+  }
+
   get isRunning() {
     return this.#raf !== undefined;
   }
@@ -910,12 +958,17 @@ window.addEventListener("resize", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (!isTouchDevice()) {
+    tutorialText.innerHTML = `Do you want to see the tutorial?<br><br>
+                              By the way, you can always advance on the tutorial by pressing N and close it by pressing X.`;
+  }
+
   if (
     screen.orientation.type == "portrait-primary" ||
     screen.orientation.type == "portrait-secundary"
   ) {
     alertMessage.showModal();
-  } else if (!localStorage.getItem("skipTutorial")) {
+  } else if (!localStorage.getItem("skipTutorial-v2")) {
     tutorialMessage.showModal();
     nextTutorialButton.focus();
   } else {
@@ -927,10 +980,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("keydown", (event) => {
   switch (event.key) {
+    case "Enter":
+      if (game.isRunning && backgroundColorInput === document.activeElement) {
+        backgroundColorInput.dispatchEvent(
+          new MouseEvent("click", { bubbles: true, cancelable: true })
+        );
+      }
+      return;
     case " ":
       event.preventDefault();
       if (game.isRunning) game.pause();
       else game.start();
+      return;
+    case "N":
+    case "n":
+      if (tutorialMessage.open) {
+        nextTutorialButton.dispatchEvent(new MouseEvent("click"));
+      }
+      return;
+    case "X":
+    case "x":
+      if (tutorialMessage.open) {
+        closeTutorialButton.click();
+      }
+      return;
+    case "C":
+    case "c":
+      backgroundColorInput.focus();
+      return;
+    case "R":
+    case "r":
+      game.randomizeColors();
+      game.adjustColors();
+      return;
+    case "P":
+    case "p":
+      startPause.focus();
+      return;
+    case "T":
+    case "t":
+      showTutorialButton.focus();
+      return;
+    case "E":
+    case "e":
+      if (!game.isRunning) return;
+      game.setEasyDifficulty();
+      return;
+    case "M":
+    case "m":
+      if (!game.isRunning) return;
+      game.setMediumDifficulty();
+      return;
+    case "H":
+    case "h":
+      if (!game.isRunning) return;
+      game.setHardDifficulty();
       return;
     case "ArrowUp":
     case "W":
@@ -1053,7 +1157,7 @@ hardButton.addEventListener("click", () => {
 
 alertButton.addEventListener("click", () => {
   alertMessage.close();
-  if (!localStorage.getItem("skipTutorial")) tutorialMessage.showModal();
+  if (!localStorage.getItem("skipTutorial-v2")) tutorialMessage.showModal();
 });
 
 //helpers for handling current state of the tutorial
@@ -1062,48 +1166,57 @@ let endTutorial = false;
 
 nextTutorialButton.addEventListener("click", () => {
   if (endTutorial) {
-    localStorage.setItem("skipTutorial", "true");
+    localStorage.setItem("skipTutorial-v2", "true");
     tutorialMessage.close();
     return;
   }
 
   const tutorialTextMessages = {
     true: {
-      0: `In this game, you move a snake around to catch as many blocks as you can.
-          Once the snake fully moves over a block, the block is added to its tail and the snake grows.
+      0: `In this game, you move a snake around to catch as many blocks as possible.<br><br>
+          Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
           If the snake touches the grid or its body, however, the game ends.`,
-      1: `You can choose the difficulty of the game using the icon buttons on the top right.
-          The snake moves faster on harder difficulties.`,
-      2: `There's a score counter below the difficulty buttons. 
-          You gain points whenever the snake finishes moving over a block.
+      1: `You can choose the difficulty of the game using the icon buttons in the top right corner.<br><br>
+          The snake moves faster at higher difficulty levels.`,
+      2: `There's a score counter below the difficulty buttons.<br><br>
+          You gain points whenever the snake finishes moving over a block.<br><br>
           The greater the snake and the harder the game, the more points you gain.`,
-      3: `On the right of the grid, below the score, there are buttons for starting and restarting the game.
+      3: `On the right of the grid, below the score, there's a selector where you can change the color of the game area. 
+          The game pauses while you're selecting a color and resumes as soon as you make a selection.<br><br>
+          There's also a button for randomizing the colors of the snake and the block.`,
+      4: `Below the color picker, there are buttons for starting and restarting the game.
           Once the game starts, you can pause it too.`,
-      4: "You can move the snake with the directional pad on the left.",
-      5: "That's it! Do you want me to repeat?",
+      5: "You can move the snake with the directional pad on the left of the game area.",
+      6: "That's it! Do you want me to repeat?",
     },
     false: {
-      0: `In this game, you move a snake around to catch as many blocks as you can.
-          Once the snake fully moves over a block, the block is added to its tail and the snake grows.
+      0: `In this game, you move a snake around to catch as many blocks as possible.<br><br>
+          Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
           If the snake touches the grid or its body, however, the game ends.`,
-      1: `You can choose the difficulty of the game using the icon buttons on the top right.
-          It's also possible to increase or reduce the difficulty pressing + and -, respectively.
-          The snake moves faster on harder difficulties.`,
-      2: `There's a score counter below the difficulty buttons. 
-          You gain points whenever the snake finishes moving over a block.
+      1: `You can choose the difficulty of the game using the icon buttons in the top right corner.<br><br>
+          It's also possible to select the difficulty by pressing E (Easy), M (Medium) and H (Hard).<br><br>
+          You can increase current difficulty by pressing + and reduce it by pressing - .<br><br>
+          The snake moves faster at higher difficulty levels.`,
+      2: `There's a score counter below the difficulty buttons.<br><br>
+          You gain points whenever the snake finishes moving over a block.<br><br>
           The greater the snake and the harder the game, the more points you gain.`,
-      3: `On the right of the grid, below the score, there are buttons for starting and restarting the game.
-          Once the game starts, you can pause it too.
-          You can also start, pause or continue the game pressing spacebar.`,
-      4: `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.
+      3: `On the right of the grid, below the score, there's a selector where you can change the color of the game area.
+          You can also press C to focus on this selector.<br><br>
+          The game pauses while you're selecting a color and resumes as soon as you make a selection.<br><br>
+          There's also a button for randomizing the colors of the snake and the block. You can press R to do the same.`,
+      4: `Below the color picker, there are buttons for starting and restarting the game.
+          Once the game starts, you can pause it too.<br><br>
+          It's possible to focus on the start/pause button by pressing P.<br><br>
+          You can also start, pause or continue the game by pressing spacebar.`,
+      5: `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br><br>
           W moves up, S moves down, A moves left and D moves right.`,
-      5: "That's it! Do you want me to repeat?",
+      6: "That's it! Do you want me to repeat?",
     },
   };
 
   tutorialText.innerHTML = tutorialTextMessages[isTouchDevice()][tutorialStep];
 
-  if (tutorialStep == 5) {
+  if (tutorialStep == 6) {
     nextTutorialButton.innerHTML = "Yes";
     closeTutorialButton.innerHTML = "No";
     closeTutorialButton.focus();
@@ -1114,7 +1227,7 @@ nextTutorialButton.addEventListener("click", () => {
   }
 
   tutorialStep++;
-  tutorialStep %= 6;
+  tutorialStep %= 7;
 });
 
 closeTutorialButton.addEventListener("click", () => {
@@ -1124,7 +1237,12 @@ closeTutorialButton.addEventListener("click", () => {
     return;
   }
   endTutorial = true;
-  tutorialText.innerHTML = "Do you want to skip this tutorial in the future?";
+  if (isTouchDevice())
+    tutorialText.innerHTML = `Do you want to skip this tutorial in the future?<br><br> 
+                              If you ever need to see it again, you can always click on the 'Show Tutorial' button`;
+  else
+    tutorialText.innerHTML = `Do you want to skip this tutorial in the future?<br><br> 
+                              If you ever need to see it again, you can always click on the 'Show Tutorial' button. You can focus on this button by pressing T.`;
   nextTutorialButton.innerHTML = "Yes";
   closeTutorialButton.innerHTML = "No";
   nextTutorialButton.focus();
@@ -1135,13 +1253,23 @@ showTutorialButton.addEventListener("click", () => {
     game.pause();
   }
 
-  localStorage.removeItem("skipTutorial");
+  localStorage.removeItem("skipTutorial-v2");
   endTutorial = false;
   tutorialStep = 0;
-  tutorialText.innerHTML = "Do you want to see the tutorial?";
+  if (isTouchDevice())
+    tutorialText.innerHTML = "Do you want to see the tutorial?";
+  else
+    tutorialText.innerHTML = `Do you want to see the tutorial?<br><br>
+                              By the way, you can always advance on the tutorial by pressing N and close it by pressing X.`;
   nextTutorialButton.innerHTML = "Next";
   closeTutorialButton.innerHTML = "Close";
   tutorialMessage.showModal();
+});
+
+let isCrtRunning = false;
+backgroundColorInput.addEventListener("click", () => {
+  isCrtRunning = game.isRunning;
+  game.pause();
 });
 
 backgroundColorInput.addEventListener("input", (event) => {
@@ -1149,5 +1277,14 @@ backgroundColorInput.addEventListener("input", (event) => {
     "--canvas-color",
     event.target.value
   );
+  game.adjustColors();
+  if (isCrtRunning) {
+    game.start();
+    isCrtRunning = false;
+  }
+});
+
+randomizeColors.addEventListener("click", () => {
+  game.randomizeColors();
   game.adjustColors();
 });
