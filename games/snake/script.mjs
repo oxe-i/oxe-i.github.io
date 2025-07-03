@@ -1284,7 +1284,6 @@ showTutorialButton.addEventListener("click", () => {
 
 backgroundColorInput.addEventListener("click", () => {
   game.pause();
-  isColorPickerOpen = true;
 });
 
 backgroundColorInput.addEventListener("input", (event) => {
@@ -1330,7 +1329,6 @@ backgroundColorInput.addEventListener("input", (event) => {
 
   game.randomizeColors();
   game.start();
-  isColorPickerOpen = false;
 });
 
 randomizeColors.addEventListener("click", () => {
