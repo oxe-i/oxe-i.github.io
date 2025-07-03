@@ -980,6 +980,7 @@ window.addEventListener("resize", () => {
 document.addEventListener("DOMContentLoaded", () => {
   backgroundColorInput.value = "#e0fda9";
   document.documentElement.style.setProperty("--canvas-color", "#e0fda9");
+  adjustImgProperties("#e0fda9");
 
   if (!isTouchDevice()) {
     tutorialText.innerHTML = `Do you want to see the tutorial?<br><br>
@@ -1286,11 +1287,7 @@ backgroundColorInput.addEventListener("click", () => {
   game.pause();
 });
 
-backgroundColorInput.addEventListener("input", (event) => {
-  const color = event.target.value;
-
-  document.documentElement.style.setProperty("--canvas-color", color);
-
+function adjustImgProperties(color) {
   const svgTemplates = [
     snakeEyes(color),
     smile(color),
@@ -1326,7 +1323,14 @@ backgroundColorInput.addEventListener("input", (event) => {
       `url("${dataURI}")`
     );
   });
+}
 
+backgroundColorInput.addEventListener("input", (event) => {
+  const color = event.target.value;
+
+  document.documentElement.style.setProperty("--canvas-color", color);
+
+  adjustImgProperties(color);
   game.randomizeColors();
   game.start();
 });

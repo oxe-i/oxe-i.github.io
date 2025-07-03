@@ -233,7 +233,7 @@ dialog::backdrop {
   }
 
   button {
-    grid-row: 3 / end;
+    grid-row: 3;
     grid-column: 1 / end;
     background: var(--low-contrast-color);
     padding: 1vh 0;
