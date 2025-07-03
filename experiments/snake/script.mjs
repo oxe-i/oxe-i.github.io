@@ -41,23 +41,9 @@ const closeTutorialButton = tutorialMessage.querySelector("#close-tutorial");
 //button to show tutorial
 const showTutorialButton = document.querySelector("#show-tutorial");
 
-//background color
-const backgroundInput = document.querySelector("#background-color");
-const randomBackground = document.querySelector("#randomize-background");
-
-//snake color
-const snakeInput = document.querySelector("#snake-color");
-const randomSnake = document.querySelector("#randomize-snake");
-
-//block color
-const blockInput = document.querySelector("#block-color");
-const randomBlock = document.querySelector("#randomize-block");
-
-//all random
-const randomAll = document.querySelector("#randomize-everything");
-
-const openOptions = document.querySelector("#open-options");
-const closeOptions = document.querySelector("#close-options");
+//input for background color
+const backgroundColorInput = document.querySelector("#background-color");
+const randomizeColors = document.querySelector("#randomize-colors");
 
 //imgs templates
 const snakeEyes = (color) => {
@@ -231,35 +217,6 @@ function validContrast(lum1, lum2) {
   return (greater + 0.05) / (smaller + 0.05) >= MIN_CONTRAST;
 }
 
-//generates any random color
-function randomColor() {
-  return getHexColor(
-    shuffleArray([255, 255, 255]).map((multiplier) =>
-      Math.floor(randomNum() * multiplier)
-    )
-  );
-}
-
-//generates a random color with good contrast with the canvas
-function validColor() {
-  const canvasColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--canvas-color");
-  const canvasLum = getLuminance(colorHexToRGB(canvasColor));
-
-  let color;
-  let colorComponents;
-  let lum;
-
-  do {
-    color = randomColor();
-    colorComponents = colorHexToRGB(color);
-    lum = getLuminance(colorComponents);
-  } while (!validContrast(canvasLum, lum));
-
-  return color;
-}
-
 //class to represent an uniform interface for elements in the game
 class Piece {
   #elem;
@@ -270,7 +227,7 @@ class Piece {
     this.#elem = document.createElement("div");
     this.#elem.className = "piece";
     gameArea.appendChild(this.#elem);
-    this.setColor(validColor());
+    this.randomizeColor();
     this.#updateComputedStyle();
   }
 
@@ -279,7 +236,25 @@ class Piece {
     this.#updated = true; // flag for computing styles lazily
   }
 
-  setColor(color) {
+  randomizeColor() {
+    const canvasColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--canvas-color");
+    const canvasLum = getLuminance(colorHexToRGB(canvasColor));
+    let color;
+    let colorComponents;
+    let lum;
+
+    do {
+      color = getHexColor(
+        shuffleArray([255, 255, 255]).map((multiplier) =>
+          Math.floor(randomNum() * multiplier)
+        )
+      );
+      colorComponents = colorHexToRGB(color);
+      lum = getLuminance(colorComponents);
+    } while (!validContrast(canvasLum, lum));
+
     this.addStyle("background-color", color);
   }
 
@@ -499,7 +474,7 @@ class Head extends Piece {
 //class to represent the snake, with a Head and a tail with four pieces
 class Snake {
   #segments;
-  #uniformColor;
+
   /**
    *
    * @param {Game} game
@@ -514,7 +489,6 @@ class Snake {
     );
 
     this.#initializeSegments(game);
-    this.#uniformColor = false;
   }
 
   get size() {
@@ -676,8 +650,6 @@ class Snake {
    * @param {Piece} newSegment
    */
   addSegment(newSegment) {
-    if (this.#uniformColor)
-      newSegment.setColor(this.#segments[0].getStyle("background-color"));
     this.#segments.push(newSegment);
   }
 
@@ -726,16 +698,8 @@ class Snake {
 
   randomizeColors() {
     this.#segments.forEach((segment) => {
-      segment.setColor(validColor());
+      segment.randomizeColor();
     });
-    this.#uniformColor = false;
-  }
-
-  setColor(color) {
-    this.#segments.forEach((segment) => {
-      segment.setColor(color);
-    });
-    this.#uniformColor = true;
   }
 }
 
@@ -990,21 +954,17 @@ class Game {
 
     this.difficulty = Difficulty.MEDIUM;
     this.#raf = undefined;
+
+    backgroundColorInput.value = "#e0fda9";
+    document.documentElement.style.setProperty("--canvas-color", "#e0fda9");
+    adjustImgProperties("#e0fda9");
+    this.randomizeColors();
   }
 
   randomizeColors() {
     this.#snake.randomizeColors();
-    this.#block.setColor(validColor());
-    this.#ingestingBlocks.forEach((block) => block.setColor(validColor()));
-  }
-
-  setSnakeColor(color) {
-    this.#snake.setColor(color);
-  }
-
-  setBlockColor(color) {
-    this.#block.setColor(color);
-    this.#ingestingBlocks.forEach((block) => block.setColor(color));
+    this.#block.randomizeColor();
+    this.#ingestingBlocks.forEach((block) => block.randomizeColor());
   }
 
   get isRunning() {
@@ -1020,16 +980,13 @@ window.addEventListener("resize", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const backgroundColor = "#e0fda9";
-  document.documentElement.style.setProperty("--canvas-color", backgroundColor);
-  adjustImgProperties(backgroundColor);
-  backgroundInput.value = backgroundColor;
-  blockInput.value = "#000000";
-  snakeInput.value = "#000000";
+  backgroundColorInput.value = "#e0fda9";
+  document.documentElement.style.setProperty("--canvas-color", "#e0fda9");
+  adjustImgProperties("#e0fda9");
 
   if (!isTouchDevice()) {
     tutorialText.innerHTML = `Do you want to see the tutorial?<br><br>
-                              By the way, you can always advance on the tutorial by pressing N and close it by pressing C.`;
+                              By the way, you can always advance on the tutorial by pressing N and close it by pressing X.`;
   }
 
   if (
@@ -1043,6 +1000,8 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     startPause.focus();
   }
+
+  backgroundColorInput.value = "#e0fda9";
 });
 
 document.addEventListener("keydown", (event) => {
@@ -1058,43 +1017,20 @@ document.addEventListener("keydown", (event) => {
         nextTutorialButton.dispatchEvent(new MouseEvent("click"));
       }
       return;
-    case "O":
-    case "o":
-      openOptions.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true })
-      );
-      return;
-    case "R":
-    case "r":
-      randomAll.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true })
-      );
-      return;
-    case "G":
-    case "g":
-      if (isOptionsOpen()) {
-        backgroundInput.dispatchEvent(
-          new MouseEvent("click", { bubbles: true, cancelable: true })
-        );
-      }
-      return;
-    case "B":
-    case "b":
-      if (isOptionsOpen()) {
-        blockInput.dispatchEvent(
-          new MouseEvent("click", { bubbles: true, cancelable: true })
-        );
+    case "X":
+    case "x":
+      if (tutorialMessage.open) {
+        closeTutorialButton.click();
       }
       return;
     case "C":
     case "c":
-      if (isOptionsOpen()) {
-        closeOptions.dispatchEvent(
-          new MouseEvent("click", { bubbles: true, cancelable: true })
-        );
-      } else if (tutorialMessage.open) {
-        closeTutorialButton.click();
-      }
+      backgroundColorInput.focus();
+      return;
+    case "R":
+    case "r":
+      game.randomizeColors();
+      game.adjustColors();
       return;
     case "P":
     case "p":
@@ -1102,9 +1038,7 @@ document.addEventListener("keydown", (event) => {
       return;
     case "T":
     case "t":
-      showTutorialButton.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true })
-      );
+      showTutorialButton.focus();
       return;
     case "E":
     case "e":
@@ -1129,11 +1063,7 @@ document.addEventListener("keydown", (event) => {
     case "ArrowDown":
     case "S":
     case "s":
-      if (isOptionsOpen()) {
-        snakeInput.dispatchEvent(
-          new MouseEvent("click", { bubbles: true, cancelable: true })
-        );
-      } else game.addDirection("DOWN");
+      game.addDirection("DOWN");
       return;
     case "ArrowLeft":
     case "A":
@@ -1270,10 +1200,10 @@ nextTutorialButton.addEventListener("click", () => {
       2: `There's a score counter below the difficulty buttons.<br><br>
           You gain points whenever the snake finishes moving over a block.<br><br>
           The greater the snake and the harder the game, the more points you gain.`,
-      3: `Below the score, there's a button of options which opens a panel to change the colors of all game elements.<br><br> 
-          The game pauses while you're selecting colors and resumes as soon as you close the options panel.<br><br>
-          On this panel, there are also buttons to randomize any one element or all at once.`,
-      4: `On the bottom right of the game area, there are buttons for starting and restarting the game.
+      3: `On the right of the grid, below the score, there's a selector where you can change the color of the game area. 
+          The game pauses while you're selecting a color and resumes as soon as you make a selection.<br><br>
+          There's also a button for randomizing the colors of the snake and the block.`,
+      4: `Below the color picker, there are buttons for starting and restarting the game.
           Once the game starts, you can pause it too.`,
       5: "You can move the snake with the directional pad on the left of the game area.",
       6: "That's it! Do you want me to repeat?",
@@ -1289,13 +1219,13 @@ nextTutorialButton.addEventListener("click", () => {
       2: `There's a score counter below the difficulty buttons.<br><br>
           You gain points whenever the snake finishes moving over a block.<br><br>
           The greater the snake and the harder the game, the more points you gain.`,
-      3: `Below the score, there's a button of options which opens a panel to change the colors of all game elements. 
-          This panel can also be opened by pressing O on the keyboard.<br><br>
-          The game pauses while you're selecting colors and resumes as soon as you close the options panel.<br><br>
-          On this panel, there are also buttons to randomize any one element or all at once.
-          You can also press R on the keyboard to randomize everything`,
-      4: `On the bottom right of the game area, there are buttons for starting and restarting the game.
+      3: `On the right of the grid, below the score, there's a selector where you can change the color of the game area.
+          You can also press C to focus on this selector.<br><br>
+          The game pauses while you're selecting a color and resumes as soon as you make a selection.<br><br>
+          There's also a button for randomizing the colors of the snake and the block. You can press R to do the same.`,
+      4: `Below the color picker, there are buttons for starting and restarting the game.
           Once the game starts, you can pause it too.<br><br>
+          It's possible to focus on the start/pause button by pressing P.<br><br>
           You can also start, pause or continue the game by pressing spacebar.`,
       5: `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br><br>
           W moves up, S moves down, A moves left and D moves right.`,
@@ -1310,8 +1240,8 @@ nextTutorialButton.addEventListener("click", () => {
     closeTutorialButton.innerHTML = "No";
     closeTutorialButton.focus();
   } else {
-    nextTutorialButton.innerHTML = "<em>N</em>ext";
-    closeTutorialButton.innerHTML = "<em>C</em>lose";
+    nextTutorialButton.innerHTML = "Next";
+    closeTutorialButton.innerHTML = "Close";
     nextTutorialButton.focus();
   }
 
@@ -1349,10 +1279,14 @@ showTutorialButton.addEventListener("click", () => {
     tutorialText.innerHTML = "Do you want to see the tutorial?";
   else
     tutorialText.innerHTML = `Do you want to see the tutorial?<br><br>
-                              By the way, you can always advance on the tutorial by pressing N and close it by pressing C.`;
-  nextTutorialButton.innerHTML = "<em>N</em>ext";
-  closeTutorialButton.innerHTML = "<em>C</em>lose";
+                              By the way, you can always advance on the tutorial by pressing N and close it by pressing X.`;
+  nextTutorialButton.innerHTML = "Next";
+  closeTutorialButton.innerHTML = "Close";
   tutorialMessage.showModal();
+});
+
+backgroundColorInput.addEventListener("click", () => {
+  game.pause();
 });
 
 function adjustImgProperties(color) {
@@ -1393,75 +1327,16 @@ function adjustImgProperties(color) {
   });
 }
 
-let isGameRunning = false;
-openOptions.addEventListener("click", () => {
-  if (game.isRunning) {
-    isGameRunning = true;
-    game.pause();
-  }
-  document.documentElement.style.setProperty("--is-options", "grid");
-});
+backgroundColorInput.addEventListener("input", (event) => {
+  const color = event.target.value;
 
-closeOptions.addEventListener("click", () => {
-  document.documentElement.style.setProperty("--is-options", "none");
-  if (isGameRunning) {
-    isGameRunning = false;
-    game.start();
-  }
-});
-
-function isOptionsOpen() {
-  return (
-    getComputedStyle(document.documentElement).getPropertyValue(
-      "--is-options"
-    ) !== "none"
-  );
-}
-
-function setBackgroundColor(color) {
   document.documentElement.style.setProperty("--canvas-color", color);
+
   adjustImgProperties(color);
   game.randomizeColors();
-}
-
-backgroundInput.addEventListener("input", (event) => {
-  const color = event.target.value;
-  setBackgroundColor(color);
+  game.start();
 });
 
-snakeInput.addEventListener("input", (event) => {
-  const color = event.target.value;
-  game.setSnakeColor(color);
-});
-
-blockInput.addEventListener("input", (event) => {
-  const color = event.target.value;
-  game.setBlockColor(color);
-});
-
-randomBackground.addEventListener("click", () => {
-  const color = randomColor();
-  setBackgroundColor(color);
-  backgroundInput.value = color;
-});
-
-randomSnake.addEventListener("click", () => {
-  const color = validColor();
-  game.setSnakeColor(color);
-  snakeInput.value = color;
-});
-
-randomBlock.addEventListener("click", () => {
-  const color = validColor();
-  game.setBlockColor(color);
-  blockInput.value = color;
-});
-
-randomAll.addEventListener("click", () => {
-  const backgroundColor = randomColor();
-  setBackgroundColor(backgroundColor);
+randomizeColors.addEventListener("click", () => {
   game.randomizeColors();
-  backgroundInput.value = backgroundColor;
-  blockInput.value = "#000000";
-  snakeInput.value = "#000000";
 });
