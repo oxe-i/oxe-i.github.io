@@ -957,6 +957,7 @@ class Game {
 
     backgroundColorInput.value = "#e0fda9";
     document.documentElement.style.setProperty("--canvas-color", "#e0fda9");
+    adjustImgProperties("#e0fda9");
   }
 
   randomizeColors() {
