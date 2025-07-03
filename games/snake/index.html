@@ -82,14 +82,18 @@
       </div>
       <button class="button" id="show-tutorial">Show Tutorial</button>
       <div id="color-selectors">
-        <label for="background-color">Background Color: </label>
-        <input
-          type="color"
-          id="background-color"
-          name="background-color"
-          value="#e0fda9"
-        />
-        <button id="randomize-colors">Randomize Colors</button>
+        <h1>Colors:</h1>
+        <label>
+          Background:
+          <input
+            type="color"
+            id="background-color"
+            name="background-color"
+            value="#e0fda9"
+          />
+        </label>
+
+        <button id="randomize-colors">Randomize</button>
       </div>
       <div id="game-flow-buttons">
         <button class="button" id="start-pause">
@@ -100,15 +104,6 @@
         </button>
       </div>
     </div>
-    <svg id="eyes" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="display: none">
-      <defs>
-        <g id="snake-eyes" fill="white">
-          <circle cx="60" cy="30" r="6" />
-          <circle cx="60" cy="70" r="6" />
-        </g>
-      </defs>
-      <use href="#snake-eyes" x="0" y="0" />
-    </svg>
     <script src="script.mjs"></script>
   </body>
 </html>

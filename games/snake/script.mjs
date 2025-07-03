@@ -81,7 +81,7 @@ const angry = (color) => {
 
 //global constants
 const SPEED = 1;
-const MIN_CONTRAST = 4.5; //AAA Level of contrast, as per https://www.w3.org/TR/WCAG20/
+const MIN_CONTRAST = 3; //AA Level of contrast for large text, as per https://www.w3.org/TR/WCAG20/
 
 //enum-like class to represent direction of movement for the snake
 class DirectionSpeed {
@@ -236,12 +236,11 @@ class Piece {
     this.#updated = true; // flag for computing styles lazily
   }
 
-  randomizeColor(
-    canvasColor = getComputedStyle(document.documentElement).getPropertyValue(
-      "--canvas-color"
-    ),
-    canvasLum = getLuminance(colorHexToRGB(canvasColor))
-  ) {
+  randomizeColor() {
+    const canvasColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--canvas-color");
+    const canvasLum = getLuminance(colorHexToRGB(canvasColor));
     let color;
     let colorComponents;
     let lum;
@@ -257,16 +256,6 @@ class Piece {
     } while (!validContrast(canvasLum, lum));
 
     this.addStyle("background-color", color);
-  }
-
-  adjustColorForContrast() {
-    const canvasColor = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue("--canvas-color");
-
-    const canvasLum = getLuminance(colorHexToRGB(canvasColor));
-
-    this.randomizeColor(canvasColor, canvasLum);
   }
 
   reset() {
@@ -707,12 +696,6 @@ class Snake {
     });
   }
 
-  adjustColorForContrast() {
-    this.#segments.forEach((segment) => {
-      segment.adjustColorForContrast();
-    });
-  }
-
   randomizeColors() {
     this.#segments.forEach((segment) => {
       segment.randomizeColor();
@@ -732,9 +715,12 @@ class Game {
 
   constructor() {
     this.#bounds = gameArea.getBoundingClientRect();
-    this.#pieceUnit = Math.floor(
-      (Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6
+    const maxPieceUnit = Number(
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--max-piece-unit")
+        .replaceAll(/[^\d]/g, "")
     );
+    this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
     this.#snake = new Snake(this);
     this.#block = new Block(this);
     this.#ingestingBlocks = [];
@@ -811,9 +797,12 @@ class Game {
     const prevHeight = this.maxHeight - this.minHeight + 1;
 
     this.#bounds = gameArea.getBoundingClientRect();
-    this.#pieceUnit = Math.floor(
-      (Math.min(window.innerHeight, window.innerWidth) / 100) * 3.6
+    const maxPieceUnit = Number(
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--max-piece-unit")
+        .replaceAll(/[^\d]/g, "")
     );
+    this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
 
     const newWidth = this.maxWidth - this.minWidth + 1;
     const newHeight = this.maxHeight - this.minHeight + 1;
@@ -931,6 +920,7 @@ class Game {
     setIconToPlay();
     cancelAnimationFrame(this.#raf);
     this.#raf = undefined;
+    startPause.focus();
   }
 
   over() {
@@ -967,12 +957,6 @@ class Game {
 
     backgroundColorInput.value = "#e0fda9";
     document.documentElement.style.setProperty("--canvas-color", "#e0fda9");
-  }
-
-  adjustColors() {
-    this.#snake.adjustColorForContrast();
-    this.#block.adjustColorForContrast();
-    this.#ingestingBlocks.forEach((block) => block.adjustColorForContrast());
   }
 
   randomizeColors() {
@@ -1019,13 +1003,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("keydown", (event) => {
   switch (event.key) {
-    case "Enter":
-      if (game.isRunning && backgroundColorInput === document.activeElement) {
-        backgroundColorInput.dispatchEvent(
-          new MouseEvent("click", { bubbles: true, cancelable: true })
-        );
-      }
-      return;
     case " ":
       event.preventDefault();
       if (game.isRunning) game.pause();
@@ -1305,10 +1282,9 @@ showTutorialButton.addEventListener("click", () => {
   tutorialMessage.showModal();
 });
 
-let isCrtRunning = false;
 backgroundColorInput.addEventListener("click", () => {
-  isCrtRunning = game.isRunning;
-  if (game.isRunning) game.pause();
+  game.pause();
+  isColorPickerOpen = true;
 });
 
 backgroundColorInput.addEventListener("input", (event) => {
@@ -1352,11 +1328,9 @@ backgroundColorInput.addEventListener("input", (event) => {
     );
   });
 
-  game.adjustColors();
-  if (isCrtRunning) {
-    game.start();
-    isCrtRunning = false;
-  }
+  game.randomizeColors();
+  game.start();
+  isColorPickerOpen = false;
 });
 
 randomizeColors.addEventListener("click", () => {
