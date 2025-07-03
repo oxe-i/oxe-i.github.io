@@ -250,7 +250,7 @@ dialog::backdrop {
   max-height: 100%;
   display: flex;
   justify-content: space-between;
-  margin: auto 1vmin;
+  margin: 0 1vmin;
 
   button {
     width: 15vmin;
