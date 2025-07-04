@@ -270,7 +270,6 @@ class Piece {
     this.#elem = document.createElement("div");
     this.#elem.className = "piece";
     gameArea.appendChild(this.#elem);
-    this.setColor(validColor());
     this.#updateComputedStyle();
   }
 
@@ -409,14 +408,6 @@ class Block extends Piece {
     this.#getProperties();
   }
 
-  #getFilter() {
-    return `invert(${
-      0.15 + randomNum() * 0.1
-    }) sepia(${randomNum()}) brightness(${1.3}) contrast(${1.5}) hue-rotate(${
-      randomNum() * 360
-    }deg) `;
-  }
-
   /**
    * randomizes position of the block
    * @param {Game} game
@@ -433,23 +424,26 @@ class Block extends Piece {
   }
 
   #getProperties() {
+    this.addClass("block");
     switch (Math.floor(randomNum() * 2)) {
       case 0:
         this.addClass("smiley");
         break;
       case 1:
-        this.addClass("block");
-        break;
-      default:
-        this.addClass("flower");
-        this.addStyle("filter", this.#getFilter());
+        this.addClass("angry");
         break;
     }
   }
 
   ingested() {
+    const color =
+      this.getStyle("background-color") ??
+      getComputedStyle(document.documentElement).getPropertyValue(
+        "--block-color"
+      );
     this.resetClasses();
     this.addClass("snake-segment");
+    this.setColor(color);
   }
 }
 
@@ -499,7 +493,7 @@ class Head extends Piece {
 //class to represent the snake, with a Head and a tail with four pieces
 class Snake {
   #segments;
-  #uniformColor;
+
   /**
    *
    * @param {Game} game
@@ -514,7 +508,6 @@ class Snake {
     );
 
     this.#initializeSegments(game);
-    this.#uniformColor = false;
   }
 
   get size() {
@@ -674,17 +667,26 @@ class Snake {
   /**
    * adds a digested block to the snake
    * @param {Piece} newSegment
+   * @param {boolean} isRandom
    */
-  addSegment(newSegment) {
-    if (this.#uniformColor)
-      newSegment.setColor(this.#segments[0].getStyle("background-color"));
+  addSegment(newSegment, isRandom) {
+    if (isRandom) {
+      const segmentColor =
+        newSegment.getStyle("background-color") ??
+        getComputedStyle(document.documentElement).getPropertyValue(
+          "--block-color"
+        );
+      newSegment.setColor(segmentColor);
+    } else {
+      const snakeColor = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue("--snake-segment-color");
+      newSegment.setColor(snakeColor);
+    }
+
     this.#segments.push(newSegment);
   }
 
-  /**
-   *
-   * @param {Game} game
-   */
   reset() {
     for (let i = 0; i < this.#segments.length; ++i) {
       this.#segments[i].reset();
@@ -708,12 +710,23 @@ class Snake {
     this.#segments[0].updateNext();
   }
 
+  /**
+   *
+   * @param {number} row
+   * @param {number} col
+   * @returns
+   */
   getSegmentIndex(row, col) {
     return this.#segments.findIndex(
       (segment) => segment.row == row && segment.col == col
     );
   }
 
+  /**
+   *
+   * @param {number} idx
+   * @returns {Piece}
+   */
   segmentAt(idx) {
     return this.#segments.at(idx);
   }
@@ -728,14 +741,16 @@ class Snake {
     this.#segments.forEach((segment) => {
       segment.setColor(validColor());
     });
-    this.#uniformColor = false;
   }
 
+  /**
+   *
+   * @param {string} color
+   */
   setColor(color) {
     this.#segments.forEach((segment) => {
       segment.setColor(color);
     });
-    this.#uniformColor = true;
   }
 }
 
@@ -748,6 +763,8 @@ class Game {
   #ingestingBlocks;
   #directionQueue;
   #raf;
+  #isRandomSnake;
+  #isRandomBlock;
 
   constructor() {
     this.#bounds = gameArea.getBoundingClientRect();
@@ -758,11 +775,15 @@ class Game {
     );
     this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
     this.#snake = new Snake(this);
+    this.#snake.randomizeColors();
     this.#block = new Block(this);
+    this.#block.setColor(validColor());
     this.#ingestingBlocks = [];
     this.#directionQueue = [];
     this.difficulty = Difficulty.MEDIUM;
     this.#raf = undefined;
+    this.#isRandomBlock = true;
+    this.#isRandomSnake = true;
   }
 
   get minHeight() {
@@ -930,12 +951,16 @@ class Game {
           this.#block.ingested();
           this.#ingestingBlocks.push(this.#block);
           this.#block = new Block(this);
+          if (this.#isRandomBlock) this.#block.setColor(validColor());
           this.#block.show();
         }
 
         if (this.#snake.eatsBlock(this.#ingestingBlocks?.[0])) {
           this.#score += this.difficulty * this.#snake.size;
-          this.#snake.addSegment(this.#ingestingBlocks.shift());
+          this.#snake.addSegment(
+            this.#ingestingBlocks.shift(),
+            this.#isRandomSnake
+          );
         }
 
         this.#snake.updateDirection(this.#directionQueue.shift());
@@ -982,7 +1007,9 @@ class Game {
     this.#ingestingBlocks.forEach((block) => block.reset());
 
     this.#snake = new Snake(this);
+    if (this.#isRandomSnake) this.#snake.randomizeColors();
     this.#block = new Block(this);
+    if (this.#isRandomBlock) this.#block.setColor(validColor());
 
     this.#ingestingBlocks = [];
     this.#directionQueue = [];
@@ -992,19 +1019,35 @@ class Game {
     this.#raf = undefined;
   }
 
+  setSnakeRandom() {
+    this.#isRandomSnake = true;
+  }
+
+  setBlockRandom() {
+    this.#isRandomBlock = true;
+  }
+
   randomizeColors() {
+    if (this.#isRandomSnake) this.#snake.randomizeColors();
+    if (this.#isRandomBlock) {
+      this.#block.setColor(validColor());
+      this.#ingestingBlocks.forEach((block) => block.setColor(validColor()));
+    }
+  }
+
+  randomSnakeColor() {
     this.#snake.randomizeColors();
-    this.#block.setColor(validColor());
-    this.#ingestingBlocks.forEach((block) => block.setColor(validColor()));
+    this.#isRandomSnake = true;
   }
 
   setSnakeColor(color) {
     this.#snake.setColor(color);
+    this.#isRandomSnake = false;
   }
 
-  setBlockColor(color) {
+  setBlockColor(color, isRandom) {
     this.#block.setColor(color);
-    this.#ingestingBlocks.forEach((block) => block.setColor(color));
+    this.#isRandomBlock = isRandom;
   }
 
   get isRunning() {
@@ -1431,12 +1474,14 @@ backgroundInput.addEventListener("input", (event) => {
 
 snakeInput.addEventListener("input", (event) => {
   const color = event.target.value;
-  game.setSnakeColor(color);
+  document.documentElement.style.setProperty("--snake-segment-color", color);
+  game.setSnakeColor(color, false);
 });
 
 blockInput.addEventListener("input", (event) => {
   const color = event.target.value;
-  game.setBlockColor(color);
+  document.documentElement.style.setProperty("--block-color", color);
+  game.setBlockColor(color, false);
 });
 
 randomBackground.addEventListener("click", () => {
@@ -1446,22 +1491,25 @@ randomBackground.addEventListener("click", () => {
 });
 
 randomSnake.addEventListener("click", () => {
-  const color = validColor();
-  game.setSnakeColor(color);
-  snakeInput.value = color;
+  game.randomSnakeColor();
+  snakeInput.value = "#000000";
 });
 
 randomBlock.addEventListener("click", () => {
   const color = validColor();
-  game.setBlockColor(color);
-  blockInput.value = color;
+  game.setBlockColor(color, true);
+  blockInput.value = "#000000";
 });
 
 randomAll.addEventListener("click", () => {
-  const backgroundColor = randomColor();
-  setBackgroundColor(backgroundColor);
-  game.randomizeColors();
-  backgroundInput.value = backgroundColor;
-  blockInput.value = "#000000";
-  snakeInput.value = "#000000";
+  randomBackground.dispatchEvent(
+    new MouseEvent("click", { bubbles: true, cancelable: true })
+  )
+  randomSnake.dispatchEvent(
+    new MouseEvent("click", { bubbles: true, cancelable: true })
+  );
+  randomBlock.dispatchEvent(
+    new MouseEvent("click", { bubbles: true, cancelable: true })
+  );
+  
 });

@@ -21,6 +21,7 @@
   --angry-img: url("../../assets/angry.svg");
   --eyes-img: url("../../assets/eyes.svg");
   --is-options: none;
+  --block-color: black;
 }
 
 * {
@@ -337,12 +338,16 @@ dialog::backdrop {
   display: none;
 }
 
+.piece.block {
+  background-color: var(--block-color);
+}
+
 .piece.smiley {
   border-radius: 50%;
   background-image: var(--smile-img), var(--eyes-img);
 }
 
-.piece.block {
+.piece.angry {
   background-image: var(--eyes-img), var(--angry-img);
 }
 
@@ -367,6 +372,7 @@ dialog::backdrop {
 
 .piece.snake-segment {
   border-radius: 0;
+  background-color: var(--snake-segment-color);
   border-left: 1px solid var(--canvas-color);
   transition: border-radius var(--ingestion-time) linear;
   box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);
