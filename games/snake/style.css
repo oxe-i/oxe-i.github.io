@@ -22,6 +22,7 @@
   --eyes-img: url("../../assets/eyes.svg");
   --is-options: none;
   --block-color: black;
+  --zen-blue: #ABD2FA;
 }
 
 * {
@@ -47,8 +48,12 @@ button {
   cursor: pointer;
 }
 
-button:focus {
-  outline: 1px solid var(--letter-color);
+.enabled:focus {
+  outline: 2px solid var(--letter-color);
+}
+
+.enabled:hover {
+  transform: scale(1.1);
 }
 
 em {
@@ -167,15 +172,15 @@ dialog::backdrop {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  gap: 5vh;
+  gap: 3vh;
 }
 
 #difficulty {
   display: grid;
   grid-template-areas:
-    "title title title"
-    "btn1  btn2  btn3 ";
-  row-gap: 3vh;
+    "title title title title"
+    "btn1  btn2  btn3  btn4 ";
+  row-gap: 5vh;
   column-gap: 1vw;
   margin: 0 1vmin 1vmin 1vmin;
 
@@ -188,9 +193,13 @@ dialog::backdrop {
   }
 
   button {
-    width: 10vmin;
+    width: 7.5vmin;
     aspect-ratio: 1;
   }
+}
+
+#zen:focus {
+  outline: 2px solid var(--zen-blue);
 }
 
 #easy:focus {
@@ -206,7 +215,7 @@ dialog::backdrop {
 }
 
 #game-stats {
-  margin-top: 2vh;
+  margin-top: 5vh;
   flex: initial;
   display: flex;
   gap: 1vw;
@@ -305,14 +314,16 @@ dialog::backdrop {
 }
 
 .color-button:focus {
-  box-shadow: 0 0 0 5px var(--letter-color);
-  outline: 3px solid var(--background-color);
+  box-shadow: 0 0 0 2px var(--letter-color);
+  outline: 1px solid var(--background-color);
 }
 
 #game-flow-buttons {
   display: flex;
   justify-content: space-between;
-  margin: 5vh 1vmin;
+  margin: 0 1vmin;
+  align-items: center;
+  height: 100%;
 
   button {
     width: 15vmin;
@@ -325,7 +336,7 @@ dialog::backdrop {
 }
 
 #stop:focus {
-  outline: 1px solid var(--light-red-color);
+  outline: none;
 }
 
 .piece {
@@ -374,7 +385,9 @@ dialog::backdrop {
   border-radius: 0;
   background-color: var(--snake-segment-color);
   border-left: 1px solid var(--canvas-color);
-  transition: border-radius var(--ingestion-time) linear;
+  transition: 
+    background-color var(--ingestion-time) linear,
+    border-radius var(--ingestion-time) linear;
   box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);
 }
 

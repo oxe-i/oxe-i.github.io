@@ -11,6 +11,7 @@ const dirLeft = document.querySelector("#left");
 const dirRight = document.querySelector("#right");
 
 //difficulty buttons
+const zenButton = document.querySelector("#zen");
 const easyButton = document.querySelector("#easy");
 const mediumButton = document.querySelector("#medium");
 const hardButton = document.querySelector("#hard");
@@ -37,6 +38,10 @@ const tutorialMessage = document.querySelector("#tutorial-message");
 const tutorialText = tutorialMessage.querySelector("p");
 const nextTutorialButton = tutorialMessage.querySelector("#next-tutorial");
 const closeTutorialButton = tutorialMessage.querySelector("#close-tutorial");
+
+//helpers for handling current state of the tutorial
+let tutorialStep = 0;
+let endTutorial = false;
 
 //button to show tutorial
 const showTutorialButton = document.querySelector("#show-tutorial");
@@ -115,14 +120,17 @@ class DirectionSpeed {
 
 //enum-like class that doubles as a map from difficulty of the game to score modifiers
 class Difficulty {
-  static get EASY() {
+  static get ZEN() {
     return 10;
+  }
+  static get EASY() {
+    return 15;
   }
   static get MEDIUM() {
     return 20;
   }
   static get HARD() {
-    return 40;
+    return 30;
   }
 }
 
@@ -137,24 +145,56 @@ function setIconToPause() {
   startPause.querySelector("img").alt = "pause button";
 }
 
+//helpers to enable/disable difficulty buttons if game is running or paused
+function enableDifficultyButtons() {
+  zenButton.disabled = false;
+  easyButton.disabled = false;
+  mediumButton.disabled = false;
+  hardButton.disabled = false;
+
+  zenButton.classList.add("enabled");
+  easyButton.classList.add("enabled");
+  mediumButton.classList.add("enabled");
+  hardButton.classList.add("enabled");
+}
+
+function disableDifficultyButtons() {
+  zenButton.disabled = true;
+  easyButton.disabled = true;
+  mediumButton.disabled = true;
+  hardButton.disabled = true;
+
+  zenButton.classList.remove("enabled");
+  easyButton.classList.remove("enabled");
+  mediumButton.classList.remove("enabled");
+  hardButton.classList.remove("enabled");
+}
+
 //dispatch table mapping difficulties to a helper for the corresponding button
 const buttonDifficultyTable = new Map([
+  [Difficulty.ZEN, setZenButton],
   [Difficulty.EASY, setEasyButton],
   [Difficulty.MEDIUM, setMediumButton],
   [Difficulty.HARD, setHardButton],
 ]);
 
 const timeFrameDifficultyTable = new Map([
-  [Difficulty.EASY, 400],
+  [Difficulty.ZEN, 350],
+  [Difficulty.EASY, 350],
   [Difficulty.MEDIUM, 300],
-  [Difficulty.HARD, 200],
+  [Difficulty.HARD, 250],
 ]);
 
 //helpers to set outline for the currently selected difficulty button
 function resetDifficultyButtons() {
+  zenButton.style.outline = "";
   easyButton.style.outline = "";
   mediumButton.style.outline = "";
   hardButton.style.outline = "";
+}
+
+function setZenButton() {
+  zenButton.focus();
 }
 
 function setEasyButton() {
@@ -435,12 +475,24 @@ class Block extends Piece {
     }
   }
 
-  ingested() {
-    const color =
-      this.getStyle("background-color") ??
-      getComputedStyle(document.documentElement).getPropertyValue(
-        "--block-color"
-      );
+  ingested(isRandomSnake) {
+    if (isRandomSnake) {
+      const color =
+        this.getStyle("background-color") ??
+        getComputedStyle(document.documentElement).getPropertyValue(
+          "--block-color"
+        );
+
+      this.resetClasses();
+      this.addClass("snake-segment");
+      this.setColor(color);
+      return;
+    }
+
+    const color = getComputedStyle(document.documentElement).getPropertyValue(
+      "--snake-segment-color"
+    );
+
     this.resetClasses();
     this.addClass("snake-segment");
     this.setColor(color);
@@ -612,17 +664,28 @@ class Snake {
     this.#segments[0].direction = newDirection ?? this.#segments[0].direction;
   }
 
-  /**
-   * checks if the snake touches any side of the grid
-   * @param {Game} game
-   * @returns {boolean}
-   */
+  touchesLeftWall(game) {
+    return this.#segments[0].nextCol < game.minWidth;
+  }
+
+  touchesRightWall(game) {
+    return this.#segments[0].nextCol > game.maxWidth;
+  }
+
+  touchesTopWall(game) {
+    return this.#segments[0].nextRow < game.minHeight;
+  }
+
+  touchesBottomWall(game) {
+    return this.#segments[0].nextRow > game.maxHeight;
+  }
+
   touchesGrid(game) {
     return (
-      this.#segments[0].nextRow < game.minHeight ||
-      this.#segments[0].nextRow > game.maxHeight ||
-      this.#segments[0].nextCol < game.minWidth ||
-      this.#segments[0].nextCol > game.maxWidth
+      this.touchesLeftWall(game) ||
+      this.touchesRightWall(game) ||
+      this.touchesTopWall(game) ||
+      this.touchesBottomWall(game)
     );
   }
 
@@ -638,6 +701,22 @@ class Snake {
           segment.row == this.#segments[0].nextRow &&
           segment.col == this.#segments[0].nextCol
       );
+  }
+
+  teleportRight() {
+    this.#segments[0].nextCol = game.maxWidth;
+  }
+
+  teleportLeft() {
+    this.#segments[0].nextCol = game.minWidth;
+  }
+
+  teleportTop() {
+    this.#segments[0].nextRow = game.minHeight;
+  }
+
+  teleportBottom() {
+    this.#segments[0].nextRow = game.maxHeight;
   }
 
   /**
@@ -669,21 +748,7 @@ class Snake {
    * @param {Piece} newSegment
    * @param {boolean} isRandom
    */
-  addSegment(newSegment, isRandom) {
-    if (isRandom) {
-      const segmentColor =
-        newSegment.getStyle("background-color") ??
-        getComputedStyle(document.documentElement).getPropertyValue(
-          "--block-color"
-        );
-      newSegment.setColor(segmentColor);
-    } else {
-      const snakeColor = getComputedStyle(
-        document.documentElement
-      ).getPropertyValue("--snake-segment-color");
-      newSegment.setColor(snakeColor);
-    }
-
+  addSegment(newSegment) {
     this.#segments.push(newSegment);
   }
 
@@ -783,7 +848,7 @@ class Game {
     this.difficulty = Difficulty.MEDIUM;
     this.#raf = undefined;
     this.#isRandomBlock = true;
-    this.#isRandomSnake = true;
+    this.#isRandomSnake = false;
   }
 
   get minHeight() {
@@ -824,6 +889,12 @@ class Game {
     this.#ingestingBlocks.forEach((block) => {
       block.hide();
     });
+  }
+
+  setZenMode() {
+    if (!game.isRunning) return;
+    this.difficulty = Difficulty.ZEN;
+    setZenButton();
   }
 
   setEasyDifficulty() {
@@ -915,7 +986,7 @@ class Game {
 
     this.show();
     setIconToPause();
-    buttonDifficultyTable.get(this.difficulty)();
+    enableDifficultyButtons();
 
     let crtTime = 0;
     let remTime = 0;
@@ -932,13 +1003,26 @@ class Game {
         return;
       }
 
+      buttonDifficultyTable.get(this.difficulty)();
+
       let deltaTime = timestamp - crtTime + remTime;
 
       while (deltaTime >= this.timePerFrame) {
         deltaTime -= this.timePerFrame;
 
         //game over
-        if (this.#snake.touchesGrid(this) || this.#snake.touchesTail()) {
+
+        if (this.difficulty === Difficulty.ZEN) {
+          if (this.#snake.touchesLeftWall(this)) {
+            this.#snake.teleportRight();
+          } else if (this.#snake.touchesRightWall(this)) {
+            this.#snake.teleportLeft();
+          } else if (this.#snake.touchesTopWall(this)) {
+            this.#snake.teleportBottom();
+          } else if (this.#snake.touchesBottomWall(this)) {
+            this.#snake.teleportTop();
+          }
+        } else if (this.#snake.touchesTail() || this.#snake.touchesGrid(this)) {
           this.over();
           return;
         }
@@ -948,19 +1032,16 @@ class Game {
             "--ingestion-time",
             `${this.timePerFrame * this.#snake.size}ms`
           );
-          this.#block.ingested();
+          this.#block.ingested(this.#isRandomSnake);
           this.#ingestingBlocks.push(this.#block);
           this.#block = new Block(this);
-          if (this.#isRandomBlock) this.#block.setColor(validColor());
+          this.#generateBlockColor();
           this.#block.show();
         }
 
         if (this.#snake.eatsBlock(this.#ingestingBlocks?.[0])) {
           this.#score += this.difficulty * this.#snake.size;
-          this.#snake.addSegment(
-            this.#ingestingBlocks.shift(),
-            this.#isRandomSnake
-          );
+          this.#snake.addSegment(this.#ingestingBlocks.shift());
         }
 
         this.#snake.updateDirection(this.#directionQueue.shift());
@@ -978,6 +1059,7 @@ class Game {
 
   pause() {
     if (!this.isRunning) return;
+    disableDifficultyButtons();
     setIconToPlay();
     cancelAnimationFrame(this.#raf);
     this.#raf = undefined;
@@ -1007,47 +1089,71 @@ class Game {
     this.#ingestingBlocks.forEach((block) => block.reset());
 
     this.#snake = new Snake(this);
-    if (this.#isRandomSnake) this.#snake.randomizeColors();
     this.#block = new Block(this);
-    if (this.#isRandomBlock) this.#block.setColor(validColor());
+    this.generateColors();
 
     this.#ingestingBlocks = [];
     this.#directionQueue = [];
     this.#score = 0;
-
-    this.difficulty = Difficulty.MEDIUM;
     this.#raf = undefined;
   }
 
-  setSnakeRandom() {
-    this.#isRandomSnake = true;
+  #generateRandomSnakeColors() {
+    this.#snake.randomizeColors();
   }
 
-  setBlockRandom() {
-    this.#isRandomBlock = true;
+  #generateRandomBlockColors() {
+    this.#block.setColor(validColor());
   }
 
-  randomizeColors() {
-    if (this.#isRandomSnake) this.#snake.randomizeColors();
-    if (this.#isRandomBlock) {
-      this.#block.setColor(validColor());
-      this.#ingestingBlocks.forEach((block) => block.setColor(validColor()));
+  #generateBlockColor() {
+    if (this.#isRandomBlock) this.#generateRandomBlockColors();
+    else {
+      const blockColor = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue("--block-color");
+      console.log(blockColor);
+      this.setBlockColor(blockColor);
     }
   }
 
+  #generateSnakeColor() {
+    if (this.#isRandomSnake) this.#generateRandomSnakeColors();
+    else {
+      const snakeColor = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue("--snake-segment-color");
+      this.setSnakeColor(snakeColor);
+    }
+  }
+
+  generateColors() {
+    this.#generateBlockColor();
+    this.#generateSnakeColor();
+  }
+
   randomSnakeColor() {
-    this.#snake.randomizeColors();
+    this.#generateRandomSnakeColors();
     this.#isRandomSnake = true;
+  }
+
+  randomBlockColor() {
+    this.#generateRandomBlockColors();
+    this.#isRandomBlock = true;
   }
 
   setSnakeColor(color) {
     this.#snake.setColor(color);
+    snakeInput.value = color;
+    document.documentElement.style.setProperty("--snake-segment-color", color);
     this.#isRandomSnake = false;
   }
 
-  setBlockColor(color, isRandom) {
+  setBlockColor(color) {
     this.#block.setColor(color);
-    this.#isRandomBlock = isRandom;
+    blockInput.value = color;
+    document.documentElement.style.setProperty("--block-color", color);
+    this.#isRandomBlock = false;
   }
 
   get isRunning() {
@@ -1062,34 +1168,53 @@ window.addEventListener("resize", () => {
   game.resize();
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const backgroundColor = "#e0fda9";
-  document.documentElement.style.setProperty("--canvas-color", backgroundColor);
-  adjustImgProperties(backgroundColor);
-  backgroundInput.value = backgroundColor;
-  blockInput.value = "#000000";
-  snakeInput.value = "#000000";
-
-  if (!isTouchDevice()) {
-    tutorialText.innerHTML = `Do you want to see the tutorial?<br><br>
-                              By the way, you can always advance on the tutorial by pressing N and close it by pressing C.`;
-  }
-
-  if (
+function isPortraitOrientation() {
+  return (
     screen.orientation.type == "portrait-primary" ||
     screen.orientation.type == "portrait-secundary"
-  ) {
-    alertMessage.showModal();
-  } else if (!localStorage.getItem("skipTutorial-v2")) {
+  );
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const initialColors = [
+    "#F5EE9E",
+    "#e0fda9",
+    "#A3C4BC",
+    "#FFBC0A",
+    "#AEECEF",
+    "#6B2737",
+    "#FDFFFC",
+    "#B38CB4",
+    "#ABD2FA",
+    "#E4DEE4",
+    "#9acba3",
+    "#1b416b",
+    "#02e5d4",
+    "#08ba64",
+  ];
+  setBackgroundColor(
+    initialColors[Math.floor(randomNum() * initialColors.length)]
+  );
+  const snakeColor = validColor();
+  game.setSnakeColor(snakeColor);
+  game.randomBlockColor();
+
+  if (!isTouchDevice()) {
+    tutorialText.innerHTML += `<br><br>By the way, you can always advance on the tutorial by pressing N and close it by pressing C.`;
+  }
+
+  if (isPortraitOrientation()) alertMessage.showModal();
+  else if (!localStorage.getItem("skipTutorial-v2")) {
     tutorialMessage.showModal();
     nextTutorialButton.focus();
-  } else {
-    startPause.focus();
-  }
+  } else startPause.focus();
 });
 
 document.addEventListener("keydown", (event) => {
   switch (event.key) {
+    case "Escape":
+      if (isOptionsOpen()) handleCloseOptions();
+      return;
     case " ":
       event.preventDefault();
       if (game.isRunning) game.pause();
@@ -1098,20 +1223,25 @@ document.addEventListener("keydown", (event) => {
     case "N":
     case "n":
       if (tutorialMessage.open) {
-        nextTutorialButton.dispatchEvent(new MouseEvent("click"));
+        if (tutorialStep == 7 || endTutorial) handleCloseTutorial();
+        else handleNextTutorial();
+      }
+      return;
+    case "Y":
+    case "y":
+      if (tutorialMessage.open) {
+        if (tutorialStep == 7 || endTutorial) {
+          handleNextTutorial();
+        }
       }
       return;
     case "O":
     case "o":
-      openOptions.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true })
-      );
+      handleOpenOptions();
       return;
     case "R":
     case "r":
-      randomAll.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true })
-      );
+      randomizeAll();
       return;
     case "G":
     case "g":
@@ -1131,13 +1261,8 @@ document.addEventListener("keydown", (event) => {
       return;
     case "C":
     case "c":
-      if (isOptionsOpen()) {
-        closeOptions.dispatchEvent(
-          new MouseEvent("click", { bubbles: true, cancelable: true })
-        );
-      } else if (tutorialMessage.open) {
-        closeTutorialButton.click();
-      }
+      if (isOptionsOpen()) handleCloseOptions();
+      else if (tutorialMessage.open) handleCloseTutorial();
       return;
     case "P":
     case "p":
@@ -1145,9 +1270,12 @@ document.addEventListener("keydown", (event) => {
       return;
     case "T":
     case "t":
-      showTutorialButton.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true })
-      );
+      handleShowTutorial();
+      return;
+    case "Z":
+    case "z":
+      if (!game.isRunning) return;
+      game.setZenMode();
       return;
     case "E":
     case "e":
@@ -1192,6 +1320,9 @@ document.addEventListener("keydown", (event) => {
     case "NumpadAdd":
       if (!game.isRunning) return;
       switch (game.difficulty) {
+        case Difficulty.ZEN:
+          game.setEasyDifficulty();
+          return;
         case Difficulty.EASY:
           game.setMediumDifficulty();
           break;
@@ -1209,19 +1340,19 @@ document.addEventListener("keydown", (event) => {
           game.setMediumDifficulty();
           break;
         case Difficulty.MEDIUM:
-        case Difficulty.EASY:
           game.setEasyDifficulty();
+          return;
+        case Difficulty.EASY:
+        case Difficulty.ZEN:
+          game.setZenMode();
           break;
       }
       return;
     case "Tab":
       event.preventDefault();
       switch (document.activeElement) {
-        case startPause:
-          stopButton.focus();
-          return;
-        case stopButton:
-          startPause.focus();
+        case zenButton:
+          game.setEasyDifficulty();
           return;
         case easyButton:
           game.setMediumDifficulty();
@@ -1230,7 +1361,37 @@ document.addEventListener("keydown", (event) => {
           game.setHardDifficulty();
           return;
         case hardButton:
-          game.setEasyDifficulty();
+          game.setZenMode();
+          return;
+        case backgroundInput:
+          randomBackground.focus();
+          return;
+        case randomBackground:
+          snakeInput.focus();
+          return;
+        case snakeInput:
+          randomSnake.focus();
+          return;
+        case randomSnake:
+          blockInput.focus();
+          return;
+        case blockInput:
+          randomBlock.focus();
+          return;
+        case randomBlock:
+          randomAll.focus();
+          return;
+        case randomAll:
+          closeOptions.focus();
+          return;
+        case closeOptions:
+          backgroundInput.focus();
+          return;
+        case nextTutorialButton:
+          closeTutorialButton.focus();
+          return;
+        case closeTutorialButton:
+          nextTutorialButton.focus();
           return;
       }
   }
@@ -1247,25 +1408,11 @@ stopButton.addEventListener("click", () => {
   resetDifficultyButtons();
 });
 
-dirUp.addEventListener("click", () => {
-  game.addDirection("UP");
-});
-
-dirDown.addEventListener("click", () => {
-  game.addDirection("DOWN");
-});
-
-dirLeft.addEventListener("click", () => {
-  game.addDirection("LEFT");
-});
-
-dirRight.addEventListener("click", () => {
-  game.addDirection("RIGHT");
-});
-
-[dirUp, dirDown, dirLeft, dirRight].forEach((dirButton) => {
+[dirUp, dirDown, dirLeft, dirRight].forEach((dirButton, idx) => {
   dirButton.addEventListener("pointerdown", (event) => {
     event.preventDefault();
+    const directions = ["UP", "DOWN", "LEFT", "RIGHT"];
+    game.addDirection(directions.at(idx));
   });
 });
 
@@ -1273,6 +1420,10 @@ playAgain.addEventListener("click", () => {
   gameOver.close();
   game.reset();
   game.start();
+});
+
+zenButton.addEventListener("click", () => {
+  game.setZenMode();
 });
 
 easyButton.addEventListener("click", () => {
@@ -1292,30 +1443,29 @@ alertButton.addEventListener("click", () => {
   if (!localStorage.getItem("skipTutorial-v2")) tutorialMessage.showModal();
 });
 
-//helpers for handling current state of the tutorial
-let tutorialStep = 0;
-let endTutorial = false;
-
-nextTutorialButton.addEventListener("click", () => {
+function handleNextTutorial() {
   if (endTutorial) {
     localStorage.setItem("skipTutorial-v2", "true");
     tutorialMessage.close();
     return;
   }
 
+  tutorialStep %= 7;
+
   const tutorialTextMessages = {
     true: {
       0: `In this game, you move a snake around to catch as many blocks as possible.<br><br>
           Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
-          If the snake touches the grid or its body, however, the game ends.`,
+          If the snake touches the grid or its body, however, the game ends, unless the game is in zen mode.`,
       1: `You can choose the difficulty of the game using the icon buttons in the top right corner.<br><br>
+          The first difficulty sets the zen mode, where there isn't a game over and the snake just keeps moving.<br><br>
           The snake moves faster at higher difficulty levels.`,
       2: `There's a score counter below the difficulty buttons.<br><br>
           You gain points whenever the snake finishes moving over a block.<br><br>
           The greater the snake and the harder the game, the more points you gain.`,
-      3: `Below the score, there's a button of options which opens a panel to change the colors of all game elements.<br><br> 
-          The game pauses while you're selecting colors and resumes as soon as you close the options panel.<br><br>
-          On this panel, there are also buttons to randomize any one element or all at once.`,
+      3: `Below the score, the button "Options" opens a panel to change the colors of all game elements.<br><br>
+          The game pauses while you're selecting colors.<br><br>
+          There are also buttons to randomize any one color or all at once.`,
       4: `On the bottom right of the game area, there are buttons for starting and restarting the game.
           Once the game starts, you can pause it too.`,
       5: "You can move the snake with the directional pad on the left of the game area.",
@@ -1324,19 +1474,21 @@ nextTutorialButton.addEventListener("click", () => {
     false: {
       0: `In this game, you move a snake around to catch as many blocks as possible.<br><br>
           Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
-          If the snake touches the grid or its body, however, the game ends.`,
+          If the snake touches the grid or its body, however, the game ends, unless the game is in zen mode.`,
       1: `You can choose the difficulty of the game using the icon buttons in the top right corner.<br><br>
-          It's also possible to select the difficulty by pressing E (Easy), M (Medium) and H (Hard).<br><br>
-          You can increase current difficulty by pressing + and reduce it by pressing - .<br><br>
+          It's also possible to select the difficulty by pressing Z (Zen), E (Easy), M (Medium) and H (Hard).<br><br>
+          You can also cycle through the difficulties by pressing Tab and 
+          increase or decrease the current difficulty level by pressing + or - respectively.<br><br>
+          The first difficulty sets the zen mode, where there isn't a game over and the snake just keeps moving.<br><br>
           The snake moves faster at higher difficulty levels.`,
       2: `There's a score counter below the difficulty buttons.<br><br>
           You gain points whenever the snake finishes moving over a block.<br><br>
           The greater the snake and the harder the game, the more points you gain.`,
-      3: `Below the score, there's a button of options which opens a panel to change the colors of all game elements. 
+      3: `Below the score, the button "Options" opens a panel to change the colors of all game elements.
           This panel can also be opened by pressing O on the keyboard.<br><br>
-          The game pauses while you're selecting colors and resumes as soon as you close the options panel.<br><br>
-          On this panel, there are also buttons to randomize any one element or all at once.
-          You can also press R on the keyboard to randomize everything`,
+          The game pauses while you're selecting colors.<br><br>
+          There are also buttons to randomize any one color or all at once.<br><br>
+          You can also randomize all colors by pressing R on the keyboard. This works even with the panel closed.`,
       4: `On the bottom right of the game area, there are buttons for starting and restarting the game.
           Once the game starts, you can pause it too.<br><br>
           You can also start, pause or continue the game by pressing spacebar.`,
@@ -1349,8 +1501,8 @@ nextTutorialButton.addEventListener("click", () => {
   tutorialText.innerHTML = tutorialTextMessages[isTouchDevice()][tutorialStep];
 
   if (tutorialStep == 6) {
-    nextTutorialButton.innerHTML = "Yes";
-    closeTutorialButton.innerHTML = "No";
+    nextTutorialButton.innerHTML = "<em>Y</em>es";
+    closeTutorialButton.innerHTML = "<em>N</em>o";
     closeTutorialButton.focus();
   } else {
     nextTutorialButton.innerHTML = "<em>N</em>ext";
@@ -1359,10 +1511,11 @@ nextTutorialButton.addEventListener("click", () => {
   }
 
   tutorialStep++;
-  tutorialStep %= 7;
-});
+}
 
-closeTutorialButton.addEventListener("click", () => {
+nextTutorialButton.addEventListener("click", handleNextTutorial);
+
+function handleCloseTutorial() {
   if (endTutorial) {
     tutorialMessage.close();
     startPause.focus();
@@ -1375,12 +1528,14 @@ closeTutorialButton.addEventListener("click", () => {
   else
     tutorialText.innerHTML = `Do you want to skip this tutorial in the future?<br><br> 
                               If you ever need to see it again, you can always click on the 'Show Tutorial' button. You can focus on this button by pressing T.`;
-  nextTutorialButton.innerHTML = "Yes";
-  closeTutorialButton.innerHTML = "No";
+  nextTutorialButton.innerHTML = "<em>Y</em>es";
+  closeTutorialButton.innerHTML = "<em>N</em>o";
   nextTutorialButton.focus();
-});
+}
 
-showTutorialButton.addEventListener("click", () => {
+closeTutorialButton.addEventListener("click", handleCloseTutorial);
+
+function handleShowTutorial() {
   if (game.isRunning) {
     game.pause();
   }
@@ -1396,7 +1551,9 @@ showTutorialButton.addEventListener("click", () => {
   nextTutorialButton.innerHTML = "<em>N</em>ext";
   closeTutorialButton.innerHTML = "<em>C</em>lose";
   tutorialMessage.showModal();
-});
+}
+
+showTutorialButton.addEventListener("click", handleShowTutorial);
 
 function adjustImgProperties(color) {
   const svgTemplates = [
@@ -1436,22 +1593,20 @@ function adjustImgProperties(color) {
   });
 }
 
-let isGameRunning = false;
-openOptions.addEventListener("click", () => {
-  if (game.isRunning) {
-    isGameRunning = true;
-    game.pause();
-  }
+function handleOpenOptions() {
+  if (game.isRunning) game.pause();
   document.documentElement.style.setProperty("--is-options", "grid");
-});
+  backgroundInput.focus();
+}
 
-closeOptions.addEventListener("click", () => {
+openOptions.addEventListener("click", handleOpenOptions);
+
+function handleCloseOptions() {
   document.documentElement.style.setProperty("--is-options", "none");
-  if (isGameRunning) {
-    isGameRunning = false;
-    game.start();
-  }
-});
+  startPause.focus();
+}
+
+closeOptions.addEventListener("click", handleCloseOptions);
 
 function isOptionsOpen() {
   return (
@@ -1464,7 +1619,7 @@ function isOptionsOpen() {
 function setBackgroundColor(color) {
   document.documentElement.style.setProperty("--canvas-color", color);
   adjustImgProperties(color);
-  game.randomizeColors();
+  backgroundInput.value = color;
 }
 
 backgroundInput.addEventListener("input", (event) => {
@@ -1474,42 +1629,33 @@ backgroundInput.addEventListener("input", (event) => {
 
 snakeInput.addEventListener("input", (event) => {
   const color = event.target.value;
-  document.documentElement.style.setProperty("--snake-segment-color", color);
-  game.setSnakeColor(color, false);
+  game.setSnakeColor(color);
 });
 
 blockInput.addEventListener("input", (event) => {
   const color = event.target.value;
-  document.documentElement.style.setProperty("--block-color", color);
-  game.setBlockColor(color, false);
+  game.setBlockColor(color);
 });
 
-randomBackground.addEventListener("click", () => {
+function randomizeBackground() {
   const color = randomColor();
   setBackgroundColor(color);
-  backgroundInput.value = color;
-});
+}
+
+function randomizeAll() {
+  randomizeBackground();
+  game.randomSnakeColor();
+  game.randomBlockColor();
+}
+
+randomBackground.addEventListener("click", randomizeBackground);
 
 randomSnake.addEventListener("click", () => {
   game.randomSnakeColor();
-  snakeInput.value = "#000000";
 });
 
 randomBlock.addEventListener("click", () => {
-  const color = validColor();
-  game.setBlockColor(color, true);
-  blockInput.value = "#000000";
+  game.randomBlockColor();
 });
 
-randomAll.addEventListener("click", () => {
-  randomBackground.dispatchEvent(
-    new MouseEvent("click", { bubbles: true, cancelable: true })
-  )
-  randomSnake.dispatchEvent(
-    new MouseEvent("click", { bubbles: true, cancelable: true })
-  );
-  randomBlock.dispatchEvent(
-    new MouseEvent("click", { bubbles: true, cancelable: true })
-  );
-  
-});
+randomAll.addEventListener("click", randomizeAll);
