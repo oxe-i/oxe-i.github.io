@@ -134,6 +134,18 @@ class Difficulty {
   }
 }
 
+class GameState {
+  static get NOT_STARTED() {
+    return 0;
+  }
+  static get PAUSED() {
+    return 1;
+  }
+  static get RUNNING() {
+    return 2;
+  }
+}
+
 //helpers to set icons to gameflow buttons
 function setIconToPlay() {
   startPause.querySelector("img").src = `../../assets/play.svg`;
@@ -830,6 +842,7 @@ class Game {
   #raf;
   #isRandomSnake;
   #isRandomBlock;
+  #state;
 
   constructor() {
     this.#bounds = gameArea.getBoundingClientRect();
@@ -849,6 +862,7 @@ class Game {
     this.#raf = undefined;
     this.#isRandomBlock = true;
     this.#isRandomSnake = false;
+    this.#state = GameState.NOT_STARTED;
   }
 
   get minHeight() {
@@ -932,6 +946,11 @@ class Game {
     );
     this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
 
+    if (this.#state === GameState.NOT_STARTED) {
+      this.reset();
+      return;
+    }
+
     const newWidth = this.maxWidth - this.minWidth + 1;
     const newHeight = this.maxHeight - this.minHeight + 1;
 
@@ -980,7 +999,8 @@ class Game {
       this.isRunning ||
       tutorialMessage.open ||
       alertMessage.open ||
-      gameOver.open
+      gameOver.open ||
+      isOptionsOpen()
     )
       return;
 
@@ -999,6 +1019,7 @@ class Game {
     const gameLoop = (timestamp) => {
       if (!crtTime) {
         crtTime = timestamp;
+        this.#state = GameState.RUNNING;
         this.#raf = requestAnimationFrame(gameLoop);
         return;
       }
@@ -1051,9 +1072,11 @@ class Game {
       crtTime = timestamp;
       remTime = deltaTime;
 
+      this.#state = GameState.RUNNING;
       this.#raf = requestAnimationFrame(gameLoop);
     };
 
+    this.#state = GameState.RUNNING;
     this.#raf = requestAnimationFrame(gameLoop);
   }
 
@@ -1062,7 +1085,8 @@ class Game {
     disableDifficultyButtons();
     setIconToPlay();
     cancelAnimationFrame(this.#raf);
-    this.#raf = undefined;
+    this.#state = GameState.PAUSED;
+    this.#raf = null;
     startPause.focus();
   }
 
@@ -1095,7 +1119,8 @@ class Game {
     this.#ingestingBlocks = [];
     this.#directionQueue = [];
     this.#score = 0;
-    this.#raf = undefined;
+    this.#state = GameState.NOT_STARTED;
+    this.#raf = null;
   }
 
   #generateRandomSnakeColors() {
@@ -1157,7 +1182,7 @@ class Game {
   }
 
   get isRunning() {
-    return this.#raf !== undefined;
+    return this.#state === GameState.RUNNING;
   }
 }
 
