@@ -215,7 +215,7 @@ dialog::backdrop {
 }
 
 #game-stats {
-  margin-top: 5vh;
+  margin: 1vh 0 3vh;
   flex: initial;
   display: flex;
   gap: 1vw;

@@ -1475,9 +1475,9 @@ function handleNextTutorial() {
       0: `In this game, you move a snake around to catch as many blocks as possible.<br><br>
           Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
           If the snake touches the grid or its body, however, the game ends, unless the game is in zen mode.`,
-      1: `You can choose the difficulty of the game using the icon buttons in the top right corner.<br><br>
+      1: `You can choose the difficulty of the game using the icon buttons in the top right corner.
           It's also possible to select the difficulty by pressing Z (Zen), E (Easy), M (Medium) and H (Hard).<br><br>
-          You can also cycle through the difficulties by pressing Tab and 
+          You can also cycle through the difficulties by pressing Tab; and 
           increase or decrease the current difficulty level by pressing + or - respectively.<br><br>
           The first difficulty sets the zen mode, where there isn't a game over and the snake just keeps moving.<br><br>
           The snake moves faster at higher difficulty levels.`,
