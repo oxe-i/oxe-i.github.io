@@ -41,18 +41,18 @@
     </div>
     <div id="game"></div>
     <div id="after-canvas">
-      <div id="difficulty">
+      <div id="difficulty" inert>
         <h1>difficulty:</h1>
-        <button id="zen" disabled>
+        <button id="zen" class="enabled">
           <img src="../../assets/zen.svg" alt="zen button" />
         </button>
-        <button id="easy" disabled>
+        <button id="easy" class="enabled">
           <img src="../../assets/easy-face.svg" alt="easy button" />
         </button>
-        <button id="medium" disabled>
+        <button id="medium" class="enabled">
           <img src="../../assets/medium-face.svg" alt="medium button" />
         </button>
-        <button id="hard" disabled>
+        <button id="hard" class="enabled">
           <img src="../../assets/hard-face.svg" alt="hard button" />
         </button>
       </div>
@@ -109,6 +109,7 @@
         </button>
       </div>
     </div>
+    <script src="PriorityQueue.mjs"></script>
     <script src="script.mjs"></script>
   </body>
 </html>

@@ -11,6 +11,7 @@ const dirLeft = document.querySelector("#left");
 const dirRight = document.querySelector("#right");
 
 //difficulty buttons
+const difficultyPanel = document.querySelector("#difficulty");
 const zenButton = document.querySelector("#zen");
 const easyButton = document.querySelector("#easy");
 const mediumButton = document.querySelector("#medium");
@@ -20,6 +21,7 @@ const hardButton = document.querySelector("#hard");
 const scoreText = document.querySelector("#score");
 
 //gameflow buttons
+const gameFlowPanel = document.querySelector("#game-flow-buttons");
 const startPause = document.querySelector("#start-pause");
 const stopButton = document.querySelector("#stop");
 
@@ -46,6 +48,10 @@ let endTutorial = false;
 //button to show tutorial
 const showTutorialButton = document.querySelector("#show-tutorial");
 
+//options panel
+const openOptions = document.querySelector("#open-options");
+const closeOptions = document.querySelector("#close-options");
+
 //background color
 const backgroundInput = document.querySelector("#background-color");
 const randomBackground = document.querySelector("#randomize-background");
@@ -60,9 +66,6 @@ const randomBlock = document.querySelector("#randomize-block");
 
 //all random
 const randomAll = document.querySelector("#randomize-everything");
-
-const openOptions = document.querySelector("#open-options");
-const closeOptions = document.querySelector("#close-options");
 
 //imgs templates
 const snakeEyes = (color) => {
@@ -159,27 +162,11 @@ function setIconToPause() {
 
 //helpers to enable/disable difficulty buttons if game is running or paused
 function enableDifficultyButtons() {
-  zenButton.disabled = false;
-  easyButton.disabled = false;
-  mediumButton.disabled = false;
-  hardButton.disabled = false;
-
-  zenButton.classList.add("enabled");
-  easyButton.classList.add("enabled");
-  mediumButton.classList.add("enabled");
-  hardButton.classList.add("enabled");
+  difficultyPanel.removeAttribute("inert");
 }
 
 function disableDifficultyButtons() {
-  zenButton.disabled = true;
-  easyButton.disabled = true;
-  mediumButton.disabled = true;
-  hardButton.disabled = true;
-
-  zenButton.classList.remove("enabled");
-  easyButton.classList.remove("enabled");
-  mediumButton.classList.remove("enabled");
-  hardButton.classList.remove("enabled");
+  difficultyPanel.setAttribute("inert", true);
 }
 
 //dispatch table mapping difficulties to a helper for the corresponding button
@@ -310,6 +297,78 @@ function validColor() {
   } while (!validContrast(canvasLum, lum));
 
   return color;
+}
+
+class Heap {
+  #queue;
+  #compare;
+
+  constructor(compare = (a, b) => a <= b, elems = []) {
+    this.#queue = [...elems];
+    this.#compare = compare;
+  }
+
+  #getOptimalChild(n) {
+    const children = [4 * n + 1, 4 * n + 2, 4 * n + 3, 4 * n + 4]
+      .filter((index) => index < this.#queue.length)
+      .map((index) => {
+        return { idx: index, val: this.#queue[index] };
+      });
+    return !children.length
+      ? undefined
+      : children.reduce((acc, crt) => {
+          if (this.#compare(crt.val, acc.val)) acc = crt;
+          return acc;
+        });
+  }
+
+  #getParent(n) {
+    if (n <= 0) return undefined;
+    const index = Math.floor((n - 1) / 4);
+    return {
+      idx: index,
+      val: this.#queue[index],
+    };
+  }
+
+  pop() {
+    if (this.#queue.length == 0) return undefined;
+    if (this.#queue.length == 1) return this.#queue.pop();
+
+    const min = this.#queue[0];
+    const end = this.#queue.pop();
+
+    let n = 0;
+    while (true) {
+      const minChild = this.#getOptimalChild(n);
+      if (!minChild || this.#compare(end, minChild.val)) {
+        this.#queue[n] = end;
+        break;
+      }
+      this.#queue[n] = minChild.val;
+      n = minChild.idx;
+    }
+
+    return min;
+  }
+
+  insert(...vals) {
+    for (const val of vals) {
+      this.#queue.push(val);
+      let n = this.#queue.length - 1;
+      while (true) {
+        const parent = this.#getParent(n);
+        if (!parent || this.#compare(parent.val, val)) return;
+        this.#queue[parent.idx] = val;
+        this.#queue[n] = parent.val;
+        n = parent.idx;
+      }
+    }
+  }
+
+  size() {
+    return this.#queue.length;
+  }
 }
 
 //class to represent an uniform interface for elements in the game
@@ -576,6 +635,14 @@ class Snake {
 
   get size() {
     return this.#segments.length;
+  }
+
+  get row() {
+    return this.#segments[0].row;
+  }
+
+  get col() {
+    return this.#segments[0].col;
   }
 
   /**
@@ -1184,6 +1251,106 @@ class Game {
   get isRunning() {
     return this.#state === GameState.RUNNING;
   }
+
+  #findSquare(x, y) {
+    return {
+      col: 1 + Math.floor((x - this.#bounds.left) / this.#pieceUnit),
+      row: 1 + Math.floor((y - this.#bounds.top) / this.#pieceUnit),
+    };
+  }
+
+  //TODO
+  handleClick(x, y) {
+    if (
+      x < this.#bounds.left ||
+      x > this.#bounds.right ||
+      y < this.#bounds.top ||
+      y > this.#bounds.bottom
+    )
+      return;
+
+    const target = this.#findSquare(x, y);
+
+    const heap = new Heap((a, b) => {
+      return (
+        Math.abs(a.row - target.row) + Math.abs(a.col - target.col) + a.steps <=
+        Math.abs(b.row - target.row) + Math.abs(b.col - target.col) + b.steps
+      );
+    });
+
+    let current = {
+      row: this.#snake.row,
+      col: this.#snake.col,
+      steps: 0,
+      parent: undefined,
+      direction: undefined,
+    };
+
+    const visited = new Set();
+    const multiplier = 1 + Math.max(this.maxHeight, this.maxWidth);
+    heap.insert(current);
+
+    while (heap.size() > 0) {
+      current = heap.pop();
+
+      if (current && current.row == target.row && current.col == target.col)
+        break;
+
+      visited.add(current.row * multiplier + current.col);
+
+      const neighbours = [
+        {
+          row: current.row - 1,
+          col: current.col,
+          steps: current.steps + 1,
+          parent: current,
+          direction: "UP",
+        },
+        {
+          row: current.row + 1,
+          col: current.col,
+          steps: current.steps + 1,
+          parent: current,
+          direction: "DOWN",
+        },
+        {
+          row: current.row,
+          col: current.col - 1,
+          steps: current.steps + 1,
+          parent: current,
+          direction: "LEFT",
+        },
+        {
+          row: current.row,
+          col: current.col + 1,
+          steps: current.steps + 1,
+          parent: current,
+          direction: "RIGHT",
+        },
+      ];
+
+      neighbours.forEach((neighbour) => {
+        if (
+          neighbour.row <= this.maxHeight &&
+          neighbour.row >= this.minHeight &&
+          neighbour.col <= this.maxWidth &&
+          neighbour.col >= this.minWidth &&
+          !visited.has(neighbour.row * multiplier + neighbour.col) &&
+          (this.difficulty === Difficulty.ZEN || !this.#snake.overlaps(neighbour.row, neighbour.col))
+        ) {
+          heap.insert(neighbour);
+        }
+      });
+    }
+
+    const path = [];
+    while (current.parent) {
+      path.push(current.direction);
+      current = current.parent;
+    }
+
+    this.#directionQueue = path.reverse();
+  }
 }
 
 const game = new Game();
@@ -1295,7 +1462,7 @@ document.addEventListener("keydown", (event) => {
       return;
     case "T":
     case "t":
-      handleShowTutorial();
+      if (!tutorialMessage.open) handleShowTutorial();
       return;
     case "Z":
     case "z":
@@ -1561,6 +1728,10 @@ function handleCloseTutorial() {
 closeTutorialButton.addEventListener("click", handleCloseTutorial);
 
 function handleShowTutorial() {
+  if (showTutorialButton.getAttribute("inert")) {
+    return;
+  }
+
   if (game.isRunning) {
     game.pause();
   }
@@ -1620,6 +1791,9 @@ function adjustImgProperties(color) {
 
 function handleOpenOptions() {
   if (game.isRunning) game.pause();
+  showTutorialButton.setAttribute("inert", true);
+  difficultyPanel.setAttribute("inert", true);
+  gameFlowPanel.setAttribute("inert", true);
   document.documentElement.style.setProperty("--is-options", "grid");
   backgroundInput.focus();
 }
@@ -1627,6 +1801,9 @@ function handleOpenOptions() {
 openOptions.addEventListener("click", handleOpenOptions);
 
 function handleCloseOptions() {
+  showTutorialButton.removeAttribute("inert");
+  difficultyPanel.removeAttribute("inert");
+  gameFlowPanel.removeAttribute("inert");
   document.documentElement.style.setProperty("--is-options", "none");
   startPause.focus();
 }
@@ -1684,3 +1861,7 @@ randomBlock.addEventListener("click", () => {
 });
 
 randomAll.addEventListener("click", randomizeAll);
+
+gameArea.addEventListener("click", (event) => {
+  game.handleClick(event.clientX, event.clientY);
+});
