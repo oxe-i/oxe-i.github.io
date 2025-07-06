@@ -1,9 +1,10 @@
-import { NHeap } from "./pqueue.mjs"
+import { Heap } from "./pqueue.mjs";
 
 /**
  * DOM elements
  */
-//const rootStyle = getComputedStyle(document.documentElement);
+
+const root = document.documentElement;
 const gameArea = document.querySelector("#game");
 
 //directional buttons
@@ -268,9 +269,7 @@ function randomColor(R = 255, G = 255, B = 255) {
 
 //generates a random color with good contrast with the canvas
 function validColor() {
-  const canvasColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--canvas-color");
+  const canvasColor = getComputedStyle(root).getPropertyValue("--canvas-color");
   const canvasLum = getLuminance(colorHexToRGB(canvasColor));
 
   let color;
@@ -284,82 +283,6 @@ function validColor() {
   } while (!validContrast(canvasLum, lum));
 
   return color;
-}
-
-class Heap {
-  #queue;
-  #compare;
-
-  constructor(compare = (a, b) => a <= b, elems = []) {
-    this.#queue = [...elems];
-    this.#compare = compare;
-  }
-
-  #getOptimalChild(n) {
-    const children = [4 * n + 1, 4 * n + 2, 4 * n + 3, 4 * n + 4]
-      .filter((index) => index < this.#queue.length)
-      .map((index) => {
-        return { idx: index, val: this.#queue[index] };
-      });
-    return !children.length
-      ? undefined
-      : children.reduce((acc, crt) => {
-          if (this.#compare(crt.val, acc.val)) acc = crt;
-          return acc;
-        });
-  }
-
-  #getParent(n) {
-    if (n <= 0) return undefined;
-    const index = Math.floor((n - 1) / 4);
-    return {
-      idx: index,
-      val: this.#queue[index],
-    };
-  }
-
-  peek() {
-    return this.#queue?.[0];
-  }
-
-  pop() {
-    if (this.#queue.length == 0) return undefined;
-    if (this.#queue.length == 1) return this.#queue.pop();
-
-    const min = this.#queue[0];
-    const end = this.#queue.pop();
-
-    let n = 0;
-    while (true) {
-      const minChild = this.#getOptimalChild(n);
-      if (!minChild || this.#compare(end, minChild.val)) {
-        this.#queue[n] = end;
-        break;
-      }
-      this.#queue[n] = minChild.val;
-      n = minChild.idx;
-    }
-
-    return min;
-  }
-
-  insert(...vals) {
-    for (const val of vals) {
-      this.#queue.push(val);
-      let n = this.#queue.length - 1;
-      while (true) {
-        const parent = this.#getParent(n);
-        if (!parent || this.#compare(parent.val, val)) return;
-        this.#queue[parent.idx] = val;
-        this.#queue[n] = parent.val;
-        n = parent.idx;
-      }
-    }
-  }
-
-  get length() {
-    return this.#queue.length;
-  }
 }
 
 //class to represent an uniform interface for elements in the game
@@ -541,9 +464,7 @@ class Block extends Piece {
     if (isRandomSnake) {
       const color =
         this.getStyle("background-color") ??
-        getComputedStyle(document.documentElement).getPropertyValue(
-          "--block-color"
-        );
+        getComputedStyle(root).getPropertyValue("--block-color");
 
       this.resetClasses();
       this.addClass("snake-segment");
@@ -551,7 +472,7 @@ class Block extends Piece {
       return;
     }
 
-    const color = getComputedStyle(document.documentElement).getPropertyValue(
+    const color = getComputedStyle(root).getPropertyValue(
       "--snake-segment-color"
     );
 
@@ -918,7 +839,7 @@ class Game {
   constructor() {
     this.#bounds = gameArea.getBoundingClientRect();
     const maxPieceUnit = Number(
-      getComputedStyle(document.documentElement)
+      getComputedStyle(root)
         .getPropertyValue("--max-piece-unit")
         .replaceAll(/[^\d]/g, "")
     );
@@ -1011,7 +932,7 @@ class Game {
 
     this.#bounds = gameArea.getBoundingClientRect();
     const maxPieceUnit = Number(
-      getComputedStyle(document.documentElement)
+      getComputedStyle(root)
         .getPropertyValue("--max-piece-unit")
         .replaceAll(/[^\d]/g, "")
     );
@@ -1099,7 +1020,7 @@ class Game {
       }
 
       if (this.#snake.touchesBlock(this.#block)) {
-        document.documentElement.style.setProperty(
+        root.style.setProperty(
           "--ingestion-time",
           `${this.timePerFrame * this.#snake.length}ms`
         );
@@ -1205,9 +1126,8 @@ class Game {
   #generateBlockColor() {
     if (this.#isRandomBlock) this.#generateRandomBlockColors();
     else {
-      const blockColor = getComputedStyle(
-        document.documentElement
-      ).getPropertyValue("--block-color");
+      const blockColor =
+        getComputedStyle(root).getPropertyValue("--block-color");
       this.setBlockColor(blockColor);
     }
   }
@@ -1215,9 +1135,9 @@ class Game {
   #generateSnakeColor() {
     if (this.#isRandomSnake) this.#generateRandomSnakeColors();
     else {
-      const snakeColor = getComputedStyle(
-        document.documentElement
-      ).getPropertyValue("--snake-segment-color");
+      const snakeColor = getComputedStyle(root).getPropertyValue(
+        "--snake-segment-color"
+      );
       this.setSnakeColor(snakeColor);
     }
   }
@@ -1240,14 +1160,14 @@ class Game {
   setSnakeColor(color) {
     this.#snake.setColor(color);
     snakeInput.value = color;
-    document.documentElement.style.setProperty("--snake-segment-color", color);
+    root.style.setProperty("--snake-segment-color", color);
     this.#isRandomSnake = false;
   }
 
   setBlockColor(color) {
     this.#block.setColor(color);
     blockInput.value = color;
-    document.documentElement.style.setProperty("--block-color", color);
+    root.style.setProperty("--block-color", color);
     this.#isRandomBlock = false;
   }
 
@@ -1264,7 +1184,7 @@ class Game {
 
   handleClick(x, y) {
     if (!game.isRunning) return;
-    
+
     const target = this.#findSquare(x, y);
 
     const heap = new Heap((a, b) => {
@@ -1806,10 +1726,7 @@ function adjustImgProperties(color) {
 
   dataURLs.forEach((dataURL, idx) => {
     const property = groupElems[idx].dataset.property;
-    document.documentElement.style.setProperty(
-      `${property}`,
-      `url("${dataURL}")`
-    );
+    root.style.setProperty(`${property}`, `url("${dataURL}")`);
   });
 }
 
@@ -1818,7 +1735,7 @@ function handleOpenOptions() {
   showTutorialButton.setAttribute("inert", true);
   difficultyPanel.setAttribute("inert", true);
   gameFlowPanel.setAttribute("inert", true);
-  document.documentElement.style.setProperty("--is-options", "grid");
+  root.style.setProperty("--is-options", "grid");
   backgroundInput.focus();
 }
 
@@ -1828,22 +1745,18 @@ function handleCloseOptions() {
   showTutorialButton.removeAttribute("inert");
   difficultyPanel.removeAttribute("inert");
   gameFlowPanel.removeAttribute("inert");
-  document.documentElement.style.setProperty("--is-options", "none");
+  root.style.setProperty("--is-options", "none");
   startPause.focus();
 }
 
 closeOptions.addEventListener("click", handleCloseOptions);
 
 function isOptionsOpen() {
-  return (
-    getComputedStyle(document.documentElement).getPropertyValue(
-      "--is-options"
-    ) !== "none"
-  );
+  return getComputedStyle(root).getPropertyValue("--is-options") !== "none";
 }
 
 function setBackgroundColor(color) {
-  document.documentElement.style.setProperty("--canvas-color", color);
+  root.style.setProperty("--canvas-color", color);
   adjustImgProperties(color);
   backgroundInput.value = color;
 }
