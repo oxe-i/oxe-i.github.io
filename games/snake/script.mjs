@@ -1,5 +1,6 @@
 import { Heap } from "./pqueue.mjs";
-
+import { generateColorWithContrast, randomColor } from "./colors.mjs"
+import { randomNum } from "./random.mjs"
 /**
  * DOM elements
  */
@@ -194,95 +195,14 @@ function setHardButton() {
   hardButton.focus();
 }
 
+function validColor() {
+  const canvasColor = getComputedStyle(root).getPropertyValue("--canvas-color");
+  return generateColorWithContrast(canvasColor, MIN_CONTRAST);
+}
+
 //helper to check if the device is touchscreen
 function isTouchDevice() {
   return "ontouchstart" in window || navigator.maxTouchPoints > 0;
-}
-
-//helper to generate a random float between 0 and 1
-function randomNum() {
-  const randomBuffer = new Uint32Array(1);
-  window.crypto.getRandomValues(randomBuffer);
-  return randomBuffer[0] / (0xffffffff + 1);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-//helpers for working with colors
-function colorHexToRGB(hexColor) {
-  if (hexColor.startsWith("rgb")) {
-    return hexColor
-      .replaceAll(/[^\d,]/g, "")
-      .split(",")
-      .map((str) => Number(str));
-  }
-  const red = parseInt(hexColor.slice(1, 3), 16);
-  const green = parseInt(hexColor.slice(3, 5), 16);
-  const blue = parseInt(hexColor.slice(5, 7), 16);
-  return [red, green, blue];
-}
-
-//luminance formula as per https://www.w3.org/TR/WCAG20/#relativeluminancedef
-function getLuminance(components) {
-  const [R, G, B] = components
-    .map((component) => component / 255)
-    .map((component) => {
-      if (component <= 0.03928) {
-        return component / 12.92;
-      }
-      return ((component + 0.055) / 1.055) ** 2.4;
-    });
-  return R * 0.2126 + G * 0.7152 + B * 0.0722;
-}
-
-function getHexColor([red, green, blue]) {
-  return (
-    "#" +
-    `${red.toString(16).padStart(2, "0")}${green
-      .toString(16)
-      .padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`
-  );
-}
-
-//contrast ratio formula as per https://www.w3.org/TR/WCAG20/#contrast-ratiodef
-function validContrast(lum1, lum2) {
-  const [smaller, greater] = lum1 <= lum2 ? [lum1, lum2] : [lum2, lum1];
-  return (greater + 0.05) / (smaller + 0.05) >= MIN_CONTRAST;
-}
-
-//generates any random color
-function randomColor(R = 255, G = 255, B = 255) {
-  return getHexColor(
-    [R, G, B].map(
-      (multiplier) =>
-        255 - multiplier + Math.floor(randomNum() * (multiplier + 1))
-    )
-  );
-}
-
-//generates a random color with good contrast with the canvas
-function validColor() {
-  const canvasColor = getComputedStyle(root).getPropertyValue("--canvas-color");
-  const canvasLum = getLuminance(colorHexToRGB(canvasColor));
-
-  let color;
-  let colorComponents;
-  let lum;
-
-  do {
-    color = randomColor();
-    colorComponents = colorHexToRGB(color);
-    lum = getLuminance(colorComponents);
-  } while (!validContrast(canvasLum, lum));
-
-  return color;
 }
 
 //class to represent an uniform interface for elements in the game
