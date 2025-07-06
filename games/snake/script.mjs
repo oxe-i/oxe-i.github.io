@@ -1,3 +1,5 @@
+import { NHeap } from "./pqueue.mjs"
+
 /**
  * DOM elements
  */
@@ -23,6 +25,17 @@ const scoreText = document.querySelector("#score");
 //gameflow buttons
 const gameFlowPanel = document.querySelector("#game-flow-buttons");
 const startPause = document.querySelector("#start-pause");
+const startPauseButtonImg = startPause.querySelector("img");
+const startImg = (() => {
+  const img = new Image();
+  img.src = "../../assets/play.svg";
+  return img;
+})();
+const pauseImg = (() => {
+  const img = new Image();
+  img.src = "../../assets/pause.svg";
+  return img;
+})();
 const stopButton = document.querySelector("#stop");
 
 //gameover dialog and its button
@@ -68,38 +81,10 @@ const randomBlock = document.querySelector("#randomize-block");
 const randomAll = document.querySelector("#randomize-everything");
 
 //imgs templates
-const snakeEyes = (color) => {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                <defs>
-                    <g id="snake-eyes" fill="${color}">
-                        <circle cx="60" cy="30" r="6" />
-                        <circle cx="60" cy="70" r="6" />
-                    </g>
-                </defs>
-                <use href="#snake-eyes" x="0" y="0" />
-            </svg>`;
-};
-
-const smile = (color) => {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-            <path d="M25 60 Q50 90, 75 60" fill="transparent" stroke="${color}" stroke-width="4" />
-          </svg>`;
-};
-
-const eyes = (color) => {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <circle cx="35" cy="35" r="5" fill="${color}" />
-    <circle cx="65" cy="35" r="5" fill="${color}" />
-</svg>`;
-};
-
-const angry = (color) => {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <path d="M30 20 H40 V15 H30 Z" fill="${color}" transform="rotate(30, 35, 15)" />
-    <path d="M30 20 H40 V15 H30 Z" fill="${color}" transform="translate(30, 0) rotate(-30, 35, 15)" />
-    <path d="M30 60 H70 V70 H30 Z" fill="${color}" />
-</svg>`;
-};
+const svgElems = [
+  ...document.querySelector("template").content.querySelectorAll("svg"),
+];
+const groupElems = svgElems.map((svgElem) => svgElem.querySelector("g"));
 
 //global constants
 const SPEED = 1;
@@ -151,13 +136,13 @@ class GameState {
 
 //helpers to set icons to gameflow buttons
 function setIconToPlay() {
-  startPause.querySelector("img").src = `../../assets/play.svg`;
-  startPause.querySelector("img").alt = "play button";
+  startPauseButtonImg.src = startImg.src;
+  startPauseButtonImg.alt = "play button";
 }
 
 function setIconToPause() {
-  startPause.querySelector("img").src = `../../assets/pause.svg`;
-  startPause.querySelector("img").alt = "pause button";
+  startPauseButtonImg.src = pauseImg.src;
+  startPauseButtonImg.alt = "pause button";
 }
 
 //helpers to enable/disable difficulty buttons if game is running or paused
@@ -220,6 +205,7 @@ function randomNum() {
   return randomBuffer[0] / (0xffffffff + 1);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -271,10 +257,11 @@ function validContrast(lum1, lum2) {
 }
 
 //generates any random color
-function randomColor() {
+function randomColor(R = 255, G = 255, B = 255) {
   return getHexColor(
-    shuffleArray([255, 255, 255]).map((multiplier) =>
-      Math.floor(randomNum() * multiplier)
+    [R, G, B].map(
+      (multiplier) =>
+        255 - multiplier + Math.floor(randomNum() * (multiplier + 1))
     )
   );
 }
@@ -331,6 +318,10 @@ class Heap {
     };
   }
 
+  peek() {
+    return this.#queue?.[0];
+  }
+
   pop() {
     if (this.#queue.length == 0) return undefined;
     if (this.#queue.length == 1) return this.#queue.pop();
@@ -366,7 +357,7 @@ class Heap {
     }
   }
 
-  size() {
+  get length() {
     return this.#queue.length;
   }
 }
@@ -633,7 +624,7 @@ class Snake {
     this.#initializeSegments(game);
   }
 
-  get size() {
+  get length() {
     return this.#segments.length;
   }
 
@@ -643,6 +634,18 @@ class Snake {
 
   get col() {
     return this.#segments[0].col;
+  }
+
+  get direction() {
+    return this.#segments[0].direction;
+  }
+
+  get nextRow() {
+    return this.#segments[0].nextRow;
+  }
+
+  get nextCol() {
+    return this.#segments[0].nextCol;
   }
 
   /**
@@ -740,7 +743,8 @@ class Snake {
    * @param {Direction} newDirection
    */
   updateDirection(newDirection) {
-    this.#segments[0].direction = newDirection ?? this.#segments[0].direction;
+    if (newDirection && newDirection != this.#segments[0].direction)
+      this.#segments[0].direction = newDirection;
   }
 
   touchesLeftWall(game) {
@@ -1078,6 +1082,43 @@ class Game {
     let crtTime = 0;
     let remTime = 0;
 
+    const processFrame = () => {
+      if (this.difficulty === Difficulty.ZEN) {
+        if (this.#snake.touchesLeftWall(this)) {
+          this.#snake.teleportRight();
+        } else if (this.#snake.touchesRightWall(this)) {
+          this.#snake.teleportLeft();
+        } else if (this.#snake.touchesTopWall(this)) {
+          this.#snake.teleportBottom();
+        } else if (this.#snake.touchesBottomWall(this)) {
+          this.#snake.teleportTop();
+        }
+      } else if (this.#snake.touchesTail() || this.#snake.touchesGrid(this)) {
+        this.over();
+        return;
+      }
+
+      if (this.#snake.touchesBlock(this.#block)) {
+        document.documentElement.style.setProperty(
+          "--ingestion-time",
+          `${this.timePerFrame * this.#snake.length}ms`
+        );
+        this.#block.ingested(this.#isRandomSnake);
+        this.#ingestingBlocks.push(this.#block);
+        this.#block = new Block(this);
+        this.#generateBlockColor();
+        this.#block.show();
+      }
+
+      if (this.#snake.eatsBlock(this.#ingestingBlocks?.[0])) {
+        this.#score += this.difficulty * this.#snake.length;
+        this.#snake.addSegment(this.#ingestingBlocks.shift());
+      }
+
+      this.#snake.updateDirection(this.#directionQueue.shift());
+      this.#snake.move(this);
+    };
+
     /**
      *
      * @param {number} timestamp
@@ -1095,49 +1136,12 @@ class Game {
 
       let deltaTime = timestamp - crtTime + remTime;
 
-      while (deltaTime >= this.timePerFrame) {
-        deltaTime -= this.timePerFrame;
-
-        //game over
-
-        if (this.difficulty === Difficulty.ZEN) {
-          if (this.#snake.touchesLeftWall(this)) {
-            this.#snake.teleportRight();
-          } else if (this.#snake.touchesRightWall(this)) {
-            this.#snake.teleportLeft();
-          } else if (this.#snake.touchesTopWall(this)) {
-            this.#snake.teleportBottom();
-          } else if (this.#snake.touchesBottomWall(this)) {
-            this.#snake.teleportTop();
-          }
-        } else if (this.#snake.touchesTail() || this.#snake.touchesGrid(this)) {
-          this.over();
-          return;
-        }
-
-        if (this.#snake.touchesBlock(this.#block)) {
-          document.documentElement.style.setProperty(
-            "--ingestion-time",
-            `${this.timePerFrame * this.#snake.size}ms`
-          );
-          this.#block.ingested(this.#isRandomSnake);
-          this.#ingestingBlocks.push(this.#block);
-          this.#block = new Block(this);
-          this.#generateBlockColor();
-          this.#block.show();
-        }
-
-        if (this.#snake.eatsBlock(this.#ingestingBlocks?.[0])) {
-          this.#score += this.difficulty * this.#snake.size;
-          this.#snake.addSegment(this.#ingestingBlocks.shift());
-        }
-
-        this.#snake.updateDirection(this.#directionQueue.shift());
-        this.#snake.move(this);
-      }
+      Array.from({ length: Math.floor(deltaTime / this.timePerFrame) }, () =>
+        processFrame()
+      );
 
       crtTime = timestamp;
-      remTime = deltaTime;
+      remTime = deltaTime % this.timePerFrame;
 
       this.#state = GameState.RUNNING;
       this.#raf = requestAnimationFrame(gameLoop);
@@ -1204,7 +1208,6 @@ class Game {
       const blockColor = getComputedStyle(
         document.documentElement
       ).getPropertyValue("--block-color");
-      console.log(blockColor);
       this.setBlockColor(blockColor);
     }
   }
@@ -1254,47 +1257,60 @@ class Game {
 
   #findSquare(x, y) {
     return {
-      col: 1 + Math.floor((x - this.#bounds.left) / this.#pieceUnit),
-      row: 1 + Math.floor((y - this.#bounds.top) / this.#pieceUnit),
+      col: Math.ceil((x - this.#bounds.left) / this.#pieceUnit),
+      row: Math.ceil((y - this.#bounds.top) / this.#pieceUnit),
     };
   }
 
-  //TODO
   handleClick(x, y) {
-    if (
-      x < this.#bounds.left ||
-      x > this.#bounds.right ||
-      y < this.#bounds.top ||
-      y > this.#bounds.bottom
-    )
-      return;
-
+    if (!game.isRunning) return;
+    
     const target = this.#findSquare(x, y);
 
     const heap = new Heap((a, b) => {
-      return (
-        Math.abs(a.row - target.row) + Math.abs(a.col - target.col) + a.steps <=
-        Math.abs(b.row - target.row) + Math.abs(b.col - target.col) + b.steps
-      );
+      const cost = (node) => {
+        return node.steps;
+      };
+
+      const heuristics = (node) => {
+        const rowDiff = Math.abs(node.row - target.row);
+        const colDiff = Math.abs(node.col - target.col);
+
+        if (this.difficulty === Difficulty.ZEN) {
+          //can cross grid, teleporting to the opposite wall
+          const rowModDiff = Math.min(
+            Math.abs(node.row + this.maxHeight - target.row),
+            Math.abs(target.row + this.maxHeight - node.row)
+          );
+          const colModDiff = Math.min(
+            Math.abs(node.col + this.maxWidth - target.col),
+            Math.abs(target.col + this.maxWidth - node.col)
+          );
+          return Math.min(rowDiff, rowModDiff) + Math.min(colDiff, colModDiff);
+        }
+
+        return rowDiff + colDiff;
+      };
+
+      return heuristics(a) + cost(a) <= heuristics(b) + cost(b);
     });
 
     let current = {
-      row: this.#snake.row,
-      col: this.#snake.col,
+      row: this.#snake.nextRow,
+      col: this.#snake.nextCol,
       steps: 0,
       parent: undefined,
       direction: undefined,
     };
 
     const visited = new Set();
-    const multiplier = 1 + Math.max(this.maxHeight, this.maxWidth);
+    const multiplier = 1 + Math.max(this.maxHeight, this.maxWidth); //to hash the pair (row, col)
     heap.insert(current);
 
-    while (heap.size() > 0) {
+    while (heap.length) {
       current = heap.pop();
 
-      if (current && current.row == target.row && current.col == target.col)
-        break;
+      if (current.row == target.row && current.col == target.col) break;
 
       visited.add(current.row * multiplier + current.col);
 
@@ -1329,21 +1345,40 @@ class Game {
         },
       ];
 
-      neighbours.forEach((neighbour) => {
-        if (
-          neighbour.row <= this.maxHeight &&
-          neighbour.row >= this.minHeight &&
-          neighbour.col <= this.maxWidth &&
-          neighbour.col >= this.minWidth &&
-          !visited.has(neighbour.row * multiplier + neighbour.col) &&
-          (this.difficulty === Difficulty.ZEN || !this.#snake.overlaps(neighbour.row, neighbour.col))
-        ) {
-          heap.insert(neighbour);
-        }
-      });
+      if (this.difficulty === Difficulty.ZEN) {
+        neighbours.forEach((neighbour) => {
+          if (neighbour.row > this.maxHeight) {
+            neighbour.row = this.minHeight;
+          } else if (neighbour.row < this.minHeight) {
+            neighbour.row = this.maxHeight;
+          }
+
+          if (neighbour.col > this.maxWidth) {
+            neighbour.col = this.minWidth;
+          } else if (neighbour.col < this.minWidth) {
+            neighbour.col = this.maxWidth;
+          }
+
+          if (!visited.has(neighbour.row * multiplier + neighbour.col))
+            heap.insert(neighbour);
+        });
+      } else {
+        neighbours.forEach((neighbour) => {
+          if (
+            neighbour.row <= this.maxHeight &&
+            neighbour.row >= this.minHeight &&
+            neighbour.col <= this.maxWidth &&
+            neighbour.col >= this.minWidth &&
+            !visited.has(neighbour.row * multiplier + neighbour.col) &&
+            !this.#snake.overlaps(neighbour.row, neighbour.col)
+          ) {
+            heap.insert(neighbour);
+          }
+        });
+      }
     }
 
-    const path = [];
+    let path = [];
     while (current.parent) {
       path.push(current.direction);
       current = current.parent;
@@ -1409,8 +1444,7 @@ document.addEventListener("keydown", (event) => {
       return;
     case " ":
       event.preventDefault();
-      if (game.isRunning) game.pause();
-      else game.start();
+      handleStartPause();
       return;
     case "N":
     case "n":
@@ -1458,7 +1492,7 @@ document.addEventListener("keydown", (event) => {
       return;
     case "P":
     case "p":
-      startPause.focus();
+      handleStartPause();
       return;
     case "T":
     case "t":
@@ -1589,10 +1623,12 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-startPause.addEventListener("click", () => {
+function handleStartPause() {
   if (game.isRunning) game.pause();
   else game.start();
-});
+}
+
+startPause.addEventListener("click", handleStartPause);
 
 stopButton.addEventListener("click", () => {
   game.pause();
@@ -1751,40 +1787,28 @@ function handleShowTutorial() {
 
 showTutorialButton.addEventListener("click", handleShowTutorial);
 
-function adjustImgProperties(color) {
-  const svgTemplates = [
-    snakeEyes(color),
-    smile(color),
-    angry(color),
-    eyes(color),
-  ];
-
-  const parser = new DOMParser();
-  const svgDocs = svgTemplates.map((template) =>
-    parser.parseFromString(template, "image/svg+xml")
-  );
-  const svgElems = svgDocs.map((svgDoc) => svgDoc.documentElement);
-
+function getElemString(elem) {
   const serializer = new XMLSerializer();
-  const svgStrings = svgElems.map((svgElem) =>
-    serializer.serializeToString(svgElem)
-  );
-  const encodedData = svgStrings.map((svgString) =>
-    encodeURIComponent(svgString)
-  );
-  const dataURIs = encodedData.map(
-    (data) => `data:image/svg+xml;charset=utf-8,${data}`
-  );
-  const properties = [
-    "--snake-eyes-img",
-    "--smile-img",
-    "--angry-img",
-    "--eyes-img",
-  ];
-  dataURIs.forEach((dataURI, idx) => {
+  return serializer.serializeToString(elem);
+}
+
+function getDataSVG(elemString) {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(elemString)}`;
+}
+
+function adjustImgProperties(color) {
+  groupElems.forEach((svgElem) => {
+    const attribute = svgElem.dataset.color;
+    svgElem.setAttribute(attribute, color);
+  });
+
+  const dataURLs = svgElems.map((elem) => getDataSVG(getElemString(elem)));
+
+  dataURLs.forEach((dataURL, idx) => {
+    const property = groupElems[idx].dataset.property;
     document.documentElement.style.setProperty(
-      `${properties.at(idx)}`,
-      `url("${dataURI}")`
+      `${property}`,
+      `url("${dataURL}")`
     );
   });
 }

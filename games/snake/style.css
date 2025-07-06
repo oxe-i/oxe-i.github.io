@@ -391,6 +391,10 @@ dialog::backdrop {
   box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);
 }
 
+#snake-eyes {
+  fill: var(--canvas-color);
+}
+
 @keyframes LEFT-UP {
   from {
     transform: rotate(0deg);

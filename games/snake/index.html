@@ -109,7 +109,66 @@
         </button>
       </div>
     </div>
-    <script src="PriorityQueue.mjs"></script>
-    <script src="script.mjs"></script>
+    <template>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <defs>
+          <g
+            id="snake-eyes"
+            fill="white"
+            data-property="--snake-eyes-img"
+            data-color="fill"
+          >
+            <circle cx="60" cy="30" r="6" />
+            <circle cx="60" cy="70" r="6" />
+          </g>
+        </defs>
+        <use href="#snake-eyes" x="0" y="0" />
+      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <defs>
+          <g
+            id="angry"
+            fill="white"
+            data-property="--angry-img"
+            data-color="fill"
+          >
+            <path d="M30 20 H40 V15 H30 Z" transform="rotate(30, 35, 15)" />
+            <path
+              d="M30 20 H40 V15 H30 Z"
+              transform="translate(30, 0) rotate(-30, 35, 15)"
+            />
+            <path d="M30 60 H70 V70 H30 Z" />
+          </g>
+        </defs>
+        <use href="#angry" x="0" y="0" />
+      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <defs>
+          <g
+            id="eyes"
+            fill="white"
+            data-property="--eyes-img"
+            data-color="fill"
+          >
+            <circle cx="35" cy="35" r="5" />
+            <circle cx="65" cy="35" r="5" />
+          </g>
+        </defs>
+        <use href="#eyes" x="0" y="0" />
+      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <defs>
+          <g id="smile" stroke="white" data-property="--smile-img" data-color="stroke">
+            <path
+              d="M25 60 Q50 90, 75 60"
+              fill="transparent"
+              stroke-width="4"
+            />
+          </g>
+        </defs>
+        <use href="#smile" x="0" y="0" />
+      </svg>
+    </template>
+    <script type="module" src="script.mjs"></script>
   </body>
 </html>
