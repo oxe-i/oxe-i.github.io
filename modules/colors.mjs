@@ -1,5 +1,4 @@
-
-import { randomNum } from "./random.mjs"
+import { randomNum } from "./random.mjs";
 
 //helpers for working with colors
 export function colorHexToRGB(hexColor) {

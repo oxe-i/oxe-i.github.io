@@ -1,4 +1,4 @@
-export class Heap {
+export class PQueue {
   #queue;
   #compare;
 

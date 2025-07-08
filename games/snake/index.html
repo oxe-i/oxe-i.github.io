@@ -42,7 +42,7 @@
     <div id="game"></div>
     <div id="after-canvas">
       <div id="difficulty" inert>
-        <h1>difficulty:</h1>
+        <h2>difficulty:</h2>
         <button id="zen" class="enabled">
           <img src="../../assets/zen.svg" alt="zen button" />
         </button>
@@ -57,49 +57,97 @@
         </button>
       </div>
       <div id="game-stats">
-        <h1 id="score-title">score:</h1>
+        <h2 id="score-title">score:</h2>
         <p id="score">0</p>
       </div>
       <button class="enabled" id="show-tutorial">Show <em>T</em>utorial</button>
       <button class="enabled" id="open-options"><em>O</em>ptions</button>
-      <div id="color-selectors">
-        <h1>Colors:</h1>
-        <div id="first-row">
-          <h2><em>G</em>ame Area:</h2>
-          <input
-            type="color"
-            class="color-button enabled"
-            id="background-color"
-            name="background-color"
-            value="#e0fda9"
-          />
-          <button class="enabled" id="randomize-background">Random</button>
+      <dialog id="options-modal">
+        <div role="tablist" id="options-tablist">
+          <a
+            href="#color-selectors"
+            class="options-tab"
+            id="color-tab"
+            role="tab"
+            aria-controls="color-selectors"
+            aria-selected="true"
+          >
+            <h2>Colors</h2>
+          </a>
+          <a
+            href="#gameplay-selectors"
+            class="options-tab"
+            id="gameplay-tab"
+            role="tab"
+            aria-controls="gameplay-selectors"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            <h2>Gameplay</h2>
+          </a>
         </div>
-        <div id="second-row">
-          <h2><em>S</em>nake:</h2>
-          <input
-            type="color"
-            class="color-button enabled"
-            id="snake-color"
-            name="snake-color"
-          />
-          <button class="enabled" id="randomize-snake">Random</button>
+        <div
+          id="color-selectors"
+          class="option-selector tab"
+          role="tabpanel"
+          aria-labelledby="color-tab"
+          tabindex="0"
+        >
+          <div id="first-row">
+            <h3><em>G</em>ame Area:</h3>
+            <input
+              type="color"
+              class="color-button enabled"
+              id="background-color"
+              name="background-color"
+              value="#e0fda9"
+            />
+            <button class="enabled" id="randomize-background">Random</button>
+          </div>
+          <div id="second-row">
+            <h3><em>S</em>nake:</h3>
+            <input
+              type="color"
+              class="color-button enabled"
+              id="snake-color"
+              name="snake-color"
+            />
+            <button class="enabled" id="randomize-snake">Random</button>
+          </div>
+          <div id="third-row">
+            <h3><em>B</em>lock:</h3>
+            <input
+              type="color"
+              class="color-button enabled"
+              id="block-color"
+              name="block-color"
+            />
+            <button class="enabled" id="randomize-block">Random</button>
+          </div>
+          <button class="enabled" id="randomize-everything">
+            All <em>R</em>andom
+          </button>
         </div>
-        <div id="third-row">
-          <h2><em>B</em>lock:</h2>
-          <input
-            type="color"
-            class="color-button enabled"
-            id="block-color"
-            name="block-color"
-          />
-          <button class="enabled" id="randomize-block">Random</button>
+        <div
+          id="gameplay-selectors"
+          class="option-selector tab"
+          role="tabpanel"
+          aria-labelledby="gameplay-tab"
+          tabindex="0"
+        >
+          <label>
+            Show Directional Pad:
+            <input id="directional-pad-checkbox" type="checkbox" checked />
+          </label>
         </div>
-        <button class="enabled" id="randomize-everything">
-          All <em>R</em>andom
+        <button
+          class="enabled close-options"
+          data-tab="gameplay"
+          data-role="close"
+        >
+          <em>C</em>lose
         </button>
-        <button class="enabled" id="close-options"><em>C</em>lose</button>
-      </div>
+      </dialog>
       <div id="game-flow-buttons">
         <button autofocus class="enabled" id="start-pause">
           <img src="../../assets/play.svg" alt="play button" />
@@ -158,7 +206,12 @@
       </svg>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
         <defs>
-          <g id="smile" stroke="white" data-property="--smile-img" data-color="stroke">
+          <g
+            id="smile"
+            stroke="white"
+            data-property="--smile-img"
+            data-color="stroke"
+          >
             <path
               d="M25 60 Q50 90, 75 60"
               fill="transparent"

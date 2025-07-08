@@ -1,6 +1,10 @@
-import { Heap } from "./pqueue.mjs";
-import { generateColorWithContrast, randomColor } from "./colors.mjs"
-import { randomNum } from "./random.mjs"
+import { PQueue } from "../../modules/pqueue.mjs";
+import {
+  generateColorWithContrast,
+  randomColor,
+} from "../../modules/colors.mjs";
+import { randomNum } from "../../modules/random.mjs";
+import { ElementWrapper, TabList } from "../../modules/domInterface.mjs";
 /**
  * DOM elements
  */
@@ -9,6 +13,7 @@ const root = document.documentElement;
 const gameArea = document.querySelector("#game");
 
 //directional buttons
+const dirButtonsContainer = document.querySelector("#directional-buttons");
 const dirUp = document.querySelector("#up");
 const dirDown = document.querySelector("#down");
 const dirLeft = document.querySelector("#left");
@@ -25,7 +30,6 @@ const hardButton = document.querySelector("#hard");
 const scoreText = document.querySelector("#score");
 
 //gameflow buttons
-const gameFlowPanel = document.querySelector("#game-flow-buttons");
 const startPause = document.querySelector("#start-pause");
 const startPauseButtonImg = startPause.querySelector("img");
 const startImg = (() => {
@@ -64,8 +68,9 @@ let endTutorial = false;
 const showTutorialButton = document.querySelector("#show-tutorial");
 
 //options panel
+const optionsModal = document.querySelector("#options-modal");
 const openOptions = document.querySelector("#open-options");
-const closeOptions = document.querySelector("#close-options");
+const tabs = new TabList(document.querySelector("#options-modal"));
 
 //background color
 const backgroundInput = document.querySelector("#background-color");
@@ -81,6 +86,9 @@ const randomBlock = document.querySelector("#randomize-block");
 
 //all random
 const randomAll = document.querySelector("#randomize-everything");
+
+//gameplay options
+const dirPadCheckBox = document.querySelector("#directional-pad-checkbox");
 
 //imgs templates
 const svgElems = [
@@ -206,21 +214,12 @@ function isTouchDevice() {
 }
 
 //class to represent an uniform interface for elements in the game
-class Piece {
-  #elem;
-  #style;
-  #updated;
-
+class Piece extends ElementWrapper {
   constructor() {
-    this.#elem = document.createElement("div");
-    this.#elem.className = "piece";
-    gameArea.appendChild(this.#elem);
-    this.#updateComputedStyle();
-  }
-
-  #updateComputedStyle() {
-    this.#style = getComputedStyle(this.#elem);
-    this.#updated = true; // flag for computing styles lazily
+    super(document.createElement("div"));
+    this.addClass("piece");
+    this.appendParent(gameArea);
+    this.updateStyle();
   }
 
   setColor(color) {
@@ -228,71 +227,20 @@ class Piece {
   }
 
   reset() {
-    gameArea.removeChild(this.#elem);
-    this.#elem = undefined;
-  }
-
-  /**
-   *
-   * @param {string} className
-   */
-  addClass(className) {
-    this.#elem.classList.add(className);
-  }
-
-  /**
-   *
-   * @param {string} className
-   */
-  removeClass(className) {
-    this.#elem.classList.remove(className);
-  }
-
-  /**
-   *
-   * @param {string} className
-   * @returns {boolean}
-   */
-  checkClass(className) {
-    return this.#elem.classList.contains(className);
+    this.removeParent(gameArea);
   }
 
   resetClasses() {
-    this.#elem.className = "piece";
+    this.removeClasses();
+    this.addClass("piece");
   }
 
-  /**
-   *
-   * @param {string} property
-   * @param {string} value
-   */
-  addStyle(property, value) {
-    this.#elem.style.setProperty(`${property}`, `${value}`);
-    this.#updated = false;
-  }
-
-  /**
-   *
-   * @param {string} property
-   * @returns {string}
-   */
-  getStyle(property) {
-    if (!this.#updated) this.#updateComputedStyle();
-    return this.#style.getPropertyValue(`${property}`);
-  }
-
-  /**
-   * both getters return the current CSS property value converted to a number
-   * CSS works with PERCENTAGES
-   */
   get row() {
-    if (!this.#updated) this.#updateComputedStyle();
-    return Number(this.#style.getPropertyValue("--row"));
+    return Number(this.getStyle("--row"));
   }
 
   get col() {
-    if (!this.#updated) this.#updateComputedStyle();
-    return Number(this.#style.getPropertyValue("--col"));
+    return Number(this.getStyle("--col"));
   }
 
   /**
@@ -300,22 +248,20 @@ class Piece {
    * CSS works with PERCENTAGES
    */
   set row(value) {
-    this.#elem.style.setProperty("--row", `${value}`);
-    this.#updated = false;
+    this.addStyle("--row", `${value}`);
   }
 
   set col(value) {
-    this.#elem.style.setProperty("--col", `${value}`);
-    this.#updated = false;
+    this.addStyle("--col", `${value}`);
   }
 
   //bounds getters
   get width() {
-    return this.#elem.getBoundingClientRect().width;
+    return this.boundingRect.width;
   }
 
   get height() {
-    return this.#elem.getBoundingClientRect().height;
+    return this.boundingRect.height;
   }
 
   /**
@@ -888,7 +834,7 @@ class Game {
    * @param {Direction} newDirection
    */
   addDirection(newDirection) {
-    if (this.isRunning) this.#directionQueue.push(newDirection);
+    if (this.isRunning) this.#directionQueue = [newDirection];
   }
 
   /**
@@ -936,7 +882,7 @@ class Game {
         }
       } else if (this.#snake.touchesTail() || this.#snake.touchesGrid(this)) {
         this.over();
-        return;
+        return false;
       }
 
       if (this.#snake.touchesBlock(this.#block)) {
@@ -958,6 +904,7 @@ class Game {
 
       this.#snake.updateDirection(this.#directionQueue.shift());
       this.#snake.move(this);
+      return true;
     };
 
     /**
@@ -977,9 +924,13 @@ class Game {
 
       let deltaTime = timestamp - crtTime + remTime;
 
-      Array.from({ length: Math.floor(deltaTime / this.timePerFrame) }, () =>
-        processFrame()
-      );
+      for (
+        let count = 0;
+        count < Math.floor(deltaTime / this.timePerFrame);
+        ++count
+      ) {
+        if (!processFrame()) return;
+      }
 
       crtTime = timestamp;
       remTime = deltaTime % this.timePerFrame;
@@ -1107,7 +1058,7 @@ class Game {
 
     const target = this.#findSquare(x, y);
 
-    const heap = new Heap((a, b) => {
+    const heap = new PQueue((a, b) => {
       const cost = (node) => {
         return node.steps;
       };
@@ -1267,6 +1218,7 @@ document.addEventListener("DOMContentLoaded", () => {
   game.randomBlockColor();
 
   if (!isTouchDevice()) {
+    dirPadCheckBox.checked = false;
     tutorialText.innerHTML += `<br><br>By the way, you can always advance on the tutorial by pressing N and close it by pressing C.`;
   }
 
@@ -1279,9 +1231,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("keydown", (event) => {
   switch (event.key) {
-    case "Escape":
-      if (isOptionsOpen()) handleCloseOptions();
-      return;
     case " ":
       event.preventDefault();
       handleStartPause();
@@ -1336,6 +1285,7 @@ document.addEventListener("keydown", (event) => {
       return;
     case "T":
     case "t":
+      console.log(tutorialMessage.open);
       if (!tutorialMessage.open) handleShowTutorial();
       return;
     case "Z":
@@ -1414,52 +1364,6 @@ document.addEventListener("keydown", (event) => {
           break;
       }
       return;
-    case "Tab":
-      event.preventDefault();
-      switch (document.activeElement) {
-        case zenButton:
-          game.setEasyDifficulty();
-          return;
-        case easyButton:
-          game.setMediumDifficulty();
-          return;
-        case mediumButton:
-          game.setHardDifficulty();
-          return;
-        case hardButton:
-          game.setZenMode();
-          return;
-        case backgroundInput:
-          randomBackground.focus();
-          return;
-        case randomBackground:
-          snakeInput.focus();
-          return;
-        case snakeInput:
-          randomSnake.focus();
-          return;
-        case randomSnake:
-          blockInput.focus();
-          return;
-        case blockInput:
-          randomBlock.focus();
-          return;
-        case randomBlock:
-          randomAll.focus();
-          return;
-        case randomAll:
-          closeOptions.focus();
-          return;
-        case closeOptions:
-          backgroundInput.focus();
-          return;
-        case nextTutorialButton:
-          closeTutorialButton.focus();
-          return;
-        case closeTutorialButton:
-          nextTutorialButton.focus();
-          return;
-      }
   }
 });
 
@@ -1652,24 +1556,19 @@ function adjustImgProperties(color) {
 
 function handleOpenOptions() {
   if (game.isRunning) game.pause();
-  showTutorialButton.setAttribute("inert", true);
-  difficultyPanel.setAttribute("inert", true);
-  gameFlowPanel.setAttribute("inert", true);
-  root.style.setProperty("--is-options", "grid");
-  backgroundInput.focus();
+  optionsModal.showModal();
+  window.location.hash = "color-selectors";
 }
 
 openOptions.addEventListener("click", handleOpenOptions);
 
 function handleCloseOptions() {
-  showTutorialButton.removeAttribute("inert");
-  difficultyPanel.removeAttribute("inert");
-  gameFlowPanel.removeAttribute("inert");
-  root.style.setProperty("--is-options", "none");
+  optionsModal.close();
   startPause.focus();
+  history.replaceState(null, null, " ");
 }
 
-closeOptions.addEventListener("click", handleCloseOptions);
+tabs.setEndBehaviour(handleCloseOptions);
 
 function isOptionsOpen() {
   return getComputedStyle(root).getPropertyValue("--is-options") !== "none";
@@ -1722,3 +1621,26 @@ randomAll.addEventListener("click", randomizeAll);
 gameArea.addEventListener("click", (event) => {
   game.handleClick(event.clientX, event.clientY);
 });
+
+dirPadCheckBox.addEventListener("change", () => {
+  if (dirPadCheckBox.checked) {
+    dirButtonsContainer.style.display = "grid";
+    gameArea.style.marginLeft = "0";
+    gameArea.style.maxWidth = "calc(100% - 80vmin - 8vw)";
+  } else {
+    dirButtonsContainer.style.display = "none";
+    gameArea.style.marginLeft = "2vw";
+    gameArea.style.maxWidth = "calc(100% - 40vmin - 4vw)";
+  }
+});
+
+dirPadCheckBox.addEventListener("keydown", (event) => {
+  switch (event.key) {
+    case "Enter":
+    case " ":
+      dirPadCheckBox.click();
+      return;
+  }
+});
+
+
