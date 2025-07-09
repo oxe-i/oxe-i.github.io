@@ -45,7 +45,7 @@ async function handlePageInfo(searchKey) {
   const results = items.map(async (item) => {
     const title = item?.data?.[0]?.title;
     const description = item?.data?.[0]?.description;
-    const imgObj = item?.links?.find((link) => link?.rel === "alternate");
+    const imgObj = item?.links?.find((link) => link?.rel === "canonical");
     if (title && description && imgObj) {
       const { width, height, href } = imgObj;
       try {
