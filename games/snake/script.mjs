@@ -62,6 +62,61 @@ const tutorialText = tutorialMessage.querySelector("p");
 const nextTutorialButton = tutorialMessage.querySelector("#next-tutorial");
 const closeTutorialButton = tutorialMessage.querySelector("#close-tutorial");
 
+const tutorialTextMessages = {
+  true: [
+    `In this game, you move a snake around to catch as many blocks as possible.<br><br>
+      Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
+      If the snake touches the grid or its body, however, the game ends, unless the game is in zen mode.`,
+    `You can choose the difficulty of the game using the icon buttons in the top right corner.<br><br>
+      The first difficulty sets the zen mode, where there isn't a game over and the snake just keeps moving.<br><br>
+      The snake moves faster at higher difficulty levels.`,
+    `There's a score counter below the difficulty buttons.<br><br>
+      You gain points whenever the snake finishes moving over a block.<br><br>
+      The greater the snake and the harder the game, the more points you gain.`,
+    `On "Options" you can adjust various settings of the game. The game pauses while the options panel is open.`,
+    `The first tab in the options panel is "Colors", where you can customize the colors of the game area background, the snake or the blocks.
+      There are also buttons to randomize any one of those colors or all at once.<br><br>
+      Once you randomize a block, the color of new blocks remain random until you set the color again on the options panel.`,
+    `The second tab in the options panel is "Gameplay", where you can add or remove a directional pad on the left of the screen, 
+      or choose to have the snake move with a click on the game area.`,
+    `On the bottom right of the screen, there are buttons for starting and restarting the game.
+      Once the game starts, you can pause it too.`,
+    `You can move the snake with the directional pad on the left of the game area.<br><br>
+      If you've activated the corresponding setting in the options panel, you can also move the snake by clicking on the game area.`,
+    "That's it! Do you want me to repeat?",
+  ],
+  false: [
+    `In this game, you move a snake around to catch as many blocks as possible.<br><br>
+      Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
+      If the snake touches the grid or its body, however, the game ends, unless the game is in zen mode.`,
+    `You can choose the difficulty of the game using the icon buttons in the top right corner.
+      It's also possible to select the difficulty by pressing Z (Zen), E (Easy), M (Medium) and H (Hard).<br><br>
+      You can also cycle through the difficulties by pressing Tab; and 
+      increase or decrease the current difficulty level by pressing + or - respectively.<br><br>
+      The first difficulty sets the zen mode, where there isn't a game over and the snake just keeps moving.<br><br>
+      The snake moves faster at higher difficulty levels.`,
+    `There's a score counter below the difficulty buttons.<br><br>
+      You gain points whenever the snake finishes moving over a block.<br><br>
+      The greater the snake and the harder the game, the more points you gain.`,
+    `On "Options" you can adjust various settings of the game. The game pauses while the options panel is open.
+      This panel can also be opened by pressing O on the keyboard.`,
+    `The first tab in the options panel is "Colors", where you can customize the colors of the game area background, the snake or the blocks.
+      There are also buttons to randomize any one of those colors or all at once.<br><br>
+      You can also randomize block color by pressing B, game area background color by pressing G, snake color by pressing N, and all at once by pressing R. 
+      All those shortcuts work with the panel closed.<br><br>
+      Once you randomize a block, the color of new blocks remain random until you set the color again on the options panel.`,
+    `The second tab in the options panel is "Gameplay", where you can add or remove a directional pad on the left of the screen, 
+      or choose to have the snake move with a click on the game area.`,
+    `On the bottom right of the screen, there are buttons for starting and restarting the game.
+      Once the game starts, you can pause it too.<br><br>
+      You can also start, pause or continue the game by pressing spacebar.`,
+    `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.
+      W moves up, S moves down, A moves left and D moves right.<br><br>
+      If you've activated the corresponding setting in the options panel, you can also move the snake using a directional pad or by clicking on the game area.`,
+    "That's it! Do you want me to repeat?",
+  ],
+};
+
 //helpers for handling current state of the tutorial
 let tutorialStep = 0;
 let endTutorial = false;
@@ -135,6 +190,7 @@ class Difficulty {
   }
 }
 
+//enum-like class to keep track of current game state
 class GameState {
   static get NOT_STARTED() {
     return 0;
@@ -205,6 +261,7 @@ function setHardButton() {
   hardButton.focus();
 }
 
+//generates a random color with at least MIN_CONTRAST with current canvas color
 function validColor() {
   const canvasColor = root.getStyle("--canvas-color");
   return generateColorWithContrast(canvasColor, MIN_CONTRAST);
@@ -228,7 +285,7 @@ class Piece extends ElementWrapper {
   }
 
   /**
-   *
+   * sets color property for the element
    * @param {string} color
    */
   setColor(color) {
@@ -274,7 +331,7 @@ class Piece extends ElementWrapper {
   }
 
   /**
-   *
+   * reposition the piece after resizing of the game area
    * @param {number} pWidth
    * @param {number} pHeight
    * @param {number} nWidth
@@ -310,7 +367,7 @@ class Block extends Piece {
   }
 
   /**
-   *
+   * generates a valid random position for the block
    * @param {Game} game
    */
   #getPosition(game) {
@@ -336,7 +393,7 @@ class Block extends Piece {
   }
 
   /**
-   *
+   * adjusts block classes and properties to be assimilated by the snake
    * @param {boolean} isRandomSnake
    * @returns
    */
@@ -391,7 +448,7 @@ class Head extends Piece {
   }
 
   /**
-   *
+   * adds animation when the head changes direction
    * @param {Game} game
    * @returns
    */
@@ -413,7 +470,6 @@ class Snake {
   #segments;
 
   /**
-   *
    * @param {Game} game
    */
   constructor(game) {
@@ -452,7 +508,7 @@ class Snake {
   }
 
   /**
-   *
+   * reposition all snake segments after game area resize
    * @param {number} pWidth
    * @param {number} pHeight
    * @param {number} nWidth
@@ -486,7 +542,7 @@ class Snake {
   }
 
   /**
-   *
+   * checks if the position overlaps with any snake segment
    * @param {number} row
    * @param {number} col
    * @returns {boolean}
@@ -496,7 +552,7 @@ class Snake {
   }
 
   /**
-   *
+   * adjust border for a snake segment on idx
    * @param {string} border
    * @param {number} idx
    */
@@ -511,6 +567,7 @@ class Snake {
     );
   }
 
+  //adjust border for all snake segments
   #setBorder() {
     for (let i = 1; i < this.#segments.length; ++i) {
       if (this.#segments[i - 1].row < this.#segments[i].row)
@@ -524,7 +581,7 @@ class Snake {
   }
 
   /**
-   *
+   * move the snake
    * @param {Game} game
    */
   move(game) {
@@ -542,7 +599,7 @@ class Snake {
   }
 
   /**
-   *
+   * updates direction if it's different from current one
    * @param {string | undefined} newDirection
    */
   updateDirection(newDirection) {
@@ -749,18 +806,18 @@ class Game {
     );
     this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
     this.#snake = new Snake(this);
-    this.#snake.randomizeColors();
     this.#block = new Block(this);
-    this.#block.setColor(validColor());
+    this.setBlockColor(validColor());
+    this.setSnakeColor(validColor());
     this.#ingestingBlocks = [];
     this.#directionQueue = [];
     this.#raf = 0;
-    this.#isRandomBlock = true;
+    this.#isRandomBlock = false;
     this.#isRandomSnake = false;
     this.#state = GameState.NOT_STARTED;
 
     this.difficulty = Difficulty.MEDIUM;
-    this.isClickMove = true;
+    this.isClickMove = snakeClickMove.checked;
   }
 
   get minHeight() {
@@ -1271,9 +1328,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setBackgroundColor(
     initialColors[Math.floor(randomNum() * initialColors.length)]
   );
-  const snakeColor = validColor();
-  game.setSnakeColor(snakeColor);
-  game.randomBlockColor();
+
+  game.generateColors();
 
   if (!isTouchDevice()) {
     dirPadCheckBox.checked = false;
@@ -1298,6 +1354,8 @@ document.addEventListener("keydown", (event) => {
       if (tutorialMessage.open) {
         if (tutorialStep == 7 || endTutorial) handleCloseTutorial();
         else handleNextTutorial();
+      } else {
+        game.randomSnakeColor();
       }
       return;
     case "Y":
@@ -1322,6 +1380,8 @@ document.addEventListener("keydown", (event) => {
         backgroundInput.dispatchEvent(
           new MouseEvent("click", { bubbles: true, cancelable: true })
         );
+      } else {
+        randomizeBackground();
       }
       return;
     case "B":
@@ -1330,6 +1390,8 @@ document.addEventListener("keydown", (event) => {
         blockInput.dispatchEvent(
           new MouseEvent("click", { bubbles: true, cancelable: true })
         );
+      } else {
+        game.randomBlockColor();
       }
       return;
     case "C":
@@ -1343,7 +1405,6 @@ document.addEventListener("keydown", (event) => {
       return;
     case "T":
     case "t":
-      console.log(tutorialMessage.open);
       if (!tutorialMessage.open) handleShowTutorial();
       return;
     case "Z":
@@ -1454,10 +1515,10 @@ stopButton.addEventListener("click", () => {
 });
 
 [dirUp, dirDown, dirLeft, dirRight].forEach((dirButton, idx) => {
+  const direction = ["UP", "DOWN", "LEFT", "RIGHT"].at(idx);
   dirButton.addEventListener("pointerdown", (event) => {
     event.preventDefault();
-    const directions = ["UP", "DOWN", "LEFT", "RIGHT"];
-    game.addDirection(directions[idx]);
+    game.addDirection(direction);
   });
 });
 
@@ -1495,58 +1556,12 @@ function handleNextTutorial() {
     return;
   }
 
-  tutorialStep %= 7;
-
-  const tutorialTextMessages = {
-    true: {
-      0: `In this game, you move a snake around to catch as many blocks as possible.<br><br>
-          Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
-          If the snake touches the grid or its body, however, the game ends, unless the game is in zen mode.`,
-      1: `You can choose the difficulty of the game using the icon buttons in the top right corner.<br><br>
-          The first difficulty sets the zen mode, where there isn't a game over and the snake just keeps moving.<br><br>
-          The snake moves faster at higher difficulty levels.`,
-      2: `There's a score counter below the difficulty buttons.<br><br>
-          You gain points whenever the snake finishes moving over a block.<br><br>
-          The greater the snake and the harder the game, the more points you gain.`,
-      3: `Below the score, the button "Options" opens a panel to change the colors of all game elements.<br><br>
-          The game pauses while you're selecting colors.<br><br>
-          There are also buttons to randomize any one color or all at once.`,
-      4: `On the bottom right of the game area, there are buttons for starting and restarting the game.
-          Once the game starts, you can pause it too.`,
-      5: "You can move the snake with the directional pad on the left of the game area.",
-      6: "That's it! Do you want me to repeat?",
-    },
-    false: {
-      0: `In this game, you move a snake around to catch as many blocks as possible.<br><br>
-          Once all snake segments finish moving over a block, that block is added to the snake's tail and the snake grows.<br><br>
-          If the snake touches the grid or its body, however, the game ends, unless the game is in zen mode.`,
-      1: `You can choose the difficulty of the game using the icon buttons in the top right corner.
-          It's also possible to select the difficulty by pressing Z (Zen), E (Easy), M (Medium) and H (Hard).<br><br>
-          You can also cycle through the difficulties by pressing Tab; and 
-          increase or decrease the current difficulty level by pressing + or - respectively.<br><br>
-          The first difficulty sets the zen mode, where there isn't a game over and the snake just keeps moving.<br><br>
-          The snake moves faster at higher difficulty levels.`,
-      2: `There's a score counter below the difficulty buttons.<br><br>
-          You gain points whenever the snake finishes moving over a block.<br><br>
-          The greater the snake and the harder the game, the more points you gain.`,
-      3: `Below the score, the button "Options" opens a panel to change the colors of all game elements.
-          This panel can also be opened by pressing O on the keyboard.<br><br>
-          The game pauses while you're selecting colors.<br><br>
-          There are also buttons to randomize any one color or all at once.<br><br>
-          You can also randomize all colors by pressing R on the keyboard. This works even with the panel closed.`,
-      4: `On the bottom right of the game area, there are buttons for starting and restarting the game.
-          Once the game starts, you can pause it too.<br><br>
-          You can also start, pause or continue the game by pressing spacebar.`,
-      5: `You can move the snake by pressing W, A, S, D or the directional keys in your keyboard.<br><br>
-          W moves up, S moves down, A moves left and D moves right.`,
-      6: "That's it! Do you want me to repeat?",
-    },
-  };
+  tutorialStep %= tutorialTextMessages.true.length;
 
   tutorialText.innerHTML =
     tutorialTextMessages[String(isTouchDevice())][tutorialStep];
 
-  if (tutorialStep == 6) {
+  if (tutorialStep == tutorialTextMessages.true.length - 1) {
     nextTutorialButton.innerHTML = "<em>Y</em>es";
     closeTutorialButton.innerHTML = "<em>N</em>o";
     closeTutorialButton.focus();

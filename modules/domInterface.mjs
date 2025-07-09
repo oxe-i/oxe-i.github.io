@@ -79,6 +79,10 @@ export class ElementWrapper {
     return this.#elem.classList.contains(className);
   }
 
+  getAttribute(attribute) {
+    this.#elem.getAttribute(`${attribute}`);
+  }
+
   addAttribute(attribute, value = true) {
     this.#elem.setAttribute(`${attribute}`, `${value}`);
   }
