@@ -37,8 +37,8 @@ button:focus {
   background: var(--background-color);
   display: grid;
   grid-template-rows: [page-start] auto [title] min-content [description] auto [buttons] min-content 1fr [page-end];
-  grid-template-columns: [page-start] 50vmax [img-start] 1fr [page-end];
-  row-gap: 5vh;
+  grid-template-columns: [page-start] 40% [img-start] 1fr [page-end];
+  row-gap: 5vmin;
   column-gap: 2vw;
 }
 
@@ -57,19 +57,22 @@ button:focus {
   display: flex;
   padding: 0;
   gap: 2vw;
+  max-width: 100%;
 }
 
 #search-bar {
   flex: 1;
   font-size: var(--normal-font-size);
-  padding: 0 min(2vmin, 15px);
+  padding: 0 10px;
   border-radius: var(--default-border-radius);
   border: var(--default-border);
   background: none;
   outline: none;
+  min-width: 0;
 }
 
 #search-submit {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,10 +250,6 @@ dialog::backdrop {
     margin-top: 10vmin;
 
     img {
-      position: absolute;
-      top: 0%;
-      left: 50%;
-      transform: translateX(-50%);
       max-width: 100%;
       border: var(--default-border);
       border-radius: var(--default-border-radius);
