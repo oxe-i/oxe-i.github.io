@@ -10,7 +10,7 @@ import { ElementWrapper, TabList } from "../../modules/domInterface.mjs";
  * DOM elements
  */
 
-const root = document.documentElement;
+const root = new ElementWrapper(document.documentElement);
 const gameArea = document.querySelector("#game");
 
 //directional buttons
@@ -206,7 +206,7 @@ function setHardButton() {
 }
 
 function validColor() {
-  const canvasColor = getComputedStyle(root).getPropertyValue("--canvas-color");
+  const canvasColor = root.getStyle("--canvas-color");
   return generateColorWithContrast(canvasColor, MIN_CONTRAST);
 }
 
@@ -254,7 +254,7 @@ class Piece extends ElementWrapper {
 
   /**
    * both setters update the CSS directly, avoiding duplication and mismatches
-   * CSS works with PERCENTAGES
+   * rows and cols are integers
    */
   set row(value) {
     this.addStyle("--row", `${value}`);
@@ -304,6 +304,7 @@ class Block extends Piece {
    */
   constructor(game) {
     super();
+    this.addClass("block");
     this.#getPosition(game);
     this.#getProperties();
   }
@@ -316,15 +317,14 @@ class Block extends Piece {
     do {
       this.row =
         game.minHeight +
-        Math.floor(Math.random() * (game.maxHeight - game.minHeight + 1));
+        Math.floor(randomNum() * (game.maxHeight - game.minHeight + 1));
       this.col =
         game.minWidth +
-        Math.floor(Math.random() * (game.maxWidth - game.minWidth + 1));
+        Math.floor(randomNum() * (game.maxWidth - game.minWidth + 1));
     } while (game.overlapsWithSnake(this.row, this.col));
   }
 
   #getProperties() {
-    this.addClass("block");
     switch (Math.floor(randomNum() * 2)) {
       case 0:
         this.addClass("smiley");
@@ -343,8 +343,7 @@ class Block extends Piece {
   ingested(isRandomSnake) {
     if (isRandomSnake) {
       const color =
-        this.getStyle("background-color") ??
-        getComputedStyle(root).getPropertyValue("--block-color");
+        this.getStyle("background-color") ?? root.getStyle("--block-color");
 
       this.resetClasses();
       this.addClass("snake-segment");
@@ -352,9 +351,7 @@ class Block extends Piece {
       return;
     }
 
-    const color = getComputedStyle(root).getPropertyValue(
-      "--snake-segment-color"
-    );
+    const color = root.getStyle("--snake-segment-color");
 
     this.resetClasses();
     this.addClass("snake-segment");
@@ -399,13 +396,14 @@ class Head extends Piece {
    * @returns
    */
   adjustFacingDirection(game) {
-    if (this.#prevDirection == this.direction) return;
-    this.addStyle(
-      "animation",
-      `${game.timePerFrame}ms ease 1 forwards ${this.#prevDirection}-${
-        this.direction
-      }`
-    );
+    if (this.#prevDirection === this.direction) return;
+    if (this.#prevDirection !== undefined) {
+      this.addStyle(
+        "animation",
+        `${game.timePerFrame}ms ease 1 forwards 
+         ${this.#prevDirection}-${this.direction}`
+      );
+    }
     this.#prevDirection = this.direction;
   }
 }
@@ -632,19 +630,19 @@ class Snake {
 
   /**
    *
-   * @param {Block} block
+   * @param {Block | undefined} block
    * @returns {boolean}
    */
   touchesBlock(block) {
     return (
-      this.#segments[0].nextRow == block.row &&
-      this.#segments[0].nextCol == block.col
+      this.#segments[0].nextRow === block?.row &&
+      this.#segments[0].nextCol === block?.col
     );
   }
 
   /**
    *
-   * @param {Block} block
+   * @param {Block | undefined} block
    * @returns {boolean}
    */
   eatsBlock(block) {
@@ -747,9 +745,7 @@ class Game {
   constructor() {
     this.#bounds = gameArea.getBoundingClientRect();
     const maxPieceUnit = Number(
-      getComputedStyle(root)
-        .getPropertyValue("--max-piece-unit")
-        .replaceAll(/[^\d]/g, "")
+      root.getStyle("--max-piece-unit").replaceAll(/[^\d]/g, "")
     );
     this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
     this.#snake = new Snake(this);
@@ -832,7 +828,7 @@ class Game {
 
   //time per frame depends on difficulty
   get timePerFrame() {
-    return timeFrameDifficultyTable.get(this.difficulty);
+    return timeFrameDifficultyTable.get(this.difficulty) ?? 200;
   }
 
   resize() {
@@ -841,9 +837,7 @@ class Game {
 
     this.#bounds = gameArea.getBoundingClientRect();
     const maxPieceUnit = Number(
-      getComputedStyle(root)
-        .getPropertyValue("--max-piece-unit")
-        .replaceAll(/[^\d]/g, "")
+      root.getStyle("--max-piece-unit").replaceAll(/[^\d]/g, "")
     );
     this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
 
@@ -929,7 +923,7 @@ class Game {
       }
 
       if (this.#snake.touchesBlock(this.#block)) {
-        root.style.setProperty(
+        root.addStyle(
           "--ingestion-time",
           `${this.timePerFrame * this.#snake.length}ms`
         );
@@ -966,12 +960,9 @@ class Game {
       buttonDifficultyTable.get(this.difficulty)();
 
       const deltaTime = timestamp - crtTime + remTime;
+      const numFrames = Math.floor(deltaTime / this.timePerFrame);
 
-      for (
-        let count = 0;
-        count < Math.floor(deltaTime / this.timePerFrame);
-        ++count
-      ) {
+      for (let count = 0; count < numFrames; ++count) {
         if (!processFrame()) return;
       }
 
@@ -1042,8 +1033,7 @@ class Game {
   #generateBlockColor() {
     if (this.#isRandomBlock) this.#generateRandomBlockColors();
     else {
-      const blockColor =
-        getComputedStyle(root).getPropertyValue("--block-color");
+      const blockColor = root.getStyle("--block-color");
       this.setBlockColor(blockColor);
     }
   }
@@ -1051,9 +1041,7 @@ class Game {
   #generateSnakeColor() {
     if (this.#isRandomSnake) this.#generateRandomSnakeColors();
     else {
-      const snakeColor = getComputedStyle(root).getPropertyValue(
-        "--snake-segment-color"
-      );
+      const snakeColor = root.getStyle("--snake-segment-color");
       this.setSnakeColor(snakeColor);
     }
   }
@@ -1080,7 +1068,7 @@ class Game {
   setSnakeColor(color) {
     this.#snake.setColor(color);
     snakeInput.value = color;
-    root.style.setProperty("--snake-segment-color", color);
+    root.addStyle("--snake-segment-color", color);
     this.#isRandomSnake = false;
   }
 
@@ -1091,7 +1079,7 @@ class Game {
   setBlockColor(color) {
     this.#block.setColor(color);
     blockInput.value = color;
-    root.style.setProperty("--block-color", color);
+    root.addStyle("--block-color", color);
     this.#isRandomBlock = false;
   }
 
@@ -1113,7 +1101,7 @@ class Game {
   }
 
   /**
-   * finds optimal path for the snake towards clicked position, using astar algorithm
+   * finds optimal path for the snake towards clicked position, using A* algorithm
    * @param {number} x
    * @param {number} y
    * @returns
@@ -1651,7 +1639,7 @@ function adjustImgProperties(color) {
 
   dataURLs.forEach((dataURL, idx) => {
     const property = groupElems[idx].dataset.property;
-    root.style.setProperty(`${property}`, `url("${dataURL}")`);
+    root.addStyle(`${property}`, `url("${dataURL}")`);
   });
 }
 
@@ -1672,7 +1660,7 @@ function handleCloseOptions() {
 tabs.setEndBehaviour(handleCloseOptions);
 
 function isOptionsOpen() {
-  return getComputedStyle(root).getPropertyValue("--is-options") !== "none";
+  return root.getStyle("--is-options") !== "none";
 }
 
 /**
@@ -1680,7 +1668,7 @@ function isOptionsOpen() {
  * @param {string} color
  */
 function setBackgroundColor(color) {
-  root.style.setProperty("--canvas-color", color);
+  root.addStyle("--canvas-color", color);
   adjustImgProperties(color);
   backgroundInput.value = color;
 }

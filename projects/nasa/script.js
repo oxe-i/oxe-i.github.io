@@ -10,10 +10,18 @@ const searchAgain = noResult.querySelector("#search-again");
 const previousResult = document.querySelector("#previous-result");
 const nextResult = document.querySelector("#next-result");
 
+let crtTitle;
+let crtDescription;
+
 function createImgElement(url, width, height) {
   fstImg.src = url;
   fstImg.style.aspectRatio = width && height ? `${width / height}` : "1";
 }
+
+fstImg.addEventListener("load", () => {
+  titleText.textContent = crtTitle;
+  descriptionText.textContent = crtDescription;
+});
 
 function preloadImage(url) {
   return new Promise((resolve, reject) => {
@@ -103,9 +111,9 @@ async function getNextResult() {
           result: prevResult.result,
         });
       }
+      crtTitle = result.title;
+      crtDescription = result.description;
       createImgElement(img.src, result.width, result.height);
-      titleText.textContent = result.title;
-      descriptionText.textContent = result.description;
     },
     () => {
       getNextResult();
@@ -126,7 +134,7 @@ async function getPrevResult() {
     (img) => {
       if (nextResult) {
         nextResults.unshift(nextResult.promise);
-      }      
+      }
       createImgElement(img.src, result.width, result.height);
       titleText.textContent = result.title;
       descriptionText.textContent = result.description;
