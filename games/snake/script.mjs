@@ -5,6 +5,7 @@ import {
 } from "../../modules/colors.mjs";
 import { randomNum } from "../../modules/random.mjs";
 import { ElementWrapper, TabList } from "../../modules/domInterface.mjs";
+
 /**
  * DOM elements
  */
@@ -25,6 +26,7 @@ const zenButton = document.querySelector("#zen");
 const easyButton = document.querySelector("#easy");
 const mediumButton = document.querySelector("#medium");
 const hardButton = document.querySelector("#hard");
+const diffButtons = [zenButton, easyButton, mediumButton, hardButton];
 
 //current score text
 const scoreText = document.querySelector("#score");
@@ -89,6 +91,7 @@ const randomAll = document.querySelector("#randomize-everything");
 
 //gameplay options
 const dirPadCheckBox = document.querySelector("#directional-pad-checkbox");
+const snakeClickMove = document.querySelector("#snake-movement-checkbox");
 
 //imgs templates
 const svgElems = [
@@ -161,7 +164,7 @@ function enableDifficultyButtons() {
 }
 
 function disableDifficultyButtons() {
-  difficultyPanel.setAttribute("inert", true);
+  difficultyPanel.setAttribute("inert", "true");
 }
 
 //dispatch table mapping difficulties to a helper for the corresponding button
@@ -181,10 +184,9 @@ const timeFrameDifficultyTable = new Map([
 
 //helpers to set outline for the currently selected difficulty button
 function resetDifficultyButtons() {
-  zenButton.style.outline = "";
-  easyButton.style.outline = "";
-  mediumButton.style.outline = "";
-  hardButton.style.outline = "";
+  diffButtons.forEach((button) => {
+    button.style.setProperty("outline", "");
+  });
 }
 
 function setZenButton() {
@@ -208,7 +210,10 @@ function validColor() {
   return generateColorWithContrast(canvasColor, MIN_CONTRAST);
 }
 
-//helper to check if the device is touchscreen
+/**
+ * helper to check if the device is touchscreen
+ * @returns {boolean}
+ */
 function isTouchDevice() {
   return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
@@ -222,6 +227,10 @@ class Piece extends ElementWrapper {
     this.updateStyle();
   }
 
+  /**
+   *
+   * @param {string} color
+   */
   setColor(color) {
     this.addStyle("background-color", color);
   }
@@ -265,7 +274,7 @@ class Piece extends ElementWrapper {
   }
 
   /**
-   * called on window resizing to scale the piece
+   *
    * @param {number} pWidth
    * @param {number} pHeight
    * @param {number} nWidth
@@ -300,7 +309,7 @@ class Block extends Piece {
   }
 
   /**
-   * randomizes position of the block
+   *
    * @param {Game} game
    */
   #getPosition(game) {
@@ -311,7 +320,7 @@ class Block extends Piece {
       this.col =
         game.minWidth +
         Math.floor(Math.random() * (game.maxWidth - game.minWidth + 1));
-    } while (game?.overlapsWithSnake(this.row, this.col));
+    } while (game.overlapsWithSnake(this.row, this.col));
   }
 
   #getProperties() {
@@ -326,6 +335,11 @@ class Block extends Piece {
     }
   }
 
+  /**
+   *
+   * @param {boolean} isRandomSnake
+   * @returns
+   */
   ingested(isRandomSnake) {
     if (isRandomSnake) {
       const color =
@@ -351,6 +365,8 @@ class Block extends Piece {
 //class to represent the head of the snake, with a direction and memory of next position
 class Head extends Piece {
   #prevDirection;
+  nextRow;
+  nextCol;
 
   constructor() {
     super();
@@ -363,6 +379,9 @@ class Head extends Piece {
     return this.getStyle("--direction");
   }
 
+  /**
+   * @param {string} value
+   */
   set direction(value) {
     this.addStyle("--direction", `${value}`);
   }
@@ -407,7 +426,6 @@ class Snake {
         return segment;
       })
     );
-
     this.#initializeSegments(game);
   }
 
@@ -436,7 +454,7 @@ class Snake {
   }
 
   /**
-   * called on window resizing, to scale the snake
+   *
    * @param {number} pWidth
    * @param {number} pHeight
    * @param {number} nWidth
@@ -470,7 +488,7 @@ class Snake {
   }
 
   /**
-   * checks if a position overlaps with any snake segment
+   *
    * @param {number} row
    * @param {number} col
    * @returns {boolean}
@@ -527,29 +545,54 @@ class Snake {
 
   /**
    *
-   * @param {Direction} newDirection
+   * @param {string | undefined} newDirection
    */
   updateDirection(newDirection) {
     if (newDirection && newDirection != this.#segments[0].direction)
       this.#segments[0].direction = newDirection;
   }
 
+  /**
+   *
+   * @param {Game} game
+   * @returns {boolean}
+   */
   touchesLeftWall(game) {
     return this.#segments[0].nextCol < game.minWidth;
   }
 
+  /**
+   *
+   * @param {Game} game
+   * @returns {boolean}
+   */
   touchesRightWall(game) {
     return this.#segments[0].nextCol > game.maxWidth;
   }
 
+  /**
+   *
+   * @param {Game} game
+   * @returns {boolean}
+   */
   touchesTopWall(game) {
     return this.#segments[0].nextRow < game.minHeight;
   }
 
+  /**
+   *
+   * @param {Game} game
+   * @returns {boolean}
+   */
   touchesBottomWall(game) {
     return this.#segments[0].nextRow > game.maxHeight;
   }
 
+  /**
+   *
+   * @param {Game} game
+   * @returns {boolean}
+   */
   touchesGrid(game) {
     return (
       this.touchesLeftWall(game) ||
@@ -560,17 +603,15 @@ class Snake {
   }
 
   /**
-   * checks if the snake touches its tail
+   *
    * @returns {boolean}
    */
   touchesTail() {
-    return this.#segments
-      .slice(1)
-      .some(
-        (segment) =>
-          segment.row == this.#segments[0].nextRow &&
-          segment.col == this.#segments[0].nextCol
-      );
+    return this.#segments.some(
+      (segment) =>
+        segment.row == this.#segments[0].nextRow &&
+        segment.col == this.#segments[0].nextCol
+    );
   }
 
   teleportRight() {
@@ -590,7 +631,7 @@ class Snake {
   }
 
   /**
-   * checks if the head touches the block
+   *
    * @param {Block} block
    * @returns {boolean}
    */
@@ -602,7 +643,7 @@ class Snake {
   }
 
   /**
-   * checks if the block reaches the end of the snake
+   *
    * @param {Block} block
    * @returns {boolean}
    */
@@ -614,9 +655,8 @@ class Snake {
   }
 
   /**
-   * adds a digested block to the snake
+   *
    * @param {Piece} newSegment
-   * @param {boolean} isRandom
    */
   addSegment(newSegment) {
     this.#segments.push(newSegment);
@@ -626,7 +666,7 @@ class Snake {
     for (let i = 0; i < this.#segments.length; ++i) {
       this.#segments[i].reset();
     }
-    this.#segments = null;
+    this.#segments = [];
   }
 
   /**
@@ -660,7 +700,7 @@ class Snake {
   /**
    *
    * @param {number} idx
-   * @returns {Piece}
+   * @returns {Piece | undefined}
    */
   segmentAt(idx) {
     return this.#segments.at(idx);
@@ -701,6 +741,8 @@ class Game {
   #isRandomSnake;
   #isRandomBlock;
   #state;
+  difficulty;
+  isClickMove;
 
   constructor() {
     this.#bounds = gameArea.getBoundingClientRect();
@@ -716,11 +758,13 @@ class Game {
     this.#block.setColor(validColor());
     this.#ingestingBlocks = [];
     this.#directionQueue = [];
-    this.difficulty = Difficulty.MEDIUM;
-    this.#raf = undefined;
+    this.#raf = 0;
     this.#isRandomBlock = true;
     this.#isRandomSnake = false;
     this.#state = GameState.NOT_STARTED;
+
+    this.difficulty = Difficulty.MEDIUM;
+    this.isClickMove = true;
   }
 
   get minHeight() {
@@ -756,7 +800,6 @@ class Game {
   }
 
   hide() {
-    this.#snake.hide();
     this.#block.hide();
     this.#ingestingBlocks.forEach((block) => {
       block.hide();
@@ -831,7 +874,7 @@ class Game {
 
   /**
    *
-   * @param {Direction} newDirection
+   * @param {string} newDirection
    */
   addDirection(newDirection) {
     if (this.isRunning) this.#directionQueue = [newDirection];
@@ -910,7 +953,7 @@ class Game {
     /**
      *
      * @param {number} timestamp
-     * @returns {void}
+     * @returns
      */
     const gameLoop = (timestamp) => {
       if (!crtTime) {
@@ -922,7 +965,7 @@ class Game {
 
       buttonDifficultyTable.get(this.difficulty)();
 
-      let deltaTime = timestamp - crtTime + remTime;
+      const deltaTime = timestamp - crtTime + remTime;
 
       for (
         let count = 0;
@@ -949,7 +992,7 @@ class Game {
     setIconToPlay();
     cancelAnimationFrame(this.#raf);
     this.#state = GameState.PAUSED;
-    this.#raf = null;
+    this.#raf = 0;
     startPause.focus();
   }
 
@@ -958,7 +1001,9 @@ class Game {
 
     finalScore.innerHTML = `${this.#score}`;
     const prevScore = localStorage.getItem("bestScore");
-    const crtBest = prevScore ? Math.max(prevScore, this.#score) : this.#score;
+    const crtBest = prevScore
+      ? Math.max(Number(prevScore), this.#score)
+      : this.#score;
     localStorage.setItem("bestScore", `${crtBest}`);
     bestScore.innerHTML = `${crtBest}`;
     finalScore.style.color =
@@ -983,7 +1028,7 @@ class Game {
     this.#directionQueue = [];
     this.#score = 0;
     this.#state = GameState.NOT_STARTED;
-    this.#raf = null;
+    this.#raf = 0;
   }
 
   #generateRandomSnakeColors() {
@@ -1028,6 +1073,10 @@ class Game {
     this.#isRandomBlock = true;
   }
 
+  /**
+   *
+   * @param {string} color
+   */
   setSnakeColor(color) {
     this.#snake.setColor(color);
     snakeInput.value = color;
@@ -1035,6 +1084,10 @@ class Game {
     this.#isRandomSnake = false;
   }
 
+  /**
+   *
+   * @param {string} color
+   */
   setBlockColor(color) {
     this.#block.setColor(color);
     blockInput.value = color;
@@ -1046,6 +1099,12 @@ class Game {
     return this.#state === GameState.RUNNING;
   }
 
+  /**
+   * find row and col in the game area grid for a given position in pixels
+   * @param {number} x
+   * @param {number} y
+   * @returns
+   */
   #findSquare(x, y) {
     return {
       col: Math.ceil((x - this.#bounds.left) / this.#pieceUnit),
@@ -1053,11 +1112,18 @@ class Game {
     };
   }
 
+  /**
+   * finds optimal path for the snake towards clicked position, using astar algorithm
+   * @param {number} x
+   * @param {number} y
+   * @returns
+   */
   handleClick(x, y) {
     if (!game.isRunning) return;
 
     const target = this.#findSquare(x, y);
 
+    //minheap
     const heap = new PQueue((a, b) => {
       const cost = (node) => {
         return node.steps;
@@ -1169,13 +1235,15 @@ class Game {
       }
     }
 
-    let path = [];
+    const path = [];
     while (current.parent) {
       path.push(current.direction);
       current = current.parent;
     }
 
-    this.#directionQueue = path.reverse();
+    this.#directionQueue = path
+      .filter((direction) => direction !== undefined)
+      .reverse();
   }
 }
 
@@ -1186,11 +1254,13 @@ window.addEventListener("resize", () => {
   game.resize();
 });
 
+/**
+ *
+ * @returns {boolean}
+ */
 function isPortraitOrientation() {
-  return (
-    screen.orientation.type == "portrait-primary" ||
-    screen.orientation.type == "portrait-secundary"
-  );
+  const type = screen.orientation.type;
+  return type == "portrait-primary" || type == "portrait-secundary";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1364,6 +1434,21 @@ document.addEventListener("keydown", (event) => {
           break;
       }
       return;
+    case "Tab":
+      switch (document.activeElement) {
+        case zenButton:
+          game.difficulty = Difficulty.EASY;
+          return;
+        case easyButton:
+          game.difficulty = Difficulty.MEDIUM;
+          return;
+        case mediumButton:
+          game.difficulty = Difficulty.HARD;
+          return;
+        case hardButton:
+          game.difficulty = Difficulty.ZEN;
+          return;
+      }
   }
 });
 
@@ -1384,7 +1469,7 @@ stopButton.addEventListener("click", () => {
   dirButton.addEventListener("pointerdown", (event) => {
     event.preventDefault();
     const directions = ["UP", "DOWN", "LEFT", "RIGHT"];
-    game.addDirection(directions.at(idx));
+    game.addDirection(directions[idx]);
   });
 });
 
@@ -1470,7 +1555,8 @@ function handleNextTutorial() {
     },
   };
 
-  tutorialText.innerHTML = tutorialTextMessages[isTouchDevice()][tutorialStep];
+  tutorialText.innerHTML =
+    tutorialTextMessages[String(isTouchDevice())][tutorialStep];
 
   if (tutorialStep == 6) {
     nextTutorialButton.innerHTML = "<em>Y</em>es";
@@ -1531,17 +1617,32 @@ function handleShowTutorial() {
 
 showTutorialButton.addEventListener("click", handleShowTutorial);
 
+/**
+ *
+ * @param {Node} elem
+ * @returns {string}
+ */
 function getElemString(elem) {
   const serializer = new XMLSerializer();
   return serializer.serializeToString(elem);
 }
 
+/**
+ *
+ * @param {string} elemString
+ * @returns {string}
+ */
 function getDataSVG(elemString) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(elemString)}`;
 }
 
+/**
+ *
+ * @param {string} color
+ */
 function adjustImgProperties(color) {
   groupElems.forEach((svgElem) => {
+    if (!svgElem.dataset.color) return;
     const attribute = svgElem.dataset.color;
     svgElem.setAttribute(attribute, color);
   });
@@ -1565,7 +1666,7 @@ openOptions.addEventListener("click", handleOpenOptions);
 function handleCloseOptions() {
   optionsModal.close();
   startPause.focus();
-  history.replaceState(null, null, " ");
+  history.replaceState(null, "", " ");
 }
 
 tabs.setEndBehaviour(handleCloseOptions);
@@ -1574,6 +1675,10 @@ function isOptionsOpen() {
   return getComputedStyle(root).getPropertyValue("--is-options") !== "none";
 }
 
+/**
+ *
+ * @param {string} color
+ */
 function setBackgroundColor(color) {
   root.style.setProperty("--canvas-color", color);
   adjustImgProperties(color);
@@ -1581,17 +1686,23 @@ function setBackgroundColor(color) {
 }
 
 backgroundInput.addEventListener("input", (event) => {
-  const color = event.target.value;
+  if (!event.target) return;
+  const target = event.target;
+  const color = target.value;
   setBackgroundColor(color);
 });
 
 snakeInput.addEventListener("input", (event) => {
-  const color = event.target.value;
+  if (!event.target) return;
+  const target = event.target;
+  const color = target.value;
   game.setSnakeColor(color);
 });
 
 blockInput.addEventListener("input", (event) => {
-  const color = event.target.value;
+  if (!event.target) return;
+  const target = event.target;
+  const color = target.value;
   game.setBlockColor(color);
 });
 
@@ -1619,7 +1730,7 @@ randomBlock.addEventListener("click", () => {
 randomAll.addEventListener("click", randomizeAll);
 
 gameArea.addEventListener("click", (event) => {
-  game.handleClick(event.clientX, event.clientY);
+  if (game.isClickMove) game.handleClick(event.clientX, event.clientY);
 });
 
 dirPadCheckBox.addEventListener("change", () => {
@@ -1627,10 +1738,12 @@ dirPadCheckBox.addEventListener("change", () => {
     dirButtonsContainer.style.display = "grid";
     gameArea.style.marginLeft = "0";
     gameArea.style.maxWidth = "calc(100% - 80vmin - 8vw)";
+    game.resize();
   } else {
     dirButtonsContainer.style.display = "none";
     gameArea.style.marginLeft = "2vw";
     gameArea.style.maxWidth = "calc(100% - 40vmin - 4vw)";
+    game.resize();
   }
 });
 
@@ -1643,4 +1756,15 @@ dirPadCheckBox.addEventListener("keydown", (event) => {
   }
 });
 
+snakeClickMove.addEventListener("change", () => {
+  game.isClickMove = snakeClickMove.checked;
+});
 
+snakeClickMove.addEventListener("keydown", (event) => {
+  switch (event.key) {
+    case "Enter":
+    case " ":
+      snakeClickMove.click();
+      return;
+  }
+});

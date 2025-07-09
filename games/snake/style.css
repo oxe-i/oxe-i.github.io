@@ -260,6 +260,8 @@ dialog::backdrop {
   background: var(--background-color);
   padding: 5vmin;
   width: 80vmin;
+  height: 80vmin;
+  position: fixed;
 
   button {
     background-color: var(--low-contrast-color);
@@ -298,11 +300,11 @@ dialog::backdrop {
 }
 
 [aria-selected="true"] {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 4px 10px black;
 }
 
 .option-selector {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 4px 10px black;
   position: relative;
   padding: 5vmin;
   border-radius: 0;
@@ -375,6 +377,14 @@ dialog::backdrop {
 #gameplay-selectors {
   justify-content: center;
   align-items: center;
+  grid-template-columns: 1fr repeat(3, auto);
+  grid-template-rows: repeat(2, 1fr);
+
+  label {
+    grid-column: 1/5;
+    display: flex;
+    justify-content: space-between;
+  }
 
   input {
     margin-left: 2vw;

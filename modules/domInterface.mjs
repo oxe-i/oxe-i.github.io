@@ -130,8 +130,11 @@ export class TabList {
         case "w":
           this.#tabs[this.#crtTabIdx].panel.focus();
           return;
+        case "Home":
+          this.#tabs[this.#crtTabIdx].tab.focus();
+          return;
       }
-    })
+    });
 
     this.#tabs.forEach(({ tab, panel }, idx) => {
       tab.addEventListener("keydown", (event) => {
