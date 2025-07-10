@@ -14,6 +14,8 @@
   --large-font-size: 3vmin;
   --normal-font-size: 2.5vmin;
   --max-piece-unit: 4vh;
+  --max-border-unit: calc(0.05 * var(--max-piece-unit));
+  --border-unit: max(round(down, var(--max-border-unit), 1px), 1px);
   --piece-unit: round(down, var(--max-piece-unit), 1px);
   --ingestion-time: 0;
   --snake-eyes-img: url("../../assets/snake-eyes.svg");
@@ -461,7 +463,7 @@ dialog::backdrop {
 .piece.snake-segment {
   border-radius: 0;
   background-color: var(--snake-segment-color);
-  border-left: 1px solid var(--canvas-color);
+  border-left: var(--border-unit) solid var(--canvas-color);
   transition: background-color var(--ingestion-time) linear,
     border-radius var(--ingestion-time) linear;
   box-shadow: 5px 5px 10px rgb(0, 10, 0, 0.5);

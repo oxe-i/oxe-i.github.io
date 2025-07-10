@@ -53,8 +53,8 @@ export function randomColor(R = 255, G = 255, B = 255) {
 }
 
 //generates a random color with good contrast
-export function generateColorWithContrast(baseColor, contrast) {
-  const baseLum = getLuminance(colorHexToRGB(baseColor));
+export function generateColorWithContrast(baseColors, contrast) {
+  const baseLums = baseColors.map(color => getLuminance(colorHexToRGB(color)));
 
   let color;
   let colorComponents;
@@ -64,7 +64,7 @@ export function generateColorWithContrast(baseColor, contrast) {
     color = randomColor();
     colorComponents = colorHexToRGB(color);
     lum = getLuminance(colorComponents);
-  } while (!validContrast(baseLum, lum, contrast));
+  } while (baseLums.some(baseLum => !validContrast(baseLum, lum, contrast)));
 
   return color;
 }

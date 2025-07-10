@@ -1,8 +1,5 @@
 import { PQueue } from "../../modules/pqueue.mjs";
-import {
-  generateColorWithContrast,
-  randomColor,
-} from "../../modules/colors.mjs";
+import { generateColorWithContrast } from "../../modules/colors.mjs";
 import { randomNum } from "../../modules/random.mjs";
 import { ElementWrapper, TabList } from "../../modules/domInterface.mjs";
 
@@ -103,7 +100,7 @@ const tutorialTextMessages = {
     `The first tab in the options panel is "Colors", where you can customize the colors of the game area background, the snake or the blocks.
       There are also buttons to randomize any one of those colors or all at once.<br><br>
       You can also randomize block color by pressing B, game area background color by pressing G, snake color by pressing N, and all at once by pressing R. 
-      All those shortcuts work with the panel closed.<br><br>
+      All those shortcuts work with the panel closed.<br><br> 
       Once you randomize a block, the color of new blocks remain random until you set the color again on the options panel.`,
     `The second tab in the options panel is "Gameplay", where you can add or remove a directional pad on the left of the screen, 
       or choose to have the snake move with a click on the game area.`,
@@ -262,9 +259,15 @@ function setHardButton() {
 }
 
 //generates a random color with at least MIN_CONTRAST with current canvas color
-function validColor() {
+function validPieceColor() {
   const canvasColor = root.getStyle("--canvas-color");
-  return generateColorWithContrast(canvasColor, MIN_CONTRAST);
+  return generateColorWithContrast([canvasColor], MIN_CONTRAST);
+}
+
+function validBackgroundColor() {
+  const snakeColor = root.getStyle("--snake-segment-color");
+  const blockColor = root.getStyle("--block-color");
+  return generateColorWithContrast([snakeColor, blockColor], MIN_CONTRAST);
 }
 
 /**
@@ -563,7 +566,7 @@ class Snake {
     this.#segments[idx].addStyle("border-right", "0");
     this.#segments[idx].addStyle(
       `border-${border}`,
-      "1px solid var(--canvas-color)"
+      "var(--border-unit) solid var(--canvas-color)"
     );
   }
 
@@ -769,7 +772,7 @@ class Snake {
 
   randomizeColors() {
     this.#segments.forEach((segment) => {
-      segment.setColor(validColor());
+      segment.setColor(validPieceColor());
     });
   }
 
@@ -807,8 +810,8 @@ class Game {
     this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
     this.#snake = new Snake(this);
     this.#block = new Block(this);
-    this.setBlockColor(validColor());
-    this.setSnakeColor(validColor());
+    this.setBlockColor(validPieceColor());
+    this.setSnakeColor(validPieceColor());
     this.#ingestingBlocks = [];
     this.#directionQueue = [];
     this.#raf = 0;
@@ -893,9 +896,11 @@ class Game {
     const prevHeight = this.maxHeight - this.minHeight + 1;
 
     this.#bounds = gameArea.getBoundingClientRect();
+    
     const maxPieceUnit = Number(
       root.getStyle("--max-piece-unit").replaceAll(/[^\d]/g, "")
     );
+
     this.#pieceUnit = Math.floor((window.innerHeight / 100) * maxPieceUnit);
 
     if (this.#state === GameState.NOT_STARTED) {
@@ -1084,22 +1089,36 @@ class Game {
   }
 
   #generateRandomBlockColors() {
-    this.#block.setColor(validColor());
+    this.#block.setColor(validPieceColor());
+  }
+
+  #generateSetSnakeColor(color) {
+    this.#snake.setColor(color);
+    snakeInput.value = color;
+    root.addStyle("--snake-segment-color", color);
+  }
+
+  #generateSetBlockColor(color) {
+    this.#block.setColor(color);
+    blockInput.value = color;
+    root.addStyle("--block-color", color);
   }
 
   #generateBlockColor() {
-    if (this.#isRandomBlock) this.#generateRandomBlockColors();
-    else {
+    if (this.#isRandomBlock) {
+      this.#generateRandomBlockColors();
+    } else {
       const blockColor = root.getStyle("--block-color");
-      this.setBlockColor(blockColor);
+      this.#generateSetBlockColor(blockColor);
     }
   }
 
   #generateSnakeColor() {
-    if (this.#isRandomSnake) this.#generateRandomSnakeColors();
-    else {
+    if (this.#isRandomSnake) {
+      this.#generateRandomSnakeColors();
+    } else {
       const snakeColor = root.getStyle("--snake-segment-color");
-      this.setSnakeColor(snakeColor);
+      this.#generateSetSnakeColor(snakeColor);
     }
   }
 
@@ -1119,24 +1138,20 @@ class Game {
   }
 
   /**
-   *
+   * sets color of snake, deactivating randomization
    * @param {string} color
    */
   setSnakeColor(color) {
-    this.#snake.setColor(color);
-    snakeInput.value = color;
-    root.addStyle("--snake-segment-color", color);
+    this.#generateSetSnakeColor(color);
     this.#isRandomSnake = false;
   }
 
   /**
-   *
+   * sets color of block, deactivating randomization
    * @param {string} color
    */
   setBlockColor(color) {
-    this.#block.setColor(color);
-    blockInput.value = color;
-    root.addStyle("--block-color", color);
+    this.#generateSetBlockColor(color);
     this.#isRandomBlock = false;
   }
 
@@ -1710,8 +1725,9 @@ blockInput.addEventListener("input", (event) => {
 });
 
 function randomizeBackground() {
-  const color = randomColor();
+  const color = validBackgroundColor();
   setBackgroundColor(color);
+  game.generateColors();
 }
 
 function randomizeAll() {
