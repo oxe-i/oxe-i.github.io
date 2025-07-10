@@ -1347,8 +1347,10 @@ document.addEventListener("DOMContentLoaded", () => {
   game.generateColors();
 
   if (!isTouchDevice()) {
-    dirPadCheckBox.checked = false;
     tutorialText.innerHTML += `<br><br>By the way, you can always advance on the tutorial by pressing N and close it by pressing C.`;
+  }
+  else {
+    dirPadCheckBox.click();
   }
 
   if (isPortraitOrientation()) alertMessage.showModal();

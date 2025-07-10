@@ -15,7 +15,8 @@
   --normal-font-size: 2.5vmin;
   --max-piece-unit: 4vh;
   --max-border-unit: calc(0.05 * var(--max-piece-unit));
-  --border-unit: max(round(down, var(--max-border-unit), 1px), 1px);
+  --border-unit: var(--max-border-unit);
+  --outline-unit: 0.5vmin;
   --piece-unit: round(down, var(--max-piece-unit), 1px);
   --ingestion-time: 0;
   --snake-eyes-img: url("../../assets/snake-eyes.svg");
@@ -52,7 +53,7 @@ button {
 }
 
 .enabled:focus {
-  outline: 2px solid var(--letter-color);
+  outline: 1px solid var(--letter-color);
 }
 
 .enabled:hover {
@@ -208,7 +209,7 @@ dialog::backdrop {
     grid-area: title;
     font-weight: 600;
     border-radius: 0;
-    border-bottom: 1px solid var(--letter-color);
+    border-bottom: var(--border-unit) solid var(--letter-color);
   }
 
   button {
@@ -218,19 +219,19 @@ dialog::backdrop {
 }
 
 #zen:focus {
-  outline: 2px solid var(--zen-blue);
+  outline: var(--outline-unit) solid var(--zen-blue);
 }
 
 #easy:focus {
-  outline: 2px solid var(--light-green-color);
+  outline: var(--outline-unit) solid var(--light-green-color);
 }
 
 #medium:focus {
-  outline: 2px solid var(--light-yellow-color);
+  outline: var(--outline-unit) solid var(--light-yellow-color);
 }
 
 #hard:focus {
-  outline: 2px solid var(--light-red-color);
+  outline: var(--outline-unit) solid var(--light-red-color);
 }
 
 #game-stats {
@@ -258,7 +259,7 @@ dialog::backdrop {
 }
 
 #options-modal {
-  border: 1px solid var(--letter-color);
+  border: var(--border-unit) solid var(--letter-color);
   background: var(--background-color);
   padding: 5vmin;
   width: 80vmin;
@@ -275,6 +276,11 @@ dialog::backdrop {
   display: flex;
   gap: 1vmin;
   justify-content: space-between;
+  position: absolute;
+  top: 5vmin;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60vmin;
 
   a {
     font-style: normal;
@@ -283,9 +289,8 @@ dialog::backdrop {
 }
 
 .options-tab {
-  max-width: 30vmin;
+  max-width: 20vmin;
   flex: 1;
-  margin-bottom: 0;
   border-radius: 0;
   position: relative;
   padding: 1vmin 2vmin;
@@ -297,21 +302,25 @@ dialog::backdrop {
   }
 }
 
+[aria-selected="true"]{
+  border: var(--border-unit) solid var(--letter-color);
+}
+
 [role="tab"]:hover {
   transform: scale(1.1);
 }
 
-[aria-selected="true"] {
-  box-shadow: 0 4px 10px black;
-}
-
 .option-selector {
   display: none;
-  box-shadow: 0 4px 10px black;
   position: relative;
-  padding: 5vmin;
+  width: 60vmin;
+  height: 50vmin;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 3vmin;
   border-radius: 0;
-  margin: 5vmin 0;
+  border: var(--border-unit) solid var(--letter-color);
 }
 
 .option-selector:target {
@@ -319,31 +328,36 @@ dialog::backdrop {
 }
 
 #color-selectors {
-  max-height: 50vmin;
-  grid-template-columns: 1fr repeat(3, auto);
-  grid-template-rows: repeat(4, auto);
-  column-gap: 5vmin;
-  row-gap: 5vmin;
+  grid-template-rows: repeat(5, 1fr);
+  row-gap: 3vmin;  
   align-items: center;
+  position: relative;
 
   div {
-    grid-column: 1 / end;
-    display: grid;
-    grid-template-columns: subgrid;
-    align-items: center;
+    width: 54vmin;
+    display: flex;    
 
-    h3 {
+    label {
+      flex: 1;
+      align-self: center;
       text-align: justify;
-      grid-column: 2;
-    }
+      line-height: 100%;
+      position: relative;
 
-    input {
-      border-radius: 0;
-      grid-column: 3;
+      input {
+        position: absolute;
+        right: 10vmin;
+        top: 50%;
+        max-width: 8vmin;
+        min-width: 4vmin;
+        min-height: 4vmin;
+        max-height: 100%;
+        transform: translateY(-50%);
+      }
     }
 
     button {
-      grid-column: 4;
+      flex: initial;
     }
   }
 
@@ -361,39 +375,48 @@ dialog::backdrop {
 
   button {
     margin: 0;
-    grid-column: 2/5;
   }
 
   #randomize-everything {
-    grid-row: 4;
+    grid-row: 4/end;
+    position: absolute;
+    left: 25%;
+    right: 25%;
   }
 }
 
 .close-options {
-  margin: 0 auto;
+  position: absolute;
+  bottom: 5vmin;
+  left: 20vmin;
   width: 50%;
 }
 
 #gameplay-selectors {
-  justify-content: center;
-  align-items: center;
-  grid-template-columns: 1fr repeat(3, auto);
   grid-template-rows: repeat(5, 1fr);
-  row-gap: 5vmin;
+  row-gap: 3vmin;
+  align-items: center;
 
   label {
-    grid-column: 1/5;
+    text-align: justify;
     display: flex;
     justify-content: space-between;
+    width: 100%;
+    position: relative;
   }
 
   input {
-    margin-left: 2vw;
+    width: max(2vmin, 5px);
+    height: max(2vmin, 5px);
+    border-radius: 0;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }
 
 .color-button:focus {
-  box-shadow: 0 0 0 2px var(--letter-color);
   outline: 1px solid var(--background-color);
 }
 
@@ -411,7 +434,7 @@ dialog::backdrop {
 }
 
 #start-pause:focus {
-  outline: 1px solid var(--light-green-color);
+  outline: var(--outline-unit) solid var(--light-green-color);
 }
 
 #stop:focus {
@@ -599,15 +622,15 @@ dialog::backdrop {
   }
 
   #easy:focus {
-    outline: 2px solid var(--light-green-color);
+    outline: var(--outline-unit) solid var(--light-green-color);
   }
 
   #medium:focus {
-    outline: 2px solid var(--light-yellow-color);
+    outline: var(--outline-unit) solid var(--light-yellow-color);
   }
 
   #hard:focus {
-    outline: 2px solid var(--light-red-color);
+    outline: var(--outline-unit) solid var(--light-red-color);
   }
 
   #game {
