@@ -349,11 +349,6 @@ class Piece extends ElementWrapper {
     if (this.getStyle("display") !== "none") return;
     this.addStyle("display", display);
   }
-
-  hide() {
-    if (this.getStyle("display") === "none") return;
-    this.addStyle("display", "none");
-  }
 }
 
 //class to represent the collectable block
@@ -611,7 +606,7 @@ class Snake {
   }
 
   /**
-   *
+   * checks if the snake will hit the left wall
    * @param {Game} game
    * @returns {boolean}
    */
@@ -620,7 +615,7 @@ class Snake {
   }
 
   /**
-   *
+   * checks if the snake will hit the right wall
    * @param {Game} game
    * @returns {boolean}
    */
@@ -629,7 +624,7 @@ class Snake {
   }
 
   /**
-   *
+   * checks if the snake will hit the top wall
    * @param {Game} game
    * @returns {boolean}
    */
@@ -638,7 +633,7 @@ class Snake {
   }
 
   /**
-   *
+   * checks if the snake will hit the bottom wall
    * @param {Game} game
    * @returns {boolean}
    */
@@ -647,7 +642,7 @@ class Snake {
   }
 
   /**
-   *
+   * checks if the snake will hit any wall of the grid
    * @param {Game} game
    * @returns {boolean}
    */
@@ -661,7 +656,7 @@ class Snake {
   }
 
   /**
-   *
+   * checks if the snake will hit any of its tail segments
    * @returns {boolean}
    */
   touchesTail() {
@@ -672,24 +667,40 @@ class Snake {
     );
   }
 
+  /**
+   * on zen mode, move the snake to the far right block on the same row
+   * the function is called when the snake hits the left wall
+   */
   teleportRight() {
     this.#segments[0].nextCol = game.maxWidth;
   }
 
+  /**
+   * on zen mode, move the snake to the far left block on the same row
+   * the function is called when the snake hits the right wall
+   */
   teleportLeft() {
     this.#segments[0].nextCol = game.minWidth;
   }
 
+  /**
+   * on zen mode, move the snake to the far top block on the same column
+   * the function is called when the snake hits the bottom wall
+   */
   teleportTop() {
     this.#segments[0].nextRow = game.minHeight;
   }
 
+  /**
+   * on zen mode, move the snake to the far bottom block on the same column
+   * the function is called when the snake hits the top wall
+   */
   teleportBottom() {
     this.#segments[0].nextRow = game.maxHeight;
   }
 
   /**
-   *
+   * checks if the snake will hit a given block
    * @param {Block | undefined} block
    * @returns {boolean}
    */
@@ -701,7 +712,8 @@ class Snake {
   }
 
   /**
-   *
+   * checks if the block finished being assimilated by the snake
+   * assimilation occurs when the block is in the last position of the snake
    * @param {Block | undefined} block
    * @returns {boolean}
    */
@@ -713,27 +725,27 @@ class Snake {
   }
 
   /**
-   *
+   * adds a fully processed segment to the snake
+   * it's called when a block is fully assimilated and after being processed internally
    * @param {Piece} newSegment
    */
   addSegment(newSegment) {
     this.#segments.push(newSegment);
   }
 
+  //resets the snake, eliminating all references to its segments for garbage collection
   reset() {
-    for (let i = 0; i < this.#segments.length; ++i) {
-      this.#segments[i].reset();
-    }
+    this.#segments.forEach((segment) => segment.reset());
     this.#segments = [];
   }
 
   /**
-   *
+   * initialize segments on creation of the snake, centering its segments on the grid
    * @param {Game} game
    */
   #initializeSegments(game) {
-    const centerRow = Math.floor((game.maxHeight - game.minHeight) / 2);
-    const centerCol = Math.floor((game.maxWidth - game.minWidth) / 2);
+    const centerRow = (game.maxHeight - game.minHeight) >> 1;
+    const centerCol = (game.maxWidth - game.minWidth) >> 1;
 
     this.#segments.forEach((piece, idx) => {
       piece.row = centerRow;
@@ -744,10 +756,10 @@ class Snake {
   }
 
   /**
-   *
+   * gets the index of the snake segment on a given row and column, if any
    * @param {number} row
    * @param {number} col
-   * @returns
+   * @returns {number}
    */
   getSegmentIndex(row, col) {
     return this.#segments.findIndex(
@@ -756,9 +768,9 @@ class Snake {
   }
 
   /**
-   *
+   * gets the segment of the snake on a given index, if any
    * @param {number} idx
-   * @returns {Piece | undefined}
+   * @returns {Head | Piece | undefined}
    */
   segmentAt(idx) {
     return this.#segments.at(idx);
@@ -770,6 +782,7 @@ class Snake {
     });
   }
 
+  //randomizes all segments to a different color
   randomizeColors() {
     this.#segments.forEach((segment) => {
       segment.setColor(validPieceColor());
@@ -777,7 +790,7 @@ class Snake {
   }
 
   /**
-   *
+   * sets a single given uniform color to all snake segments
    * @param {string} color
    */
   setColor(color) {
@@ -855,13 +868,6 @@ class Game {
     });
   }
 
-  hide() {
-    this.#block.hide();
-    this.#ingestingBlocks.forEach((block) => {
-      block.hide();
-    });
-  }
-
   setZenMode() {
     if (!game.isRunning) return;
     this.difficulty = Difficulty.ZEN;
@@ -896,7 +902,7 @@ class Game {
     const prevHeight = this.maxHeight - this.minHeight + 1;
 
     this.#bounds = gameArea.getBoundingClientRect();
-    
+
     const maxPieceUnit = Number(
       root.getStyle("--max-piece-unit").replaceAll(/[^\d]/g, "")
     );
@@ -1348,8 +1354,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!isTouchDevice()) {
     tutorialText.innerHTML += `<br><br>By the way, you can always advance on the tutorial by pressing N and close it by pressing C.`;
-  }
-  else {
+  } else {
     dirPadCheckBox.click();
   }
 

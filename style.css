@@ -9,22 +9,6 @@
   --text-color: #f0f3f9;
 }
 
-@font-face {
-  font-family: Atkinson;
-  src: url("./fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2"),
-    url("./fonts/AtkinsonHyperlegible-Regular.ttf") format("ttf");
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Atkinson;
-  src: url("./fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2"),
-    url("./fonts/AtkinsonHyperlegible-Bold.ttf") format("ttf");
-  font-weight: 700;
-  font-display: swap;
-}
-
 body,
 #title,
 #table-of-links,
@@ -39,7 +23,7 @@ body {
   display: flex;
   flex-direction: column;
   background-color: var(--background-color);
-  font-family: Atkinson, sans-serif;
+  font-family: sans-serif;
   gap: 5vmin;
   margin: 2vh 2vw;
 

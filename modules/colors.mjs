@@ -1,6 +1,11 @@
 import { randomNum } from "./random.mjs";
 
-//helpers for working with colors
+/**
+ * converts a color in hex or rgb format to an array of its components
+ * currently DOESN'T WORK WITH COLOR KEYWORDS
+ * @param {string} hexColor 
+ * @returns {number[]}
+ */
 export function colorHexToRGB(hexColor) {
   if (hexColor.startsWith("rgb")) {
     return hexColor
@@ -14,7 +19,12 @@ export function colorHexToRGB(hexColor) {
   return [red, green, blue];
 }
 
-//luminance formula as per https://www.w3.org/TR/WCAG20/#relativeluminancedef
+/**
+ * gets luminance associated with a set of rgb components
+ * luminance formula as per https://www.w3.org/TR/WCAG20/#relativeluminancedef
+ * @param {number[]} components 
+ * @returns {number}
+ */
 export function getLuminance(components) {
   const [R, G, B] = components
     .map((component) => component / 255)
@@ -27,6 +37,11 @@ export function getLuminance(components) {
   return R * 0.2126 + G * 0.7152 + B * 0.0722;
 }
 
+/**
+ * returns the hex color associated with a set of rgb components
+ * @param {number[]} param0 
+ * @returns {string}
+ */
 export function getHexColor([red, green, blue]) {
   return (
     "#" +
@@ -36,13 +51,27 @@ export function getHexColor([red, green, blue]) {
   );
 }
 
-//contrast ratio formula as per https://www.w3.org/TR/WCAG20/#contrast-ratiodef
+/**
+ * checks if two luminances have some minimum contrast
+ * contrast ratio formula as per https://www.w3.org/TR/WCAG20/#contrast-ratiodef
+ * @param {number} lum1 
+ * @param {number} lum2 
+ * @param {number} minContrast 
+ * @returns {boolean}
+ */
 export function validContrast(lum1, lum2, minContrast) {
   const [smaller, greater] = lum1 <= lum2 ? [lum1, lum2] : [lum2, lum1];
   return (greater + 0.05) / (smaller + 0.05) >= minContrast;
 }
 
-//generates any random color
+/**
+ * generates any random color up to given maximum rgb components
+ * by default, the colors can be in full range for all components
+ * @param {number} R 
+ * @param {number} G 
+ * @param {number} B 
+ * @returns {string}
+ */
 export function randomColor(R = 255, G = 255, B = 255) {
   return getHexColor(
     [R, G, B].map(
@@ -52,7 +81,12 @@ export function randomColor(R = 255, G = 255, B = 255) {
   );
 }
 
-//generates a random color with good contrast
+/**
+ * generates a random color with a minimum contrast with all base colors passed as argument
+ * @param {string[]} baseColors 
+ * @param {number} contrast 
+ * @returns {string}
+ */
 export function generateColorWithContrast(baseColors, contrast) {
   const baseLums = baseColors.map(color => getLuminance(colorHexToRGB(color)));
 

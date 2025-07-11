@@ -1,13 +1,18 @@
+/**
+ * Class to wrap HTMLElements
+ * It's meant to give an uniform interface to facilitate interacting with styles and the DOM
+ * It implements lazy evaluation for updating computed styles
+ */
 export class ElementWrapper {
   #elem;
   #style;
-  #updated;
+  #updated; //signal for lazy evaluation of computed styles
 
   constructor(elem) {
     if (elem instanceof HTMLElement) {
       this.#elem = elem;
       this.#style = getComputedStyle(this.#elem);
-      this.#updated = true;
+      this.#updated = true; 
       return;
     }
     if (elem instanceof ElementWrapper) {
@@ -101,6 +106,16 @@ export class ElementWrapper {
   }
 }
 
+/**
+ * Class to wrap a tab list
+ * The container is passed as argument to the constructor
+ * It's assumed all elements are previously present in the HTML
+ * The behaviour attends to accessibility guidelines for arrow and home keys
+ * There's also support to WASD usage in place of arrow keys
+ * It handles automatically moving from one tab to another
+ * It's possible to pass a callback to be called on closing of the container
+ * It's assumed the container is closed after clicking on a close button or pressing of Escape key. It doesn't handle other closing behaviour.
+ */
 export class TabList {
   #container;
   #list;

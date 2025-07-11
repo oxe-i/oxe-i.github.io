@@ -1,5 +1,10 @@
 :root {
-  --canvas-color: #e0fda9;
+  /**
+    * setting a canvas color to a keyword such as "white" will break the page
+    * check colorHexToRGB function in the colors module
+    * this is relevant because of how the canvas background color is randomized in DOMContentLoaded listener
+    */
+  --canvas-color: rgb(255, 255, 255); /* DON'T SET TO A KEYWORD */
   --background-color: rgb(19, 10, 24);
   --letter-color: #f0f3f9;
   --low-contrast-color: #33203d;

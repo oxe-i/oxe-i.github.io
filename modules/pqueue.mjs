@@ -1,3 +1,8 @@
+/**
+ * Class to represent a priority queue using a 4-ary heap internally
+ * It's possible to pass a custom compare function as argument to the constructor
+ * The default behaviour is of a minheap with direct comparison of elements
+ */
 export class PQueue {
   #queue;
   #compare;
